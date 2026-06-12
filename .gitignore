@@ -1,0 +1,23 @@
+# macOS
+.DS_Store
+
+# Editors / IDEs
+.idea/
+.vscode/
+*.swp
+*~
+
+# Agent install targets (created when testing this repo locally with `npx skills add ./`)
+.claude/
+.codex/
+.cursor/
+.gemini/
+.opencode/
+
+# Local env / secrets
+.env
+.env.local
+.env.*.local
+
+# Other
+.remember/
