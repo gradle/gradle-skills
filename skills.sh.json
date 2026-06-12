@@ -1,0 +1,13 @@
+{
+  "$schema": "https://skills.sh/schemas/skills.sh.schema.json",
+  "notGrouped": "bottom",
+  "groupings": [
+    {
+      "title": "Best Practices",
+      "description": "Skill for auditing Gradle projects against official Gradle best practices.",
+      "skills": [
+        "gradle-best-practices"
+      ]
+    }
+  ]
+}
