@@ -19,6 +19,17 @@ The best-practices catalog is **fetched live from `docs.gradle.org` on every run
 - "Best practices review"
 - "Apply best practices to my build"
 
+### gradle-cli
+
+Runs Gradle builds and tasks from the command line with `gradle` or the `./gradlew` wrapper, and produces the exact, copy-pasteable command for any invocation — using the flags valid for the project's Gradle version (7.0–9.x) and the tasks defined in the current project. It orients first (wrapper vs. system Gradle, the project's declared version, the installed version), discovers built-in and project-custom tasks, then runs the command or hands it over. Covers task selection in multi-project builds, the full grouped flag catalog, version-by-version flag differences, and wrapper operations (add/use/upgrade, including the run-the-task-twice step, SHA-256 verification, and authenticated distributions).
+
+**Use when:**
+
+- "Run the tests" / "build this project" / "run X task"
+- "Upgrade the gradle wrapper"
+- "How do I run …" / "what's the gradle command for …"
+- "List the gradle tasks"
+
 ## Installation
 
 Install into Claude Code, Codex, Gemini, Cursor, and other supported agents via [`skills.sh`](https://skills.sh/):
