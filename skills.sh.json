@@ -8,6 +8,13 @@
       "skills": [
         "gradle-best-practices"
       ]
+    },
+    {
+      "title": "Command Line",
+      "description": "Skill for running Gradle builds, tasks, and the wrapper from the command line.",
+      "skills": [
+        "gradle-cli"
+      ]
     }
   ]
 }
