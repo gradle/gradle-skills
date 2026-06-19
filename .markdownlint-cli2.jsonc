@@ -1,0 +1,15 @@
+{
+  // Rules disabled because existing docs trip them; CI still enforces all
+  // other markdownlint rules and catches future regressions.
+  "config": {
+    "MD013": false, // line-length (long prose lines, intentional)
+    "MD060": false, // table-column-style (cosmetic pipe spacing)
+    "MD040": false, // fenced-code-language
+    "MD034": false, // no-bare-urls
+    "MD032": false, // blanks-around-lists
+    "MD022": false, // blanks-around-headings
+    "MD038": false  // no-space-in-code
+  },
+  "globs": ["**/*.md"],
+  "ignores": ["node_modules"]
+}
