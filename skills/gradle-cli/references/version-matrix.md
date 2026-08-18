@@ -14,7 +14,7 @@ Examples: `https://docs.gradle.org/8.0/userguide/command_line_interface.html`, `
 
 **Determine the project version first:** read `distributionUrl` in `gradle/wrapper/gradle-wrapper.properties` (e.g. `gradle-8.14-bin.zip` → 8.14), or run `./gradlew --version`. Then fetch the matching doc above if you need certainty about a specific flag.
 
-The single most reliable check is to ask the running Gradle itself: `./gradlew --help` lists every built-in option that build supports, and `./gradlew help --task <name>` lists a task's own options. When in doubt, trust that over any table.
+The single most reliable check is to ask the running Gradle itself: `./gradlew --help` lists every built-in option that build supports, and `./gradlew help --task=<name>` lists a task's own options. When in doubt, trust that over any table.
 
 ## Major.minor releases that have their own docs
 
@@ -28,7 +28,7 @@ Patch releases (e.g. `7.6.6`, `8.14.4`, `9.3.0`) also have docs at the same URL 
 
 ## Notable flag availability
 
-Most everyday flags — `build`, `test`, `--tests`, `-x`/`--exclude-task`, `--rerun-tasks`, `--continue`, `--dry-run`, `--offline`, `--refresh-dependencies`, `--parallel`, `--max-workers`, `--build-cache`, logging (`-q/-i/-d/-s/-S`), `--console`, `--warning-mode`, environment (`-D/-P/-I/-g/-p`), daemon (`--daemon/--no-daemon/--status/--stop`), dependency verification (`-F/-M/--refresh-keys/--export-keys`), and `--write-locks`/`--update-locks` — are present across **all** of Gradle 7.0 → 9.x. Reach for the table below only for the flags that changed.
+Most everyday flags — `build`, `test`, `--tests`, `--continue`, `--dry-run`, `--offline`, `--refresh-dependencies`, `--parallel`, `--max-workers`, `--build-cache`, logging (`-q/-i/-d/-s/-S`), `--console`, `--warning-mode`, environment (`-D/-P/-I/-g/-p`), daemon (`--daemon/--no-daemon/--status/--stop`), dependency verification (`-F/-M/--refresh-keys/--export-keys`), and `--write-locks`/`--update-locks` — are present across **all** of Gradle 7.0 → 9.x. Reach for the table below only for the flags that changed.
 
 | Flag / behavior | Status across versions |
 |---|---|
@@ -43,7 +43,7 @@ Most everyday flags — `build`, `test`, `--tests`, `-x`/`--exclude-task`, `--re
 | Wrapper `--gradle-version` accepting a bare major/minor (e.g. `9`, `9.1`) | **Gradle 9+ only** (resolves to the latest matching release). On 7.x/8.x give a full version. |
 | `gradle-wrapper.properties` `distributionUrl` version format | Since **Gradle 9.0** the file must use full `X.Y.Z`; bare major/minor is not accepted *in the file* (only on the CLI in 9+). |
 | Wrapper `--network-timeout`, `--validate-url`/`--no-validate-url` | Present from 7.6 onward. |
-| Wrapper `--retries`, `--retry-back-off-ms` | Recent additions; verify with `./gradlew help --task wrapper` on the project version. |
+| Wrapper `--retries`, `--retry-back-off-ms` | Recent additions; verify with `./gradlew help --task=:wrapper` on the project version. |
 
 ## Runtime / JVM requirements (affects whether a version even runs)
 
@@ -57,4 +57,9 @@ If a build fails immediately with an "unsupported class file / JVM version" styl
 
 ## When upgrading versions
 
-Before bumping the wrapper across a major boundary (7→8, 8→9), run the existing build once with `--warning-mode=all` to surface deprecations that will become errors. The version's release notes (`/<version>/release-notes.html`) list removed flags and behaviors.
+**Upgrade one minor at a time.** At each step, run with `--warning-mode=all` and fix every deprecation before the next hop. Deprecations become removals at major boundaries (7→8, 8→9), so an unfixed warning today is a broken build later.
+
+The **upgrade guides** are the actionable reference — more useful than the raw release notes:
+
+- `https://docs.gradle.org/current/userguide/upgrading_version_8.html` — 8.x and to 9.x
+- `https://docs.gradle.org/current/userguide/upgrading_version_7.html` — 7.x and to 8.x
