@@ -19,5 +19,8 @@
 .env.local
 .env.*.local
 
+# Personal Claude Code memory (not committed)
+CLAUDE.local.md
+
 # Other
 .remember/

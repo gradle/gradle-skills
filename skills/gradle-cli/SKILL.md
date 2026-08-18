@@ -1,6 +1,6 @@
 ---
 name: gradle-cli
-description: "Run Gradle builds and tasks from the command line with `gradle` or the `./gradlew` wrapper, and produce the exact, copy-pasteable command for any Gradle invocation. Use this skill whenever the user is in a Gradle project and wants to RUN something with Gradle: build the project, run tests (e.g. 'run the JUnit tests', including `--tests` filters), run a built-in or project-custom task, list tasks, refresh dependencies, toggle the build/configuration cache, or add/upgrade the Gradle wrapper (`./gradlew :wrapper --gradle-version=<v>`). Trigger on phrases like 'run the tests', 'build this project', 'run the X task', 'upgrade the gradle wrapper', 'how do I run …', 'what's the gradle command for …', 'invoke gradlew with …', or 'list the gradle tasks'. If the user says 'run X', run it; if they ask 'how do I run X', give them the copy-pasteable command with the right flags for their Gradle version. Also use it to choose the correct flags for a specific Gradle version (7.0 through 9.x) and to discover and invoke tasks custom to the current project. Do NOT use this skill to upgrade a system-installed Gradle distribution itself (SDKMAN/Homebrew/`brew upgrade gradle`), to diagnose WHY a build or test failed, or to author build scripts and plugins — it is about invoking the CLI, not installing Gradle, debugging failures, or writing build logic."
+description: "Run Gradle builds and tasks from the command line via `gradle` or `./gradlew`, producing the exact copy-pasteable command for any invocation using flags valid for the project's Gradle version (7.0–9.x). Use whenever the user wants to build the project, run tests (including `--tests` filters), run a built-in or project-custom task, list tasks, refresh dependencies, toggle the build/configuration cache, or add/upgrade the Gradle wrapper (`./gradlew :wrapper --gradle-version=<v>`). Trigger phrases: 'run the tests', 'build this project', 'run the X task', 'upgrade the gradle wrapper', 'how do I run …', 'what's the gradle command for …', 'list the gradle tasks'. Do NOT use to install/upgrade the Gradle distribution itself (SDKMAN/Homebrew), diagnose WHY a build or test failed, or author build scripts/plugins — it's about invoking the CLI, not installing, debugging, or writing build logic."
 license: Apache-2.0
 metadata:
   author: gradle
@@ -117,7 +117,7 @@ See `references/wrapper.md` for labels, private distributions, JAR verification,
 
 ## Etiquette and safety
 
-- **Destructive/expensive tasks:** `clean`, `publish`, `release`, `bootRun`, deploy tasks. For "how do I" questions, hand over the command. Confirm before running publish/release/deploy on the user's behalf.
+- **Identify destructive/expensive tasks by reading their descriptions** (`./gradlew tasks`, `./gradlew help --task=<name>`). Verbs like "publishes", "deploys", "releases", "deletes", "starts" signal remote-state changes, deleted outputs, or long-running processes. For "how do I" questions, hand over the command; confirm before running one on the user's behalf.
 - **Don't add `--scan` silently.** A Build Scan uploads data; get consent.
 - **A long build is a side effect too.** If a command will be slow and the user only asked a question, give the command instead of launching it.
 - **Command-line order safety:** `clean build` means clean *then* build; don't reorder.
