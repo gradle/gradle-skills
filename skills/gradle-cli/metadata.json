@@ -1,7 +1,7 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "organization": "Gradle Inc.",
-  "date": "June 2026",
+  "date": "August 2026",
   "abstract": "Expert use of the Gradle command line. Runs Gradle builds and tasks via the gradle command or the ./gradlew wrapper, and produces the exact, copy-pasteable command for any invocation using flags valid for the project's Gradle version (7.0 through 9.x). Distinguishes 'run X' (execute it) from 'how do I run X' (hand over the command). Orients first — detects the wrapper, the project's declared Gradle version (from gradle-wrapper.properties), and the installed Gradle version — then discovers available built-in and project-custom tasks before constructing the command. Covers task selection in multi-project builds, task vs built-in options and the -- delimiter, the full grouped flag catalog, wrapper operations (add/use/upgrade, including the run-the-task-twice gotcha, SHA-256 verification, and authenticated distributions), and execution etiquette around destructive or long-running tasks. Bundles a per-version documentation URL index so any exact release can be verified.",
   "references": [
     "https://docs.gradle.org/current/userguide/command_line_interface.html",

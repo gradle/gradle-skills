@@ -17,15 +17,17 @@ Never hand-edit `gradlew`/`gradlew.bat`/`gradle-wrapper.jar`. Editing `distribut
 
 ## Adding a wrapper to a project that has none
 
-Requires a system Gradle install (`gradle --version` to check). Then:
+Requires a system Gradle install (`gradle --version` to check). Pin an explicit version *and* its SHA-256 from the start, and run the task twice — same reasoning as an upgrade (see [Upgrading the wrapper](#upgrading-the-wrapper)):
 
 ```
-gradle :wrapper                                   # uses the running Gradle's version
-gradle :wrapper --gradle-version 8.14.4           # pin a specific version
-gradle :wrapper --gradle-version 8.14.4 --distribution-type all   # include sources/docs
+gradle    :wrapper --gradle-version=8.14.4 --gradle-distribution-sha256-sum=<sha256>   # system Gradle creates the wrapper
+./gradlew :wrapper --gradle-version=8.14.4 --gradle-distribution-sha256-sum=<sha256>   # pinned Gradle regenerates scripts + jar
+./gradlew --version                                                                    # verify
 ```
 
-`gradle init` also generates wrapper files for a new project.
+Get `<sha256>` from https://gradle.org/release-checksums/ (or the `-bin.zip.sha256` file beside the distribution). The switch from `gradle` to `./gradlew` on the second run is deliberate — it's what makes the scripts and jar match the pinned version instead of whatever the system Gradle happened to be.
+
+(Scaffolding a brand-new build with `gradle init` also generates the wrapper files as part of that setup.)
 
 ## Using the wrapper
 
@@ -39,24 +41,23 @@ On first use the wrapper downloads the distribution into `GRADLE_USER_HOME` and 
 
 ## Upgrading the wrapper
 
-```
-./gradlew wrapper --gradle-version latest      # newest stable release
-./gradlew wrapper --gradle-version 9.3.0        # a specific version
-```
-
-Accepted labels for `--gradle-version`: `latest`, `release-candidate`, `release-nightly`, `nightly`, `release-milestone`. On **Gradle 9+** you may also pass a bare `9` or `9.1` (resolves to the latest matching release); on 7.x/8.x give a full version.
-
-### Run the `wrapper` task TWICE — the #1 real-world gotcha
-
-The first run updates only `gradle-wrapper.properties`. The `gradlew` scripts and `gradle-wrapper.jar` are left as-is. New Gradle versions sometimes ship improved launch scripts/jar, so to fully upgrade them you must **run the same `wrapper` command a second time**:
+The recommended upgrade always does two things: **pin the new distribution's SHA-256 checksum** (so the download is verified) and **run the `wrapper` task twice** (so the scripts and jar are refreshed, not just the properties file):
 
 ```
-./gradlew wrapper --gradle-version 9.3.0   # updates properties
-./gradlew wrapper --gradle-version 9.3.0   # now updates gradlew, gradlew.bat, and the jar
+./gradlew :wrapper --gradle-version=9.3.0 --gradle-distribution-sha256-sum=<sha256>
+./gradlew :wrapper --gradle-version=9.3.0 --gradle-distribution-sha256-sum=<sha256>
 ./gradlew --version                        # verify
 ```
 
-Symptoms of a half-done upgrade (very common in support questions): persistent wrapper/deprecation warnings that won't go away, a `gradlew` diff that looks odd, or a bot (e.g. Dependabot) bumping `distributionUrl` without ever re-running the task. The fix is always: run `./gradlew wrapper` (twice) and commit the result.
+Get `<sha256>` from https://gradle.org/release-checksums/ (see [SHA-256 verification](#sha-256-verification)). Treat pinning-and-validating the checksum as a standard part of every upgrade, not an optional add-on.
+
+Accepted labels for `--gradle-version`: `latest`, `release-candidate`, `release-nightly`, `nightly`, `release-milestone`. On **Gradle 9+** you may also pass a bare `9` or `9.1` (resolves to the latest matching release); on 7.x/8.x give a full version.
+
+### Why run the `wrapper` task TWICE — the #1 real-world gotcha
+
+The first run updates only `gradle-wrapper.properties`. The `gradlew` scripts and `gradle-wrapper.jar` are left as-is. New Gradle versions sometimes ship improved launch scripts/jar, so to fully upgrade them you must run the same `wrapper` command a second time (now executing under the new version), as shown above.
+
+Symptoms of a half-done upgrade (very common in support questions): persistent wrapper/deprecation warnings that won't go away, a `gradlew` diff that looks odd, or a bot (e.g. Dependabot) bumping `distributionUrl` without ever re-running the task. The fix is always: run `./gradlew :wrapper` (twice) and commit the result.
 
 Since **Gradle 9.0**, `gradle-wrapper.properties` must declare the version as full `X.Y.Z` — bare major/minor is not accepted *in the file*.
 
@@ -65,7 +66,7 @@ Since **Gradle 9.0**, `gradle-wrapper.properties` must declare the version as fu
 | Option | Purpose |
 |---|---|
 | `--gradle-version` | Version (or label) to download/run. URL is validated before writing. |
-| `--distribution-type` | `bin` (default, runtime only — smaller, faster on CI) or `all` (adds sources + docs, helps IDE navigation). |
+| `--distribution-type` | Leave at the default `bin`. (`all` also bundles Gradle's sources and docs, but `bin` is recommended — it's smaller and IDEs fetch sources on demand anyway.) |
 | `--gradle-distribution-url` | Full distribution ZIP URL. Makes `--gradle-version`/`--distribution-type` obsolete; useful for company-hosted mirrors. |
 | `--gradle-distribution-sha256-sum` | SHA-256 of the distribution for verification (writes `distributionSha256Sum`). |
 | `--network-timeout` | Download timeout in ms (default 10000). |
@@ -73,17 +74,17 @@ Since **Gradle 9.0**, `gradle-wrapper.properties` must declare the version as fu
 | `--retries` | Download retry attempts (default 0). |
 | `--retry-back-off-ms` | Initial back-off between retries; doubles each failure (default 500). |
 
-Discover the exact options your project's version supports with `./gradlew help --task wrapper`.
+Discover the exact options your project's version supports with `./gradlew help --task=:wrapper`.
 
 ### SHA-256 verification
 
 Finding the checksum is a recurring pain point. Get it from:
 
 - https://gradle.org/release-checksums/ (the full list), or
-- the `-bin.zip.sha256` / `-all.zip.sha256` file next to the distribution at https://services.gradle.org/distributions/.
+- the `-bin.zip.sha256` file next to the distribution at https://services.gradle.org/distributions/.
 
 ```
-./gradlew wrapper --gradle-version 8.14.4 \
+./gradlew :wrapper --gradle-version=8.14.4 \
   --gradle-distribution-sha256-sum=<paste-the-sha256>
 ```
 
@@ -91,7 +92,7 @@ Gradle fails the build if the configured sum doesn't match the server's. Note: o
 
 ## Verifying the wrapper JAR's integrity
 
-Because the jar is committed and executed on every machine, verify it after upgrades — a malicious PR could swap it. The [Setup Gradle GitHub Action](https://github.com/gradle/actions) validates it automatically (built in as of v4). Manually:
+Because the jar is committed and executed on every machine, make validating it a standard step — before running an unfamiliar or freshly-cloned project, and after every upgrade. A malicious PR could swap it. In CI, the [Setup Gradle GitHub Action](https://github.com/gradle/actions) validates it automatically on every build (built in as of v4) — rely on that. To check manually:
 
 ```
 sha256sum gradle/wrapper/gradle-wrapper.jar    # compare against gradle.org/release-checksums
@@ -114,4 +115,4 @@ Only over HTTPS — Basic/Bearer credentials are sent in clear text. Unscoped `s
 
 ## Customizing the wrapper task in the build
 
-To avoid retyping options (e.g. always `-all`), configure the `Wrapper` task in the root build script. See the `Wrapper` task type in the DSL/Javadoc reference. After that, `./gradlew wrapper --gradle-version <v>` honors the configured defaults.
+To avoid retyping the same options on every upgrade (for example, always pointing at a company-hosted `--gradle-distribution-url`), configure the `Wrapper` task in the root build script. See the `Wrapper` task type in the DSL/Javadoc reference. After that, `./gradlew :wrapper --gradle-version=<v>` honors the configured defaults.
