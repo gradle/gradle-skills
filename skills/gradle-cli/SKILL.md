@@ -1,10 +1,10 @@
 ---
 name: gradle-cli
-description: "Run Gradle builds and tasks from the command line via `gradle` or `./gradlew`, producing the exact copy-pasteable command for any invocation using flags valid for the project's Gradle version (7.0–9.x). Use whenever the user wants to build the project, run tests (including `--tests` filters), run a built-in or project-custom task, list tasks, refresh dependencies, toggle the build/configuration cache, or add/upgrade the Gradle wrapper (`./gradlew :wrapper --gradle-version=<v>`). Trigger phrases: 'run the tests', 'build this project', 'run the X task', 'upgrade the gradle wrapper', 'how do I run …', 'what's the gradle command for …', 'list the gradle tasks'. Do NOT use to install/upgrade the Gradle distribution itself (SDKMAN/Homebrew), diagnose WHY a build or test failed, or author build scripts/plugins — it's about invoking the CLI, not installing, debugging, or writing build logic."
+description: "Run any Gradle build from the command line"
 license: Apache-2.0
 metadata:
   author: gradle
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # Gradle CLI
@@ -75,7 +75,8 @@ Common built-in options (full catalog: `references/cli-flags.md`):
 - **Trust the exit code, not the log text:** `0` = success, non-zero = failure. Never grep for `BUILD SUCCESSFUL`/`BUILD FAILED` — `--quiet` suppresses it.
 - On Gradle 9.x, add `--non-interactive` to skip prompts (verify with `--help`).
 - Leave the daemon on (default); reserve `--no-daemon` for one-shot environments.
-- **Avoid** `--rerun-tasks` (slower than `clean` with build cache on) and `-x`/`--exclude-task` (a trap — silently drops the task's transitive dependencies too, skipping more than you intended).
+- When some tasks are excluded via the `-x`/`--exclude-task`, you need to check if their transitive dependencies produce build outputs. A transitive dependency is another task which is wired to run whenever the task to be excluded is run, hence it won't run either when you add the exclusion. The transitive dependencies that produce build outputs/artifacts will need to be run explicitly. Let's say you need to exclude the task `test`. You would do that with `-x test`. But before you do run `test --console plain --dry-run` to obtain the list of its transitively dependant tasks and check them.
+- **Avoid** `--rerun-tasks` (slower than `clean` with build cache on).
 
 ## Common workflows
 
