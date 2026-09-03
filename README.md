@@ -4,6 +4,10 @@ A collection of skills for AI coding agents working in Gradle projects. Skills a
 
 Skills follow the [Agent Skills](https://agentskills.io/) format.
 
+**The skills are harness-agnostic.** They contain no vendor- or tool-specific instructions and work in any agent that supports the Agent Skills format. They assume only capabilities every coding agent has: reading files, matching glob patterns, fetching URLs, and running shell commands.
+
+This repository is *additionally* packaged as a Claude Code plugin marketplace, for teams that distribute tooling that way. That is a convenience, not the primary distribution channel — see [Installation](#installation).
+
 ## Available Skills
 
 ### gradle-best-practices
@@ -32,6 +36,8 @@ Runs Gradle builds and tasks from the command line with `gradle` or the `./gradl
 
 ## Installation
 
+### Any agent (recommended)
+
 Install into Claude Code, Codex, Gemini, Cursor, and other supported agents via [`skills.sh`](https://skills.sh/):
 
 ```bash
@@ -45,6 +51,37 @@ npx skills add gradle/gradle-skills --skill gradle-best-practices
 ```
 
 If `npx` is not found, install Node first (e.g. `brew install node`).
+
+This is the expected path for every agent, Claude Code included.
+
+### Claude Code plugin marketplace (optional)
+
+For teams that already distribute tooling as Claude Code plugins, this repository also doubles as a plugin marketplace. It installs the same skills — nothing here is Claude-specific — so use it only if the plugin workflow is what you want.
+
+```text
+/plugin marketplace add gradle/gradle-skills
+/plugin install gradle-skills@gradle-skills
+```
+
+Restart Claude Code afterwards. The plugin bundles every skill in this repository; unlike `skills.sh`, it cannot install a single skill.
+
+To enable the marketplace and plugin for everyone working in a repository, commit this to its `.claude/settings.json`:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "gradle-skills": {
+      "source": {
+        "source": "github",
+        "repo": "gradle/gradle-skills"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "gradle-skills@gradle-skills": true
+  }
+}
+```
 
 ## Usage
 
@@ -69,6 +106,9 @@ Each skill contains:
 
 ```
 .
+├── .claude-plugin/
+│   ├── plugin.json                 # Claude Code plugin manifest
+│   └── marketplace.json            # Claude Code marketplace catalog
 ├── skills.sh.json                  # Manifest with topic groupings
 └── skills/
     └── <skill_name>/

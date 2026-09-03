@@ -41,7 +41,7 @@ If you are running unattended — a scripted, CI, or single-turn session where n
 
 ## Step 1: Discover the project's Gradle files
 
-Find Gradle-related files in the project using Glob:
+Find Gradle-related files in the project by glob pattern:
 
 | Pattern | Purpose |
 |---------|---------|
@@ -84,7 +84,7 @@ Run every applicable check.
 
 ## Step 4: Check the project
 
-Apply each detection approach using Grep / Read against the files discovered in Step 1. Record each finding with: best practice title, anchor URL, file(s) and line(s) where the violation appears, a one-sentence description, a suggested fix, and the severity band.
+Apply each detection approach by searching and reading the files discovered in Step 1. Record each finding with: best practice title, anchor URL, file(s) and line(s) where the violation appears, a one-sentence description, a suggested fix, and the severity band.
 
 Violations are not mutually exclusive: one line can violate several practices at once, and matching a line to one practice does not exhaust it. Example: `dependsOn 'listMaintainedCars'` between two tasks with actions violates both *Don't hardcode task names* (the string) and *Avoid dependsOn* (the coupling) — fixing the string form to `dependsOn someTaskProvider` resolves the first and leaves the second. Record one finding per violated practice, even when findings share a line.
 
