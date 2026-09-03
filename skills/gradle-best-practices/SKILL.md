@@ -35,6 +35,10 @@ The direct link for any given best practice is `https://docs.gradle.org/current/
 - **Audit mode** (default — "check my build", "audit gradle", "are there issues?"): run Steps 1–5 and stop after presenting the report. Then offer to apply fixes in Step 6.
 - **Apply mode** ("apply best practices", "fix my build", "modernize my build"): run Steps 1–5 to gather findings, briefly summarize them, and proceed directly into Step 6 — proposing fixes for the highest-priority items first.
 
+## Never block on a question
+
+If you are running unattended — a scripted, CI, or single-turn session where no reply will come — treat every "ask the user" or "get confirmation" step in this skill as: choose the recommended option, record the decision and its rationale in the report, and continue. Never end the session waiting for input. For structural fixes, write the plan into the report instead of asking, then execute it.
+
 ## Step 1: Discover the project's Gradle files
 
 Find Gradle-related files in the project using Glob:
@@ -82,6 +86,8 @@ Run every applicable check.
 
 Apply each detection approach using Grep / Read against the files discovered in Step 1. Record each finding with: best practice title, anchor URL, file(s) and line(s) where the violation appears, a one-sentence description, a suggested fix, and the severity band.
 
+Violations are not mutually exclusive: one line can violate several practices at once, and matching a line to one practice does not exhaust it. Example: `dependsOn 'listMaintainedCars'` between two tasks with actions violates both *Don't hardcode task names* (the string) and *Avoid dependsOn* (the coupling) — fixing the string form to `dependsOn someTaskProvider` resolves the first and leaves the second. Record one finding per violated practice, even when findings share a line.
+
 ## Step 5: Present the report
 
 If no issues were found, emit a single line: **No issues found.** Then stop.
@@ -119,7 +125,7 @@ If the user asks for an HTML report (sortable by priority/location with clickabl
 
 ## Step 6: Apply fixes
 
-In Audit mode, ask: "Would you like me to apply any of these fixes? I can propose code changes to your build scripts, settings, properties, version catalog, and source under `buildSrc/` / `build-logic/`."
+In Audit mode, ask: "Would you like me to apply any of these fixes? I can propose code changes to your build scripts, settings, properties, version catalog, and source under `buildSrc/` / `build-logic/`." If no reply can come (see "Never block on a question"), apply the fixes without asking.
 
 In Apply mode, skip the question and proceed directly.
 
@@ -127,6 +133,7 @@ When applying fixes:
 - Start with the highest-priority issues. Group related fixes (e.g., all `repositories {}` blocks moved at once).
 - For **straightforward fixes** (adding `org.gradle.caching=true`, renaming `-all.zip` to `-bin.zip`, adding `rootProject.name`, swapping `apply plugin:` for the `plugins {}` block, adding `group`/`description` to a task, replacing `.get()` with `.map { }`), edit the file in place and show the diff.
 - For **source-level fixes** in `buildSrc/` or `build-logic/` (replacing `PathSensitivity.ABSOLUTE`, removing `project.` access inside `@TaskAction`, adding `attributes { }` to consumable configurations), apply the edit and re-read the file to confirm it still compiles.
-- For **structural fixes** (migrating `buildSrc/` to `build-logic/`, modularizing a project, converting Groovy DSL to Kotlin DSL, extracting convention plugins from duplication), describe the plan first, get user confirmation, then apply incrementally with a checkpoint after each step.
+- For **structural fixes** (migrating `buildSrc/` to `build-logic/`, modularizing a project, converting Groovy DSL to Kotlin DSL, extracting convention plugins from duplication), describe the plan first, get user confirmation — or, unattended, record the plan and proceed without it — then apply incrementally with a checkpoint after each step.
 - After each fix, confirm the change resolved the issue. If a fix uncovers a related issue (e.g., moving repositories to settings reveals that `FAIL_ON_PROJECT_REPOS` should be set), surface that as a follow-up.
+- After fixing a line, re-check it against the remaining findings and the full catalog: a fix for one facet often leaves a co-located violation intact, or introduces a new one.
 - If the user declines a fix, leave it as-is and move on.
