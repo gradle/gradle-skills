@@ -4,7 +4,7 @@ description: "Run any Gradle build from the command line"
 license: Apache-2.0
 metadata:
   author: gradle
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # Gradle CLI
