@@ -37,7 +37,7 @@ The direct link for any given best practice is `https://docs.gradle.org/current/
 
 ## Step 1: Discover the project's Gradle files
 
-Find Gradle-related files in the project using Glob:
+Find Gradle-related files in the project by glob pattern:
 
 | Pattern | Purpose |
 |---------|---------|
@@ -80,7 +80,7 @@ Run every applicable check.
 
 ## Step 4: Check the project
 
-Apply each detection approach using Grep / Read against the files discovered in Step 1. Record each finding with: best practice title, anchor URL, file(s) and line(s) where the violation appears, a one-sentence description, a suggested fix, and the severity band.
+Apply each detection approach by searching and reading the files discovered in Step 1. Record each finding with: best practice title, anchor URL, file(s) and line(s) where the violation appears, a one-sentence description, a suggested fix, and the severity band.
 
 ## Step 5: Present the report
 

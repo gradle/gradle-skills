@@ -1,0 +1,34 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "gradle-skills",
+  "description": "Official Gradle skills for AI coding agents working in Gradle projects.",
+  "owner": {
+    "name": "Gradle Inc.",
+    "url": "https://github.com/gradle"
+  },
+  "plugins": [
+    {
+      "name": "gradle-skills",
+      "source": "./",
+      "version": "1.0.0",
+      "description": "Official Gradle skills for AI coding agents: audit a build against Gradle best practices, and run Gradle builds, tasks, and the wrapper from the command line.",
+      "author": {
+        "name": "Gradle Inc.",
+        "url": "https://gradle.org"
+      },
+      "homepage": "https://github.com/gradle/gradle-skills",
+      "license": "Apache-2.0",
+      "category": "development",
+      "keywords": [
+        "gradle",
+        "build",
+        "best-practices",
+        "cli",
+        "wrapper",
+        "java",
+        "kotlin",
+        "android"
+      ]
+    }
+  ]
+}

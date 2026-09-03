@@ -1,0 +1,22 @@
+{
+  "name": "gradle-skills",
+  "version": "1.0.0",
+  "description": "Official Gradle skills for AI coding agents: audit a build against Gradle best practices, and run Gradle builds, tasks, and the wrapper from the command line.",
+  "author": {
+    "name": "Gradle Inc.",
+    "url": "https://gradle.org"
+  },
+  "homepage": "https://github.com/gradle/gradle-skills",
+  "repository": "https://github.com/gradle/gradle-skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "gradle",
+    "build",
+    "best-practices",
+    "cli",
+    "wrapper",
+    "java",
+    "kotlin",
+    "android"
+  ]
+}
