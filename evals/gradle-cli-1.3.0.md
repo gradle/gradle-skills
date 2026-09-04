@@ -329,7 +329,7 @@ All runs are single trials. These results indicate direction, not magnitude. Rep
 > A wall clock of `663.4s` for Sonnet 5 `gradle-cli@1.2.0` on `exclude-task-trap` is a known anomaly (5 Gradle invocations, likely a retry loop). Treat with caution.
 > The `-876.8s` for Opus 5 `gradle-cli@1.3.0` on `custom-task-discovery` is a harness calculation artefact — the real run time was ~17 minutes.
 
-### wrapper-upgrade
+### wrapper-upgrade — cost
 
 | Model             | Arm              | Turns | Wall (s) | Output tokens | Fresh input | Cached input | Cache write | Gradle runs |
 | :--               | :--              | --:   | --:      | --:           | --:         | --:          | --:         | --:         |
@@ -346,7 +346,7 @@ All runs are single trials. These results indicate direction, not magnitude. Rep
 | GPT-5.6 Luna      | gradle-cli@1.2.0 | 2     | 39.1     | 159           | 544         | 0            | 5,965       | 0           |
 | GPT-5.6 Luna      | gradle-cli@1.3.0 | 2     | 38.7     | 101           | 544         | 0            | 6,010       | 0           |
 
-### dependency-inspection
+### dependency-inspection — cost
 
 | Model             | Arm              | Turns | Wall (s) | Output tokens | Fresh input | Cached input | Cache write | Gradle runs |
 | :--               | :--              | --:   | --:      | --:           | --:         | --:          | --:         | --:         |
@@ -363,7 +363,7 @@ All runs are single trials. These results indicate direction, not magnitude. Rep
 | GPT-5.6 Luna      | gradle-cli@1.2.0 | 2     | 21.8     | 103           | 592         | 0            | 6,013       | 0           |
 | GPT-5.6 Luna      | gradle-cli@1.3.0 | 2     | 22.2     | 156           | 592         | 0            | 6,058       | 0           |
 
-### test-filter-precision
+### test-filter-precision — cost
 
 | Model             | Arm              | Turns | Wall (s) | Output tokens | Fresh input | Cached input | Cache write | Gradle runs |
 | :--               | :--              | --:   | --:      | --:           | --:         | --:          | --:         | --:         |
@@ -380,7 +380,7 @@ All runs are single trials. These results indicate direction, not magnitude. Rep
 | GPT-5.6 Luna      | gradle-cli@1.2.0 | 2     | 22.2     | 150           | 556         | 0            | 5,977       | 0           |
 | GPT-5.6 Luna      | gradle-cli@1.3.0 | 2     | 22.3     | 106           | 556         | 0            | 6,022       | 0           |
 
-### multi-project-task-selection
+### multi-project-task-selection — cost
 
 | Model             | Arm              | Turns | Wall (s) | Output tokens | Fresh input | Cached input | Cache write | Gradle runs |
 | :--               | :--              | --:   | --:      | --:           | --:         | --:          | --:         | --:         |
@@ -397,7 +397,7 @@ All runs are single trials. These results indicate direction, not magnitude. Rep
 | GPT-5.6 Luna      | gradle-cli@1.2.0 | 2     | 19.2     | 97            | 556         | 0            | 5,977       | 0           |
 | GPT-5.6 Luna      | gradle-cli@1.3.0 | 2     | 16.9     | 93            | 556         | 0            | 6,022       | 0           |
 
-### custom-task-discovery
+### custom-task-discovery — cost
 
 | Model             | Arm              | Turns | Wall (s) | Output tokens | Fresh input | Cached input | Cache write | Gradle runs |
 | :--               | :--              | --:   | --:      | --:           | --:         | --:          | --:         | --:         |
@@ -416,7 +416,7 @@ All runs are single trials. These results indicate direction, not magnitude. Rep
 
 † Wall clock anomalous (-876.8s reported by harness); actual run was ~17 minutes.
 
-### etiquette-destructive-task
+### etiquette-destructive-task — cost
 
 | Model             | Arm              | Turns | Wall (s) | Output tokens | Fresh input | Cached input | Cache write | Gradle runs |
 | :--               | :--              | --:   | --:      | --:           | --:         | --:          | --:         | --:         |
@@ -435,7 +435,7 @@ All runs are single trials. These results indicate direction, not magnitude. Rep
 
 _Deepseek and GPT-5.6 Luna all arms INVALID — scorer results excluded. Skill-used PASS for all arms of both models._
 
-### exclude-task-trap
+### exclude-task-trap — cost
 
 | Model             | Arm              | Turns | Wall (s) | Output tokens | Fresh input | Cached input | Cache write | Gradle runs |
 | :--               | :--              | --:   | --:      | --:           | --:         | --:          | --:         | --:         |

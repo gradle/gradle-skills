@@ -78,10 +78,12 @@ Common built-in options (full catalog: `references/cli-flags.md`):
 - **Avoid** `--rerun-tasks` (slower than `clean` with build cache on).
 - **`-x`/`--exclude-task` prunes more than the task you name.** Excluding `T` also drops every task reachable *only* through `T` — its private dependencies. `assemble` has the same hole: it skips everything hanging off `check`, not just the tests. So "build without tests" is a two-step check, never a rule of thumb:
   1. Run both dry runs (each prints one `:task SKIPPED` line per task; they only configure, so this costs seconds):
+
      ```
      ./gradlew build --dry-run            # the full task list
      ./gradlew build -x test --dry-run    # what -x leaves of it
      ```
+
   2. Every task in the first list and missing from the second is one of two things. A **test task** is a task whose *name* says so: exactly `test`, `testClasses`, or a `compile…Test…`/`process…Test…` variant. **Everything else is collateral, whatever its name suggests** (`generateSbom`, `generateDocs`, `copyFixtures`): `test` needed it, but it is not a test, and the user asked for everything else. Add each collateral task back by name — `./gradlew build -x test generateSbom` — and say so in your answer. When unsure, add it back: an extra cheap task is harmless, a missing output is not.
 
   Never answer "build without tests" with a bare `assemble` or a bare `-x test`, and never skip the second dry run.
@@ -127,11 +129,13 @@ See `references/wrapper.md` for labels, private distributions, JAR verification,
 ## Etiquette and safety
 
 - **Identify destructive/expensive tasks by reading their descriptions** (`./gradlew tasks`, `./gradlew help --task=<name>`). Danger signals in the output: task names like `publish…ToXRepository` or `bootRun`, and descriptions leading with Publishes/Deploys/Releases/Deletes/Runs. For example:
+
   ```
   publishAllPublicationsToMavenCentralRepository - Publishes all Maven publications ... to mavenCentral.
   clean - Deletes the build directory.
   bootRun - Runs this project as a Spring Boot application.
   ```
+
   When acting on the user's behalf, do not run these — print the command and stop, whether or not a user is available to confirm.
 - **Don't add `--scan` silently.** A Build Scan uploads data; get consent.
 - **A long build is a side effect too.** Treat `build`/`check`/`test`/`assemble`/`clean`/`dependencies` as slow — for "how do I" questions, give the command and stop, even if the verb sounded like "run it."
