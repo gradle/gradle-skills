@@ -1,6 +1,6 @@
 # Gradle CLI — Complete Flag Reference
 
-Grouped catalog of Gradle command-line options. Reflects the current release (Gradle 9.x); for which flags exist in a specific older version, see `version-matrix.md`. The authoritative page is https://docs.gradle.org/current/userguide/command_line_interface.html.
+Grouped catalog of Gradle CLI options for Gradle 9.x. For older versions, see `version-matrix.md`. Authoritative: https://docs.gradle.org/current/userguide/command_line_interface.html.
 
 ## Contents
 - [Command structure](#command-structure)
@@ -23,9 +23,9 @@ gradle [taskName...] [--option-name...]
 ```
 
 - Put built-in (Gradle) options **before** the task names, and each task's own options immediately **after** that task: `gradle [built-in options] task [task options]`.
-- Always pass values with `=`: `--opt=value` (e.g. `--console=plain`). Use this form consistently and don't bother with the space-separated variant.
+- Always pass values with `=`: `--opt=value` (e.g. `--console=plain`) — don't use the space-separated variant.
 - Boolean options have `--no-` inverses: `--build-cache` / `--no-build-cache`.
-- **The exit code is the source of truth for success: `0` = success, any non-zero = build failure.** Don't infer the outcome from log text (and note `--quiet` hides the `BUILD SUCCESSFUL`/`BUILD FAILED` line entirely).
+- **Exit code is the source of truth: `0` = success, non-zero = failure.** Don't grep log text — `--quiet` hides `BUILD SUCCESSFUL`/`BUILD FAILED`.
 - Common short forms: `-h`/`--help`, `-q`/`--quiet`, `-i`/`--info`, `-s`/`--stacktrace`, `-S`/`--full-stacktrace`, `-m`/`--dry-run`, `-t`/`--continuous`, `-D`/`--system-prop`, `-P`/`--project-prop`, `-I`/`--init-script`, `-g`/`--gradle-user-home`, `-p`/`--project-dir`, `-U`/`--refresh-dependencies`, `-F`/`--dependency-verification`, `-M`/`--write-verification-metadata`, `-v`/`--version`.
 - Many built-in flags can instead be set in `gradle.properties` (e.g. `org.gradle.caching=true`); CLI flags override file settings.
 
@@ -52,7 +52,7 @@ Applies to `--tests`, `-D`/`--system-prop`, `-P`/`--project-prop`, `-I`/`--init-
 
 Applies to `--update-locks`, `--write-verification-metadata`.
 
-**When in doubt, repeat the flag.** It's the more common form, and it never breaks on values that legitimately contain a `,` or `:`. Only reach for the comma form when the flag's own help/docs explicitly show `[,…]`.
+**When in doubt, repeat the flag.** It's the more common form, and it never breaks on values that legitimately contain a `,` or `:`. The comma form silently fails on flags that don't accept it — for example, `./gradlew test --tests="com.pkg.Foo,com.pkg.Bar"` is parsed as one filter looking for a single test literally named `com.pkg.Foo,com.pkg.Bar`, not two filters, and simply matches nothing. Only reach for the comma form when the flag's own help/docs explicitly show `[,…]`.
 
 ## Executing & selecting tasks
 
@@ -60,14 +60,14 @@ Applies to `--update-locks`, `--write-verification-metadata`.
 |---|---|
 | `gradle :task` | Run `task` in the **root** project only. |
 | `gradle :sub:task` | Run `task` in subproject `sub`. |
-| `gradle t1 t2` | Run multiple tasks, honoring command-line order safety. |
+| `gradle :t1 :t2` | Run multiple tasks, honoring command-line order safety. |
 
-Use the **full, exact** task and project names as `tasks` / `help` report them. Gradle also accepts abbreviated and camel-case names (e.g. `che`, `mAL:cT`) for interactive typing, but an agent should never use them — they can resolve to the wrong task or become ambiguous.
+Use **full, exact** task and project names as `tasks`/`help` report them. Gradle accepts abbreviations and camel-case for interactive typing (`che` for `check`, `:mA:cT` for `:myApp:compileTest`), but an agent should never use them — they can silently resolve to the wrong task.
 
 - `--rerun` — built-in **task** option: rerun just that one task even if up-to-date. A *targeted* `--rerun` is the right tool when you genuinely need to force a single task.
 - `--rerun-tasks` — **avoid for normal builds.** Forces the requested tasks *and all their dependencies* to re-run; with the build cache enabled this is slower and more wasteful than `clean`. Use only as a last resort when diagnosing a build-logic bug (e.g. a missing task input/output declaration).
-- `-x`, `--exclude-task=<name>` — **avoid — it's a trap.** Excluding a task silently drops its transitive dependencies too, so the resulting graph often skips work you didn't intend. Prefer invoking exactly the tasks you want.
-- Disambiguation: `gradle [built-in-opts] -- [taskName] [--task-opts]` — the `--` delimiter forces following `--options` to be parsed as task options.
+- `-x`, `--exclude-task=<name>` — exclude a task from execution, **and with it every task reachable only through it.** Before relying on it, diff `./gradlew <task> --dry-run` against `./gradlew <task> -x <name> --dry-run` and add back by name whatever dropped that you still need (`build -x test generateSbom`). `assemble` is not a safer spelling of `build -x test`: it drops the same private dependencies of `check`. See SKILL.md, "Running as an agent".
+- Disambiguation: `gradle [built-in-opts] -- [taskName] [--task-opts]` — the `--` delimiter stops built-in option parsing, so any `--options` after it are interpreted in task-command context (as options on the most recent task) rather than as Gradle options.
 
 ## Execution options
 
@@ -83,7 +83,7 @@ Use the **full, exact** task and project names as `tasks` / `help` report them. 
 | `--write-locks` | Persist lock state for all lockable resolved configurations. |
 | `--update-locks=<group:name>[,…]` | Update locked versions for specific modules (implies `--write-locks`). |
 | `-a`, `--no-rebuild` | Don't rebuild project dependencies (e.g. `buildSrc`). Use with caution. |
-| `--non-interactive` | Never prompt for input; use defaults. Good for CI / agents. *(recent — verify with `--help`)* |
+| `--non-interactive` | Never prompt for input; use defaults. Good for CI / agents. *(Gradle 9.x — verify with `--help`)* |
 
 ## Performance options
 
@@ -97,7 +97,7 @@ Use the **full, exact** task and project names as `tasks` / `help` report them. 
 | `--max-workers=<n>` | Cap parallel workers. Default = CPU count. |
 | `--parallel`, `--no-parallel` | Build projects in parallel. Default off. |
 | `--priority=(normal\|low)` | Scheduling priority for the daemon and its processes. |
-| `--profile` | Write an HTML performance report under `build/reports/profile`. `--scan` is richer. |
+| `--profile` | Write an HTML performance report under `build/reports/profile` — local, no upload. `--scan` gives more detail but uploads data (see below). |
 | `--scan` | Publish a Build Scan with detailed diagnostics. **Uploads build data — get consent.** |
 | `--watch-fs`, `--no-watch-fs` | File-system watching between builds. Enabled by default where supported. |
 
@@ -124,7 +124,7 @@ Least → most verbose: `--quiet` < `--warn` < (default *lifecycle*) < `--info` 
 | `-w`, `--warn` | Warnings and above. |
 | `-i`, `--info` | Info — shows task/project name expansion, decisions, cache info. |
 | `-d`, `--debug` | Debug (very verbose, includes stacktraces). |
-| `--console=plain` | **Use this whenever you'll parse the output.** No color or progress bar. (Default `auto` is plain when not attached to a terminal.) |
+| `--console=plain` | **Pass explicitly whenever you'll parse output.** `auto` (default) usually degrades to plain off-terminal, but a pseudo-TTY (Docker, some CI wrappers) can fool it. Explicit is defense in depth. |
 | `-Dorg.gradle.logging.level=…` | Set log level via property. |
 
 `NO_COLOR` env var (non-empty) suppresses color regardless of console mode.
@@ -173,7 +173,7 @@ Least → most verbose: `--quiet` < `--warn` < (default *lifecycle*) < `--info` 
 
 ## Task options
 
-Task options are interpreted by the task, **must come immediately after the task name**, and are listed by `gradle help --task=<name>`. Built-in task options available on every task currently include `--rerun`. Plugins add their own — e.g. `--tests` (Java test filtering), `--continuous` interactions, etc.
+Task options are interpreted by the task, **must come immediately after the task name**, and are listed by `gradle help --task=<name>`. Every task supports `--rerun`. Plugins add their own — e.g. `--tests` (Java test filtering on the `Test` task).
 
 ## Project reporting tasks
 

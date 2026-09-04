@@ -1,20 +1,16 @@
 # Gradle Skills
 
-A collection of skills for AI coding agents working in Gradle projects. Skills are packaged instructions and references that extend agent capabilities.
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
 
-Skills follow the [Agent Skills](https://agentskills.io/) format.
+Packaged skills for AI coding agents working in Gradle projects, following the [Agent Skills](https://agentskills.io/) format. Harness-agnostic.
 
-**The skills are harness-agnostic.** They contain no vendor- or tool-specific instructions and work in any agent that supports the Agent Skills format. They assume only capabilities every coding agent has: reading files, matching glob patterns, fetching URLs, and running shell commands.
-
-This repository is *additionally* packaged as a Claude Code plugin marketplace, for teams that distribute tooling that way. That is a convenience, not the primary distribution channel — see [Installation](#installation).
+Also packaged as a Claude Code plugin marketplace. See [Installation](#installation).
 
 ## Available Skills
 
-### gradle-best-practices
+### gradle-best-practices [![v2.0.0](https://img.shields.io/badge/v2.0.0-02303A?logo=gradle&logoColor=white)](skills/gradle-best-practices)
 
-Audits a project's Gradle build against the [official Gradle best practices](https://docs.gradle.org/current/userguide/best_practices.html), produces a prioritized findings report, and **proposes code changes** to bring the build into compliance. Covers both Gradle scripts and Java/Kotlin/Groovy sources under `buildSrc/` and `build-logic/`.
-
-The best-practices catalog is **fetched live from `docs.gradle.org` on every run** — the skill ships no embedded list, so it always reflects the latest published documentation across all seven categories (general, structuring builds, dependencies, tasks, performance, security, testing). Requires network access.
+Audits a Gradle build against the [official best practices](https://docs.gradle.org/current/userguide/best_practices.html), produces a prioritized findings report, and proposes fixes. Covers build scripts and sources under `buildSrc/` and `build-logic/`. The catalog is fetched live from `docs.gradle.org` on every run. Requires network access.
 
 **Use when:**
 
@@ -23,9 +19,9 @@ The best-practices catalog is **fetched live from `docs.gradle.org` on every run
 - "Best practices review"
 - "Apply best practices to my build"
 
-### gradle-cli
+### gradle-cli [![v1.3.0](https://img.shields.io/badge/v1.3.0-02303A?logo=gradle&logoColor=white)](skills/gradle-cli)
 
-Runs Gradle builds and tasks from the command line with `gradle` or the `./gradlew` wrapper, and produces the exact, copy-pasteable command for any invocation — using the flags valid for the project's Gradle version (7.0–9.x) and the tasks defined in the current project. It orients first (wrapper vs. system Gradle, the project's declared version, the installed version), discovers built-in and project-custom tasks, then runs the command or hands it over. Covers task selection in multi-project builds, the full grouped flag catalog, version-by-version flag differences, and wrapper operations (add/use/upgrade, including the run-the-task-twice step, SHA-256 verification, and authenticated distributions).
+Runs Gradle builds and tasks via `./gradlew`, and produces the exact command for any invocation. Knows the right flags, task ordering, and invocation patterns for the project's Gradle version.
 
 **Use when:**
 
@@ -33,6 +29,8 @@ Runs Gradle builds and tasks from the command line with `gradle` or the `./gradl
 - "Upgrade the gradle wrapper"
 - "How do I run …" / "what's the gradle command for …"
 - "List the gradle tasks"
+
+**[Evaluation results →](evals/gradle-cli-1.3.0.md)** v1.3.0 tested across 7 scenarios on Sonnet 5, Opus 5, and Deepseek V4 Flash.
 
 ## Installation
 
@@ -56,7 +54,7 @@ This is the expected path for every agent, Claude Code included.
 
 ### Claude Code plugin marketplace (optional)
 
-For teams that already distribute tooling as Claude Code plugins, this repository also doubles as a plugin marketplace. It installs the same skills — nothing here is Claude-specific — so use it only if the plugin workflow is what you want.
+For teams that already distribute tooling as Claude Code plugins, this repository also doubles as a plugin marketplace.
 
 ```text
 /plugin marketplace add gradle/gradle-skills

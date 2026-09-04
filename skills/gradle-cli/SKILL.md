@@ -1,10 +1,10 @@
 ---
 name: gradle-cli
-description: "Run any Gradle build from the command line"
+description: "Produce or run the exact `./gradlew` command for any Gradle CLI invocation on Gradle 7.0–9.x. Use whenever the user asks to build, test, run a task, list tasks, refresh dependencies, or add/upgrade the wrapper."
 license: Apache-2.0
 metadata:
   author: gradle
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 # Gradle CLI
@@ -14,15 +14,15 @@ metadata:
 - **"Run X", "build it", "upgrade the wrapper"** → act. Orient (below), execute, report the outcome.
 - **"How do I run X?", "what's the command for X?"** → give the copy-pasteable `./gradlew …` command, name the key flags, stop.
 
-If genuinely ambiguous, give the command *and* offer to run it.
+If genuinely ambiguous, default to giving the command — don't launch on a maybe.
 
 ## Step 1 — Orient before you type
 
 **1. Wrapper or system Gradle?** Look for `gradlew` / `gradlew.bat` in the project root. If present, **always prefer the wrapper** — it pins the version the project was built against. From a subproject dir, reference it relatively (e.g. `../gradlew`). Only fall back to system `gradle` (check `gradle --version`) when there's no wrapper.
 
-This skill shows `./gradlew` throughout (Unix/macOS/WSL/Git Bash). Translate for the user's shell: **Windows cmd** → `gradlew.bat`; **PowerShell** → `.\gradlew`. Flags, tasks, and task options are identical.
+This skill shows `./gradlew` (Unix/macOS/WSL/Git Bash). Windows cmd → `gradlew.bat`; PowerShell → `.\gradlew`. Flags, tasks, and options are identical.
 
-**2. What Gradle version?** Read `distributionUrl` in `gradle/wrapper/gradle-wrapper.properties` (e.g. `gradle-8.14-bin.zip` → 8.14). `./gradlew --version` confirms the running version and JVM.
+**2. What Gradle version?** Read `distributionUrl` in `gradle/wrapper/gradle-wrapper.properties` (e.g. `gradle-8.14-bin.zip` → 8.14). `./gradlew --version` confirms the running version and JVM. For anything version-specific (which flags exist in that version, per-version doc URLs), consult `references/version-matrix.md`.
 
 ## Step 2 — Discover what you can actually run
 
@@ -32,11 +32,11 @@ This skill shows `./gradlew` throughout (Unix/macOS/WSL/Git Bash). Translate for
 - `./gradlew help --task=<name>` — one task's type, options, provenance.
 - For custom tasks, grep `buildSrc/`, `build-logic/`, and build scripts for `tasks.register(` / `tasks.create(`.
 
-**Use full, exact task and project names — never abbreviations** (e.g. `che`, `mAL:cT`). They can silently resolve to the wrong task.
+**Use full, exact task and project names — never abbreviations** (e.g. `che` for `check`, `:mA:cT` for `:myApp:compileTest`). They can silently resolve to the wrong task.
 
 ## Step 3 — Build the command
 
-**Order: built-in options first, then task names, then each task's own options right after its task.**
+**Order: built-in options → task names → each task's own options right after its task.**
 
 ```
 ./gradlew [built-in options]  task1 [task1 options]  task2 [task2 options]
@@ -71,12 +71,20 @@ Common built-in options (full catalog: `references/cli-flags.md`):
 
 **Running as an agent (non-interactive):**
 
-- Run from the project root with `--console=plain`.
+- Prefer the project root; use `-p=<dir>` or `../gradlew` from a subproject. Add `--console=plain`.
 - **Trust the exit code, not the log text:** `0` = success, non-zero = failure. Never grep for `BUILD SUCCESSFUL`/`BUILD FAILED` — `--quiet` suppresses it.
 - On Gradle 9.x, add `--non-interactive` to skip prompts (verify with `--help`).
 - Leave the daemon on (default); reserve `--no-daemon` for one-shot environments.
-- When some tasks are excluded via the `-x`/`--exclude-task`, you need to check if their transitive dependencies produce build outputs. A transitive dependency is another task which is wired to run whenever the task to be excluded is run, hence it won't run either when you add the exclusion. The transitive dependencies that produce build outputs/artifacts will need to be run explicitly. Let's say you need to exclude the task `test`. You would do that with `-x test`. But before you do run `test --console plain --dry-run` to obtain the list of its transitively dependant tasks and check them.
 - **Avoid** `--rerun-tasks` (slower than `clean` with build cache on).
+- **`-x`/`--exclude-task` prunes more than the task you name.** Excluding `T` also drops every task reachable *only* through `T` — its private dependencies. `assemble` has the same hole: it skips everything hanging off `check`, not just the tests. So "build without tests" is a two-step check, never a rule of thumb:
+  1. Run both dry runs (each prints one `:task SKIPPED` line per task; they only configure, so this costs seconds):
+     ```
+     ./gradlew build --dry-run            # the full task list
+     ./gradlew build -x test --dry-run    # what -x leaves of it
+     ```
+  2. Every task in the first list and missing from the second is one of two things. A **test task** is a task whose *name* says so: exactly `test`, `testClasses`, or a `compile…Test…`/`process…Test…` variant. **Everything else is collateral, whatever its name suggests** (`generateSbom`, `generateDocs`, `copyFixtures`): `test` needed it, but it is not a test, and the user asked for everything else. Add each collateral task back by name — `./gradlew build -x test generateSbom` — and say so in your answer. When unsure, add it back: an extra cheap task is harmless, a missing output is not.
+
+  Never answer "build without tests" with a bare `assemble` or a bare `-x test`, and never skip the second dry run.
 
 ## Common workflows
 
@@ -95,10 +103,10 @@ Common built-in options (full catalog: `references/cli-flags.md`):
 ./gradlew dependencyInsight --dependency=guava --configuration=compileClasspath
 ./gradlew projects                       # project/subproject hierarchy
 ./gradlew properties                     # project properties
-./gradlew init                           # scaffold a new build
+./gradlew init                           # scaffold a new build (empty dir; prompts otherwise)
 ```
 
-`-D` sets a JVM system property, `-P` a Gradle project property, `-I` an init script, `-g` the Gradle user home.
+`-D` sets a JVM system property (`-Dorg.gradle.jvmargs=-Xmx4g`), `-P` a Gradle project property (`-PapiKey=abc`), `-I` an init script (`-I=init.gradle.kts`), `-g` the Gradle user home (`-g=/tmp/gradle-home`).
 
 ## Wrapper operations
 
@@ -112,15 +120,21 @@ The wrapper is generated by the `:wrapper` task (`:` targets the root project �
 ./gradlew --version
 ```
 
-Get `<sha256>` from https://gradle.org/release-checksums/. The first run updates `gradle-wrapper.properties` only; the second (running under the new version) refreshes `gradlew`/`gradlew.bat` and `gradle-wrapper.jar`. Commit all four files.
+Get `<sha256>` from https://gradle.org/release-checksums/. Both runs write all four files, but `gradlew`/`gradlew.bat`/`gradle-wrapper.jar` come from the running Gradle's templates — only the second run refreshes them under the new version. Commit all four.
 
 See `references/wrapper.md` for labels, private distributions, JAR verification, and the Gradle 9 version-format change.
 
 ## Etiquette and safety
 
-- **Identify destructive/expensive tasks by reading their descriptions** (`./gradlew tasks`, `./gradlew help --task=<name>`). Verbs like "publishes", "deploys", "releases", "deletes", "starts" signal remote-state changes, deleted outputs, or long-running processes. For "how do I" questions, hand over the command; confirm before running one on the user's behalf.
+- **Identify destructive/expensive tasks by reading their descriptions** (`./gradlew tasks`, `./gradlew help --task=<name>`). Danger signals in the output: task names like `publish…ToXRepository` or `bootRun`, and descriptions leading with Publishes/Deploys/Releases/Deletes/Runs. For example:
+  ```
+  publishAllPublicationsToMavenCentralRepository - Publishes all Maven publications ... to mavenCentral.
+  clean - Deletes the build directory.
+  bootRun - Runs this project as a Spring Boot application.
+  ```
+  When acting on the user's behalf, do not run these — print the command and stop, whether or not a user is available to confirm.
 - **Don't add `--scan` silently.** A Build Scan uploads data; get consent.
-- **A long build is a side effect too.** If a command will be slow and the user only asked a question, give the command instead of launching it.
+- **A long build is a side effect too.** Treat `build`/`check`/`test`/`assemble`/`clean`/`dependencies` as slow — for "how do I" questions, give the command and stop, even if the verb sounded like "run it."
 - **Command-line order safety:** `clean build` means clean *then* build; don't reorder.
 
 ## References
