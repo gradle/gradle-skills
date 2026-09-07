@@ -13,7 +13,7 @@ gradlew                                    # Unix launch script
 gradlew.bat                                # Windows launch script
 ```
 
-Never hand-edit `gradlew`/`gradlew.bat`/`gradle-wrapper.jar`. Editing `distributionUrl` in the `.properties` file is the only manual change that's reasonable — and even then, re-run the `wrapper` task (see below).
+**Never hand-edit `gradlew`/`gradlew.bat`/`gradle-wrapper.jar`.** They are generated files: the next `wrapper` task run overwrites them silently, so any hand-edit is lost without warning. Editing `distributionUrl` in the `.properties` file is the only manual change that's reasonable — and even then, re-run the `wrapper` task (see below).
 
 ## Adding a wrapper to a project that has none
 
@@ -55,11 +55,11 @@ Accepted labels for `--gradle-version`: `latest`, `release-candidate`, `release-
 
 ### Why run the `wrapper` task TWICE — the #1 real-world gotcha
 
-The first run updates only `gradle-wrapper.properties`. The `gradlew` scripts and `gradle-wrapper.jar` are left as-is. New Gradle versions sometimes ship improved launch scripts/jar, so to fully upgrade them you must run the same `wrapper` command a second time (now executing under the new version), as shown above.
+The `wrapper` task always writes all four files, but `gradlew`/`gradlew.bat`/`gradle-wrapper.jar` come from the **currently running** Gradle's templates — not the target version. First run (under the old): properties point at the new version, generated files rewritten from old templates (byte-identical to what shipped). Second run (auto-downloaded to the new version because the properties changed): generated files rewritten from new templates.
 
 Symptoms of a half-done upgrade (very common in support questions): persistent wrapper/deprecation warnings that won't go away, a `gradlew` diff that looks odd, or a bot (e.g. Dependabot) bumping `distributionUrl` without ever re-running the task. The fix is always: run `./gradlew :wrapper` (twice) and commit the result.
 
-Since **Gradle 9.0**, `gradle-wrapper.properties` must declare the version as full `X.Y.Z` — bare major/minor is not accepted *in the file*.
+Since **Gradle 9.0**, `gradle-wrapper.properties` must declare the version as full `X.Y.Z` — bare major/minor is not accepted *in the file* (the CLI's `--gradle-version` still accepts them on 9+; see `references/version-matrix.md`).
 
 ## Wrapper task options
 
@@ -88,11 +88,11 @@ Finding the checksum is a recurring pain point. Get it from:
   --gradle-distribution-sha256-sum=<paste-the-sha256>
 ```
 
-Gradle fails the build if the configured sum doesn't match the server's. Note: once `gradle-wrapper.properties` contains `distributionSha256Sum`, the `wrapper` task will fail unless its configuration also defines a sum (it's preserved automatically when the version doesn't change).
+Gradle fails the build if the configured sum doesn't match the server's. Note: once `distributionSha256Sum` is set in `gradle-wrapper.properties`, any subsequent `wrapper` invocation that *changes* `--gradle-version` must also pass a new `--gradle-distribution-sha256-sum` matching the new distribution — the build fails rather than silently reuse the old (now wrong) sum. If the version doesn't change, the existing sum is preserved automatically.
 
 ## Verifying the wrapper JAR's integrity
 
-Because the jar is committed and executed on every machine, make validating it a standard step — before running an unfamiliar or freshly-cloned project, and after every upgrade. A malicious PR could swap it. In CI, the [Setup Gradle GitHub Action](https://github.com/gradle/actions) validates it automatically on every build (built in as of v4) — rely on that. To check manually:
+The jar is committed and executed on every machine, so a malicious PR could swap it. Validate before running an unfamiliar or freshly-cloned project, and after every upgrade. In CI, the [Setup Gradle GitHub Action](https://github.com/gradle/actions) validates it automatically (built in as of v4). Manual check:
 
 ```
 sha256sum gradle/wrapper/gradle-wrapper.jar    # compare against gradle.org/release-checksums
@@ -115,4 +115,4 @@ Only over HTTPS — Basic/Bearer credentials are sent in clear text. Unscoped `s
 
 ## Customizing the wrapper task in the build
 
-To avoid retyping the same options on every upgrade (for example, always pointing at a company-hosted `--gradle-distribution-url`), configure the `Wrapper` task in the root build script. See the `Wrapper` task type in the DSL/Javadoc reference. After that, `./gradlew :wrapper --gradle-version=<v>` honors the configured defaults.
+Configure the `Wrapper` task in the root build script to avoid retyping options on every upgrade (e.g. a company-hosted `--gradle-distribution-url`). After that, `./gradlew :wrapper --gradle-version=<v>` honors the defaults. See the `Wrapper` task type in the DSL reference.

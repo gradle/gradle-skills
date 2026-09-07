@@ -37,7 +37,7 @@ Most everyday flags — `build`, `test`, `--tests`, `--continue`, `--dry-run`, `
 | `--isolated-projects`, `--no-isolated-projects` | Incubating; introduced during the 8.x line and still incubating in 9.x. Implies `--configuration-cache`. Verify with `--help` on older 8.x. |
 | `--problems-report`, `--no-problems-report` | Added mid-8.x (incubating); on by default in 9.x. Not present in early 7.x. |
 | `--task-graph` | **Gradle 9.1.0+** only. |
-| `--non-interactive` | Recent addition (9.x line). Verify with `--help`; older versions simply don't prompt the same way. |
+| `--non-interactive` | Gradle 9.x line. Verify with `--help`; older versions simply don't prompt the same way. |
 | `--watch-fs`, `--no-watch-fs` | Present 7.x→9.x; default-on where the OS supports it. |
 | `--configure-on-demand`, `--no-configure-on-demand` | Present throughout (incubating). |
 | Wrapper `--gradle-version` accepting a bare major/minor (e.g. `9`, `9.1`) | **Gradle 9+ only** (resolves to the latest matching release). On 7.x/8.x give a full version. |
