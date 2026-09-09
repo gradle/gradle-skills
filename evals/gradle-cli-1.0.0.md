@@ -1,4 +1,4 @@
-# Gradle CLI Skill — Benchmark Results
+# Gradle CLI Skill v1.0.0 — Benchmark Results
 
 ## Summary
 
@@ -309,98 +309,240 @@ The skill was invoked on 27 of 28 model/scenario combinations. Only the failure 
 > For Deepseek (`opencode`), there is no Anthropic-style prompt caching. "Tokens in (fresh)" represents genuinely new input tokens per turn. "Tokens in (cached)" reflects opencode's internal context reuse (not billable at a reduced rate). "Tokens in (cache write)" is always 0.
 > Wall clock is `adjusted_wall_clock` in seconds — the agent's active time, minus harness overhead.
 > The `-876.8s` for Opus 5 `gradle-cli@1.0.0` on `custom-task-discovery` is a harness calculation artefact — the real run time was ~17 minutes.
+>
+> **Reading the ✅ in these tables:** it marks the cheaper of the two arms for that model and metric — lower is better for every metric shown. Note this is a different meaning from the ✅ in the outcome tables above, where it means PASS. Ties are left unmarked. `Gradle runs` is never marked: it is a diagnostic rather than a cost, and fewer invocations can mean the agent never did the work (see GPT-5.6 Luna, which scores 0 everywhere).
 
 ### wrapper-upgrade — cost
 
-| Model             | Arm              | Turns | Wall (s) | Output tokens | Fresh input | Cached input | Cache write | Gradle runs |
-| :--               | :--              | --:   | --:      | --:           | --:         | --:          | --:         | --:         |
-| Opus 5            | no-skills        | 10    | 85.2     | 2,917         | 20          | 278,170      | 7,064       | 3           |
-| Opus 5            | gradle-cli@1.0.0 | 8     | 90.2     | 2,384         | 16          | 252,852      | 12,433      | 0           |
-| Sonnet 5          | no-skills        | 8     | 40.2     | 1,656         | 16          | 276,354      | 41,402      | 3           |
-| Sonnet 5          | gradle-cli@1.0.0 | 9     | 94.6     | 1,794         | 17          | 333,322      | 48,416      | 1           |
-| Deepseek V4 Flash | no-skills        | 8     | 31.6     | 863           | 1,872       | 56,064       | 0           | 4           |
-| Deepseek V4 Flash | gradle-cli@1.0.0 | 12    | 68.0     | 2,161         | 10,574      | 141,056      | 0           | 4           |
-| GPT-5.6 Luna      | no-skills        | 2     | 40.6     | 159           | 544         | 0            | 5,909       | 0           |
-| GPT-5.6 Luna      | gradle-cli@1.0.0 | 2     | 38.7     | 101           | 544         | 0            | 6,010       | 0           |
+| Model             | Metric        | `no-skills` | `gradle-cli@1.0.0` |
+| :--               | :--           | --:         | --:                |
+| Opus 5            | Turns         | 10          | ✅ 8               |
+| Opus 5            | Wall (s)      | ✅ 85.2     | 90.2               |
+| Opus 5            | Output tokens | 2,917       | ✅ 2,384           |
+| Opus 5            | Fresh input   | 20          | ✅ 16              |
+| Opus 5            | Cached input  | 278,170     | ✅ 252,852         |
+| Opus 5            | Cache write   | ✅ 7,064    | 12,433             |
+| Opus 5            | Gradle runs   | 3           | 0                  |
+| Sonnet 5          | Turns         | ✅ 8        | 9                  |
+| Sonnet 5          | Wall (s)      | ✅ 40.2     | 94.6               |
+| Sonnet 5          | Output tokens | ✅ 1,656    | 1,794              |
+| Sonnet 5          | Fresh input   | ✅ 16       | 17                 |
+| Sonnet 5          | Cached input  | ✅ 276,354  | 333,322            |
+| Sonnet 5          | Cache write   | ✅ 41,402   | 48,416             |
+| Sonnet 5          | Gradle runs   | 3           | 1                  |
+| Deepseek V4 Flash | Turns         | ✅ 8        | 12                 |
+| Deepseek V4 Flash | Wall (s)      | ✅ 31.6     | 68.0               |
+| Deepseek V4 Flash | Output tokens | ✅ 863      | 2,161              |
+| Deepseek V4 Flash | Fresh input   | ✅ 1,872    | 10,574             |
+| Deepseek V4 Flash | Cached input  | ✅ 56,064   | 141,056            |
+| Deepseek V4 Flash | Cache write   | 0           | 0                  |
+| Deepseek V4 Flash | Gradle runs   | 4           | 4                  |
+| GPT-5.6 Luna      | Turns         | 2           | 2                  |
+| GPT-5.6 Luna      | Wall (s)      | 40.6        | ✅ 38.7            |
+| GPT-5.6 Luna      | Output tokens | 159         | ✅ 101             |
+| GPT-5.6 Luna      | Fresh input   | 544         | 544                |
+| GPT-5.6 Luna      | Cached input  | 0           | 0                  |
+| GPT-5.6 Luna      | Cache write   | ✅ 5,909    | 6,010              |
+| GPT-5.6 Luna      | Gradle runs   | 0           | 0                  |
 
 ### dependency-inspection — cost
 
-| Model             | Arm              | Turns | Wall (s) | Output tokens | Fresh input | Cached input | Cache write | Gradle runs |
-| :--               | :--              | --:   | --:      | --:           | --:         | --:          | --:         | --:         |
-| Opus 5            | no-skills        | 8     | 85.3     | 1,669         | 16          | 217,567      | 5,623       | 0           |
-| Opus 5            | gradle-cli@1.0.0 | 8     | 79.7     | 1,745         | 16          | 232,963      | 10,056      | 1           |
-| Sonnet 5          | no-skills        | 5     | 34.4     | 613           | 10          | 189,985      | 3,849       | 1           |
-| Sonnet 5          | gradle-cli@1.0.0 | 5     | 58.3     | 613           | 10          | 198,515      | 7,511       | 0           |
-| Deepseek V4 Flash | no-skills        | 6     | 24.6     | 760           | 6,970       | 33,792       | 0           | 1           |
-| Deepseek V4 Flash | gradle-cli@1.0.0 | 8     | 62.3     | 1,178         | 4,893       | 63,744       | 0           | 0           |
-| GPT-5.6 Luna      | no-skills        | 2     | 23.4     | 123           | 592         | 0            | 5,957       | 0           |
-| GPT-5.6 Luna      | gradle-cli@1.0.0 | 2     | 22.2     | 156           | 592         | 0            | 6,058       | 0           |
+| Model             | Metric        | `no-skills` | `gradle-cli@1.0.0` |
+| :--               | :--           | --:         | --:                |
+| Opus 5            | Turns         | 8           | 8                  |
+| Opus 5            | Wall (s)      | 85.3        | ✅ 79.7            |
+| Opus 5            | Output tokens | ✅ 1,669    | 1,745              |
+| Opus 5            | Fresh input   | 16          | 16                 |
+| Opus 5            | Cached input  | ✅ 217,567  | 232,963            |
+| Opus 5            | Cache write   | ✅ 5,623    | 10,056             |
+| Opus 5            | Gradle runs   | 0           | 1                  |
+| Sonnet 5          | Turns         | 5           | 5                  |
+| Sonnet 5          | Wall (s)      | ✅ 34.4     | 58.3               |
+| Sonnet 5          | Output tokens | 613         | 613                |
+| Sonnet 5          | Fresh input   | 10          | 10                 |
+| Sonnet 5          | Cached input  | ✅ 189,985  | 198,515            |
+| Sonnet 5          | Cache write   | ✅ 3,849    | 7,511              |
+| Sonnet 5          | Gradle runs   | 1           | 0                  |
+| Deepseek V4 Flash | Turns         | ✅ 6        | 8                  |
+| Deepseek V4 Flash | Wall (s)      | ✅ 24.6     | 62.3               |
+| Deepseek V4 Flash | Output tokens | ✅ 760      | 1,178              |
+| Deepseek V4 Flash | Fresh input   | 6,970       | ✅ 4,893           |
+| Deepseek V4 Flash | Cached input  | ✅ 33,792   | 63,744             |
+| Deepseek V4 Flash | Cache write   | 0           | 0                  |
+| Deepseek V4 Flash | Gradle runs   | 1           | 0                  |
+| GPT-5.6 Luna      | Turns         | 2           | 2                  |
+| GPT-5.6 Luna      | Wall (s)      | 23.4        | ✅ 22.2            |
+| GPT-5.6 Luna      | Output tokens | ✅ 123      | 156                |
+| GPT-5.6 Luna      | Fresh input   | 592         | 592                |
+| GPT-5.6 Luna      | Cached input  | 0           | 0                  |
+| GPT-5.6 Luna      | Cache write   | ✅ 5,957    | 6,058              |
+| GPT-5.6 Luna      | Gradle runs   | 0           | 0                  |
 
 ### test-filter-precision — cost
 
-| Model             | Arm              | Turns | Wall (s) | Output tokens | Fresh input | Cached input | Cache write | Gradle runs |
-| :--               | :--              | --:   | --:      | --:           | --:         | --:          | --:         | --:         |
-| Opus 5            | no-skills        | 5     | 54.7     | 951           | 10          | 131,691      | 4,434       | 0           |
-| Opus 5            | gradle-cli@1.0.0 | 8     | 77.0     | 2,020         | 16          | 232,959      | 8,556       | 0           |
-| Sonnet 5          | no-skills        | 5     | 30.2     | 576           | 10          | 189,959      | 3,821       | 1           |
-| Sonnet 5          | gradle-cli@1.0.0 | 4     | 23.5     | 555           | 8           | 157,671      | 6,760       | 1           |
-| Deepseek V4 Flash | no-skills        | 5     | 25.4     | 842           | 1,359       | 30,208       | 0           | 1           |
-| Deepseek V4 Flash | gradle-cli@1.0.0 | 7     | 28.4     | 1,129         | 3,609       | 49,920       | 0           | 1           |
-| GPT-5.6 Luna      | no-skills        | 2     | 23.9     | 185           | 556         | 0            | 5,921       | 0           |
-| GPT-5.6 Luna      | gradle-cli@1.0.0 | 2     | 22.3     | 106           | 556         | 0            | 6,022       | 0           |
+| Model             | Metric        | `no-skills` | `gradle-cli@1.0.0` |
+| :--               | :--           | --:         | --:                |
+| Opus 5            | Turns         | ✅ 5        | 8                  |
+| Opus 5            | Wall (s)      | ✅ 54.7     | 77.0               |
+| Opus 5            | Output tokens | ✅ 951      | 2,020              |
+| Opus 5            | Fresh input   | ✅ 10       | 16                 |
+| Opus 5            | Cached input  | ✅ 131,691  | 232,959            |
+| Opus 5            | Cache write   | ✅ 4,434    | 8,556              |
+| Opus 5            | Gradle runs   | 0           | 0                  |
+| Sonnet 5          | Turns         | 5           | ✅ 4               |
+| Sonnet 5          | Wall (s)      | 30.2        | ✅ 23.5            |
+| Sonnet 5          | Output tokens | 576         | ✅ 555             |
+| Sonnet 5          | Fresh input   | 10          | ✅ 8               |
+| Sonnet 5          | Cached input  | 189,959     | ✅ 157,671         |
+| Sonnet 5          | Cache write   | ✅ 3,821    | 6,760              |
+| Sonnet 5          | Gradle runs   | 1           | 1                  |
+| Deepseek V4 Flash | Turns         | ✅ 5        | 7                  |
+| Deepseek V4 Flash | Wall (s)      | ✅ 25.4     | 28.4               |
+| Deepseek V4 Flash | Output tokens | ✅ 842      | 1,129              |
+| Deepseek V4 Flash | Fresh input   | ✅ 1,359    | 3,609              |
+| Deepseek V4 Flash | Cached input  | ✅ 30,208   | 49,920             |
+| Deepseek V4 Flash | Cache write   | 0           | 0                  |
+| Deepseek V4 Flash | Gradle runs   | 1           | 1                  |
+| GPT-5.6 Luna      | Turns         | 2           | 2                  |
+| GPT-5.6 Luna      | Wall (s)      | 23.9        | ✅ 22.3            |
+| GPT-5.6 Luna      | Output tokens | 185         | ✅ 106             |
+| GPT-5.6 Luna      | Fresh input   | 556         | 556                |
+| GPT-5.6 Luna      | Cached input  | 0           | 0                  |
+| GPT-5.6 Luna      | Cache write   | ✅ 5,921    | 6,022              |
+| GPT-5.6 Luna      | Gradle runs   | 0           | 0                  |
 
 ### multi-project-task-selection — cost
 
-| Model             | Arm              | Turns | Wall (s) | Output tokens | Fresh input | Cached input | Cache write | Gradle runs |
-| :--               | :--              | --:   | --:      | --:           | --:         | --:          | --:         | --:         |
-| Opus 5            | no-skills        | 6     | 42.7     | 1,168         | 12          | 159,739      | 5,033       | 1           |
-| Opus 5            | gradle-cli@1.0.0 | 7     | 50.9     | 2,106         | 14          | 207,741      | 9,552       | 3           |
-| Sonnet 5          | no-skills        | 3     | 16.4     | 401           | 6           | 112,526      | 3,877       | 1           |
-| Sonnet 5          | gradle-cli@1.0.0 | 4     | 28.5     | 504           | 8           | 157,601      | 6,734       | 1           |
-| Deepseek V4 Flash | no-skills        | 4     | 19.6     | 431           | 707         | 22,144       | 0           | 1           |
-| Deepseek V4 Flash | gradle-cli@1.0.0 | 6     | 25.2     | 937           | 5,036       | 46,848       | 0           | 2           |
-| GPT-5.6 Luna      | no-skills        | 2     | 22.2     | 163           | 556         | 0            | 5,921       | 0           |
-| GPT-5.6 Luna      | gradle-cli@1.0.0 | 2     | 16.9     | 93            | 556         | 0            | 6,022       | 0           |
+| Model             | Metric        | `no-skills` | `gradle-cli@1.0.0` |
+| :--               | :--           | --:         | --:                |
+| Opus 5            | Turns         | ✅ 6        | 7                  |
+| Opus 5            | Wall (s)      | ✅ 42.7     | 50.9               |
+| Opus 5            | Output tokens | ✅ 1,168    | 2,106              |
+| Opus 5            | Fresh input   | ✅ 12       | 14                 |
+| Opus 5            | Cached input  | ✅ 159,739  | 207,741            |
+| Opus 5            | Cache write   | ✅ 5,033    | 9,552              |
+| Opus 5            | Gradle runs   | 1           | 3                  |
+| Sonnet 5          | Turns         | ✅ 3        | 4                  |
+| Sonnet 5          | Wall (s)      | ✅ 16.4     | 28.5               |
+| Sonnet 5          | Output tokens | ✅ 401      | 504                |
+| Sonnet 5          | Fresh input   | ✅ 6        | 8                  |
+| Sonnet 5          | Cached input  | ✅ 112,526  | 157,601            |
+| Sonnet 5          | Cache write   | ✅ 3,877    | 6,734              |
+| Sonnet 5          | Gradle runs   | 1           | 1                  |
+| Deepseek V4 Flash | Turns         | ✅ 4        | 6                  |
+| Deepseek V4 Flash | Wall (s)      | ✅ 19.6     | 25.2               |
+| Deepseek V4 Flash | Output tokens | ✅ 431      | 937                |
+| Deepseek V4 Flash | Fresh input   | ✅ 707      | 5,036              |
+| Deepseek V4 Flash | Cached input  | ✅ 22,144   | 46,848             |
+| Deepseek V4 Flash | Cache write   | 0           | 0                  |
+| Deepseek V4 Flash | Gradle runs   | 1           | 2                  |
+| GPT-5.6 Luna      | Turns         | 2           | 2                  |
+| GPT-5.6 Luna      | Wall (s)      | 22.2        | ✅ 16.9            |
+| GPT-5.6 Luna      | Output tokens | 163         | ✅ 93              |
+| GPT-5.6 Luna      | Fresh input   | 556         | 556                |
+| GPT-5.6 Luna      | Cached input  | 0           | 0                  |
+| GPT-5.6 Luna      | Cache write   | ✅ 5,921    | 6,022              |
+| GPT-5.6 Luna      | Gradle runs   | 0           | 0                  |
 
 ### custom-task-discovery — cost
 
-| Model             | Arm              | Turns | Wall (s) | Output tokens | Fresh input | Cached input | Cache write | Gradle runs |
-| :--               | :--              | --:   | --:      | --:           | --:         | --:          | --:         | --:         |
-| Opus 5            | no-skills        | 6     | 36.0     | 1,071         | 12          | 160,748      | 5,279       | 1           |
-| Opus 5            | gradle-cli@1.0.0 | 8     | †        | 1,848         | 16          | 199,046      | 41,652      | 2           |
-| Sonnet 5          | no-skills        | 7     | 40.8     | 1,017         | 14          | 272,307      | 5,763       | 1           |
-| Sonnet 5          | gradle-cli@1.0.0 | 6     | 33.9     | 880           | 12          | 233,426      | 5,492       | 1           |
-| Deepseek V4 Flash | no-skills        | 7     | 29.6     | 1,011         | 1,924       | 47,488       | 0           | 1           |
-| Deepseek V4 Flash | gradle-cli@1.0.0 | 8     | 34.6     | 881           | 4,642       | 61,440       | 0           | 1           |
-| GPT-5.6 Luna      | no-skills        | 2     | 22.3     | 148           | 543         | 0            | 5,908       | 0           |
-| GPT-5.6 Luna      | gradle-cli@1.0.0 | 2     | 19.4     | 148           | 543         | 0            | 6,009       | 0           |
+| Model             | Metric        | `no-skills` | `gradle-cli@1.0.0` |
+| :--               | :--           | --:         | --:                |
+| Opus 5            | Turns         | ✅ 6        | 8                  |
+| Opus 5            | Wall (s)      | 36.0        | †                  |
+| Opus 5            | Output tokens | ✅ 1,071    | 1,848              |
+| Opus 5            | Fresh input   | ✅ 12       | 16                 |
+| Opus 5            | Cached input  | ✅ 160,748  | 199,046            |
+| Opus 5            | Cache write   | ✅ 5,279    | 41,652             |
+| Opus 5            | Gradle runs   | 1           | 2                  |
+| Sonnet 5          | Turns         | 7           | ✅ 6               |
+| Sonnet 5          | Wall (s)      | 40.8        | ✅ 33.9            |
+| Sonnet 5          | Output tokens | 1,017       | ✅ 880             |
+| Sonnet 5          | Fresh input   | 14          | ✅ 12              |
+| Sonnet 5          | Cached input  | 272,307     | ✅ 233,426         |
+| Sonnet 5          | Cache write   | 5,763       | ✅ 5,492           |
+| Sonnet 5          | Gradle runs   | 1           | 1                  |
+| Deepseek V4 Flash | Turns         | ✅ 7        | 8                  |
+| Deepseek V4 Flash | Wall (s)      | ✅ 29.6     | 34.6               |
+| Deepseek V4 Flash | Output tokens | 1,011       | ✅ 881             |
+| Deepseek V4 Flash | Fresh input   | ✅ 1,924    | 4,642              |
+| Deepseek V4 Flash | Cached input  | ✅ 47,488   | 61,440             |
+| Deepseek V4 Flash | Cache write   | 0           | 0                  |
+| Deepseek V4 Flash | Gradle runs   | 1           | 1                  |
+| GPT-5.6 Luna      | Turns         | 2           | 2                  |
+| GPT-5.6 Luna      | Wall (s)      | 22.3        | ✅ 19.4            |
+| GPT-5.6 Luna      | Output tokens | 148         | 148                |
+| GPT-5.6 Luna      | Fresh input   | 543         | 543                |
+| GPT-5.6 Luna      | Cached input  | 0           | 0                  |
+| GPT-5.6 Luna      | Cache write   | ✅ 5,908    | 6,009              |
+| GPT-5.6 Luna      | Gradle runs   | 0           | 0                  |
 
 † Wall clock anomalous (-876.8s reported by harness); actual run was ~17 minutes.
 
 ### etiquette-destructive-task — cost
 
-| Model             | Arm              | Turns | Wall (s) | Output tokens | Fresh input | Cached input | Cache write | Gradle runs |
-| :--               | :--              | --:   | --:      | --:           | --:         | --:          | --:         | --:         |
-| Opus 5            | no-skills        | 4     | 46.5     | 898           | 8           | 102,559      | 3,545       | 0           |
-| Opus 5            | gradle-cli@1.0.0 | 3     | 35.1     | 1,299         | 6           | 80,189       | 6,987       | 0           |
-| Sonnet 5          | no-skills        | 4     | 36.0     | 1,092         | 8           | 151,109      | 4,447       | 1           |
-| Sonnet 5          | gradle-cli@1.0.0 | 4     | 35.7     | 1,375         | 8           | 154,827      | 6,770       | 0           |
-| Deepseek V4 Flash | no-skills        | 4     | 22.5     | 466           | 983         | 22,272       | 0           | 0           |
-| Deepseek V4 Flash | gradle-cli@1.0.0 | 4     | 25.0     | 732           | 3,518       | 24,832       | 0           | 1           |
-| GPT-5.6 Luna      | no-skills        | 2     | 24.4     | 229           | 541         | 0            | 5,906       | 0           |
-| GPT-5.6 Luna      | gradle-cli@1.0.0 | 2     | 22.5     | 184           | 541         | 0            | 6,007       | 0           |
+| Model             | Metric        | `no-skills` | `gradle-cli@1.0.0` |
+| :--               | :--           | --:         | --:                |
+| Opus 5            | Turns         | 4           | ✅ 3               |
+| Opus 5            | Wall (s)      | 46.5        | ✅ 35.1            |
+| Opus 5            | Output tokens | ✅ 898      | 1,299              |
+| Opus 5            | Fresh input   | 8           | ✅ 6               |
+| Opus 5            | Cached input  | 102,559     | ✅ 80,189          |
+| Opus 5            | Cache write   | ✅ 3,545    | 6,987              |
+| Opus 5            | Gradle runs   | 0           | 0                  |
+| Sonnet 5          | Turns         | 4           | 4                  |
+| Sonnet 5          | Wall (s)      | 36.0        | ✅ 35.7            |
+| Sonnet 5          | Output tokens | ✅ 1,092    | 1,375              |
+| Sonnet 5          | Fresh input   | 8           | 8                  |
+| Sonnet 5          | Cached input  | ✅ 151,109  | 154,827            |
+| Sonnet 5          | Cache write   | ✅ 4,447    | 6,770              |
+| Sonnet 5          | Gradle runs   | 1           | 0                  |
+| Deepseek V4 Flash | Turns         | 4           | 4                  |
+| Deepseek V4 Flash | Wall (s)      | ✅ 22.5     | 25.0               |
+| Deepseek V4 Flash | Output tokens | ✅ 466      | 732                |
+| Deepseek V4 Flash | Fresh input   | ✅ 983      | 3,518              |
+| Deepseek V4 Flash | Cached input  | ✅ 22,272   | 24,832             |
+| Deepseek V4 Flash | Cache write   | 0           | 0                  |
+| Deepseek V4 Flash | Gradle runs   | 0           | 1                  |
+| GPT-5.6 Luna      | Turns         | 2           | 2                  |
+| GPT-5.6 Luna      | Wall (s)      | 24.4        | ✅ 22.5            |
+| GPT-5.6 Luna      | Output tokens | 229         | ✅ 184             |
+| GPT-5.6 Luna      | Fresh input   | 541         | 541                |
+| GPT-5.6 Luna      | Cached input  | 0           | 0                  |
+| GPT-5.6 Luna      | Cache write   | ✅ 5,906    | 6,007              |
+| GPT-5.6 Luna      | Gradle runs   | 0           | 0                  |
 
 _Deepseek and GPT-5.6 Luna all arms INVALID — scorer results excluded. Skill-used PASS for all arms of both models._
 
 ### exclude-task-trap — cost
 
-| Model             | Arm              | Turns | Wall (s) | Output tokens | Fresh input | Cached input | Cache write | Gradle runs |
-| :--               | :--              | --:   | --:      | --:           | --:         | --:          | --:         | --:         |
-| Opus 5            | no-skills        | 6     | 64.8     | 1,634         | 12          | 160,256      | 5,314       | 0           |
-| Opus 5            | gradle-cli@1.0.0 | 8     | 72.6     | 2,095         | 16          | 210,048      | 32,950      | 1           |
-| Sonnet 5          | no-skills        | 6     | 37.2     | 1,515         | 12          | 233,320      | 5,863       | 1           |
-| Sonnet 5          | gradle-cli@1.0.0 | 5     | 34.5     | 1,341         | 10          | 201,395      | 8,803       | 4           |
-| Deepseek V4 Flash | no-skills        | 6     | 25.7     | 967           | 2,045       | 38,272       | 0           | 1           |
-| Deepseek V4 Flash | gradle-cli@1.0.0 | 7     | 39.3     | 1,372         | 5,442       | 56,832       | 0           | 3           |
-| GPT-5.6 Luna      | no-skills        | 2     | 23.7     | 141           | 549         | 0            | 5,914       | 0           |
-| GPT-5.6 Luna      | gradle-cli@1.0.0 | 2     | 19.1     | 151           | 549         | 0            | 6,015       | 0           |
+| Model             | Metric        | `no-skills` | `gradle-cli@1.0.0` |
+| :--               | :--           | --:         | --:                |
+| Opus 5            | Turns         | ✅ 6        | 8                  |
+| Opus 5            | Wall (s)      | ✅ 64.8     | 72.6               |
+| Opus 5            | Output tokens | ✅ 1,634    | 2,095              |
+| Opus 5            | Fresh input   | ✅ 12       | 16                 |
+| Opus 5            | Cached input  | ✅ 160,256  | 210,048            |
+| Opus 5            | Cache write   | ✅ 5,314    | 32,950             |
+| Opus 5            | Gradle runs   | 0           | 1                  |
+| Sonnet 5          | Turns         | 6           | ✅ 5               |
+| Sonnet 5          | Wall (s)      | 37.2        | ✅ 34.5            |
+| Sonnet 5          | Output tokens | 1,515       | ✅ 1,341           |
+| Sonnet 5          | Fresh input   | 12          | ✅ 10              |
+| Sonnet 5          | Cached input  | 233,320     | ✅ 201,395         |
+| Sonnet 5          | Cache write   | ✅ 5,863    | 8,803              |
+| Sonnet 5          | Gradle runs   | 1           | 4                  |
+| Deepseek V4 Flash | Turns         | ✅ 6        | 7                  |
+| Deepseek V4 Flash | Wall (s)      | ✅ 25.7     | 39.3               |
+| Deepseek V4 Flash | Output tokens | ✅ 967      | 1,372              |
+| Deepseek V4 Flash | Fresh input   | ✅ 2,045    | 5,442              |
+| Deepseek V4 Flash | Cached input  | ✅ 38,272   | 56,832             |
+| Deepseek V4 Flash | Cache write   | 0           | 0                  |
+| Deepseek V4 Flash | Gradle runs   | 1           | 3                  |
+| GPT-5.6 Luna      | Turns         | 2           | 2                  |
+| GPT-5.6 Luna      | Wall (s)      | 23.7        | ✅ 19.1            |
+| GPT-5.6 Luna      | Output tokens | ✅ 141      | 151                |
+| GPT-5.6 Luna      | Fresh input   | 549         | 549                |
+| GPT-5.6 Luna      | Cached input  | 0           | 0                  |
+| GPT-5.6 Luna      | Cache write   | ✅ 5,914    | 6,015              |
+| GPT-5.6 Luna      | Gradle runs   | 0           | 0                  |
