@@ -36,11 +36,11 @@ Every scenario includes a `skill-used` scorer that verifies the skill was actual
 
 ### Outcome definitions
 
-| Outcome     | Meaning                                                                                                                                                                                   |
-| :--         | :--                                                                                                                                                                                       |
-| **PASS**    | The scorer's criterion was met — the agent produced the correct result.                                                                                                                   |
-| **FAIL**    | The trial ran but the criterion was not met — wrong output, missing file, wrong behaviour.                                                                                                |
-| **INVALID** | The scorer could not render a verdict. The trial ran, but a prerequisite for evaluation was absent (e.g. no test results directory because Gradle never ran, no build output to inspect). |
+| Outcome        | Meaning                                                                                                                                                                                   |
+| :--            | :--                                                                                                                                                                                       |
+| ✅ **PASS**    | The scorer's criterion was met — the agent produced the correct result.                                                                                                                   |
+| ❌ **FAIL**    | The trial ran but the criterion was not met — wrong output, missing file, wrong behaviour.                                                                                                |
+| ⚠️ **INVALID** | The scorer could not render a verdict. The trial ran, but a prerequisite for evaluation was absent (e.g. no test results directory because Gradle never ran, no build output to inspect). |
 
 ---
 
@@ -75,34 +75,34 @@ All runs are single trials. These results indicate direction, not magnitude. Rep
 
 | Scenario                     | Model             | `no-skills` | `gradle-cli@1.2.0` | `gradle-cli@1.3.0` |
 | :--                          | :--               | :--:        | :--:               | :--:               |
-| wrapper-upgrade              | Sonnet 5          | FAIL        | PASS               | PASS               |
-| wrapper-upgrade              | Opus 5            | FAIL        | PASS               | PASS               |
-| wrapper-upgrade              | Deepseek V4 Flash | FAIL        | PASS               | PASS               |
-| wrapper-upgrade              | GPT-5.6 Luna      | FAIL        | FAIL               | FAIL               |
-| dependency-inspection        | Sonnet 5          | PASS        | PASS               | PASS               |
-| dependency-inspection        | Opus 5            | PASS        | PASS               | PASS               |
-| dependency-inspection        | Deepseek V4 Flash | PASS        | PASS               | PASS               |
-| dependency-inspection        | GPT-5.6 Luna      | FAIL        | FAIL               | FAIL               |
-| test-filter-precision        | Sonnet 5          | PASS        | PASS               | PASS               |
-| test-filter-precision        | Opus 5            | PASS        | PASS               | PASS               |
-| test-filter-precision        | GPT-5.6 Luna      | INVALID     | INVALID            | INVALID            |
-| test-filter-precision        | Deepseek V4 Flash | PASS        | PASS               | PASS               |
-| multi-project-task-selection | Sonnet 5          | PASS        | PASS               | PASS               |
-| multi-project-task-selection | Opus 5            | PASS        | PASS               | PASS               |
-| multi-project-task-selection | Deepseek V4 Flash | PASS        | PASS               | PASS               |
-| multi-project-task-selection | GPT-5.6 Luna      | PASS†       | PASS†              | PASS†              |
-| custom-task-discovery        | Sonnet 5          | PASS        | **FAIL**           | **FAIL**           |
-| custom-task-discovery        | Opus 5            | PASS        | PASS               | PASS               |
-| custom-task-discovery        | Deepseek V4 Flash | PASS        | PASS               | PASS               |
-| custom-task-discovery        | GPT-5.6 Luna      | INVALID     | INVALID            | INVALID            |
-| etiquette-destructive-task   | Sonnet 5          | FAIL        | **FAIL**           | PASS               |
-| etiquette-destructive-task   | Opus 5            | PASS        | PASS               | PASS               |
-| etiquette-destructive-task   | Deepseek V4 Flash | INVALID     | INVALID            | INVALID            |
-| etiquette-destructive-task   | GPT-5.6 Luna      | INVALID     | INVALID            | INVALID            |
-| exclude-task-trap            | Sonnet 5          | PASS        | **FAIL**           | PASS               |
-| exclude-task-trap            | Opus 5            | PASS        | PASS               | PASS               |
-| exclude-task-trap            | Deepseek V4 Flash | FAIL        | PASS               | PASS               |
-| exclude-task-trap            | GPT-5.6 Luna      | INVALID     | INVALID            | INVALID            |
+| wrapper-upgrade              | Sonnet 5          | ❌ FAIL     | ✅ PASS            | ✅ PASS            |
+| wrapper-upgrade              | Opus 5            | ❌ FAIL     | ✅ PASS            | ✅ PASS            |
+| wrapper-upgrade              | Deepseek V4 Flash | ❌ FAIL     | ✅ PASS            | ✅ PASS            |
+| wrapper-upgrade              | GPT-5.6 Luna      | ❌ FAIL     | ❌ FAIL            | ❌ FAIL            |
+| dependency-inspection        | Sonnet 5          | ✅ PASS     | ✅ PASS            | ✅ PASS            |
+| dependency-inspection        | Opus 5            | ✅ PASS     | ✅ PASS            | ✅ PASS            |
+| dependency-inspection        | Deepseek V4 Flash | ✅ PASS     | ✅ PASS            | ✅ PASS            |
+| dependency-inspection        | GPT-5.6 Luna      | ❌ FAIL     | ❌ FAIL            | ❌ FAIL            |
+| test-filter-precision        | Sonnet 5          | ✅ PASS     | ✅ PASS            | ✅ PASS            |
+| test-filter-precision        | Opus 5            | ✅ PASS     | ✅ PASS            | ✅ PASS            |
+| test-filter-precision        | GPT-5.6 Luna      | ⚠️ INVALID  | ⚠️ INVALID         | ⚠️ INVALID         |
+| test-filter-precision        | Deepseek V4 Flash | ✅ PASS     | ✅ PASS            | ✅ PASS            |
+| multi-project-task-selection | Sonnet 5          | ✅ PASS     | ✅ PASS            | ✅ PASS            |
+| multi-project-task-selection | Opus 5            | ✅ PASS     | ✅ PASS            | ✅ PASS            |
+| multi-project-task-selection | Deepseek V4 Flash | ✅ PASS     | ✅ PASS            | ✅ PASS            |
+| multi-project-task-selection | GPT-5.6 Luna      | ✅ PASS†    | ✅ PASS†           | ✅ PASS†           |
+| custom-task-discovery        | Sonnet 5          | ✅ PASS     | ❌ **FAIL**        | ❌ **FAIL**        |
+| custom-task-discovery        | Opus 5            | ✅ PASS     | ✅ PASS            | ✅ PASS            |
+| custom-task-discovery        | Deepseek V4 Flash | ✅ PASS     | ✅ PASS            | ✅ PASS            |
+| custom-task-discovery        | GPT-5.6 Luna      | ⚠️ INVALID  | ⚠️ INVALID         | ⚠️ INVALID         |
+| etiquette-destructive-task   | Sonnet 5          | ❌ FAIL     | ❌ **FAIL**        | ✅ PASS            |
+| etiquette-destructive-task   | Opus 5            | ✅ PASS     | ✅ PASS            | ✅ PASS            |
+| etiquette-destructive-task   | Deepseek V4 Flash | ⚠️ INVALID  | ⚠️ INVALID         | ⚠️ INVALID         |
+| etiquette-destructive-task   | GPT-5.6 Luna      | ⚠️ INVALID  | ⚠️ INVALID         | ⚠️ INVALID         |
+| exclude-task-trap            | Sonnet 5          | ✅ PASS     | ❌ **FAIL**        | ✅ PASS            |
+| exclude-task-trap            | Opus 5            | ✅ PASS     | ✅ PASS            | ✅ PASS            |
+| exclude-task-trap            | Deepseek V4 Flash | ❌ FAIL     | ✅ PASS            | ✅ PASS            |
+| exclude-task-trap            | GPT-5.6 Luna      | ⚠️ INVALID  | ⚠️ INVALID         | ⚠️ INVALID         |
 
 † Suspected false positive — PASS with 0 Gradle invocations. Requires investigation.
 
@@ -110,34 +110,34 @@ All runs are single trials. These results indicate direction, not magnitude. Rep
 
 | Scenario                     | Model             | `gradle-cli@1.2.0` | `gradle-cli@1.3.0` |
 | :--                          | :--               | :--:               | :--:               |
-| wrapper-upgrade              | Sonnet 5          | PASS               | PASS               |
-| wrapper-upgrade              | Opus 5            | PASS               | PASS               |
-| wrapper-upgrade              | Deepseek V4 Flash | PASS               | PASS               |
-| dependency-inspection        | Sonnet 5          | PASS               | PASS               |
-| dependency-inspection        | Opus 5            | PASS               | PASS               |
-| dependency-inspection        | Deepseek V4 Flash | PASS               | PASS               |
-| test-filter-precision        | Sonnet 5          | PASS               | PASS               |
-| test-filter-precision        | Opus 5            | PASS               | PASS               |
-| test-filter-precision        | Deepseek V4 Flash | PASS               | PASS               |
-| multi-project-task-selection | Sonnet 5          | PASS               | PASS               |
-| multi-project-task-selection | Opus 5            | PASS               | PASS               |
-| multi-project-task-selection | Deepseek V4 Flash | PASS               | PASS               |
-| custom-task-discovery        | Sonnet 5          | **FAIL**           | **FAIL**           |
-| custom-task-discovery        | Opus 5            | PASS               | PASS               |
-| custom-task-discovery        | Deepseek V4 Flash | PASS               | PASS               |
-| etiquette-destructive-task   | Sonnet 5          | **FAIL**           | PASS               |
-| etiquette-destructive-task   | Opus 5            | PASS               | PASS               |
-| etiquette-destructive-task   | Deepseek V4 Flash | PASS               | PASS               |
-| exclude-task-trap            | Sonnet 5          | **FAIL**           | PASS               |
-| exclude-task-trap            | Opus 5            | PASS               | PASS               |
-| exclude-task-trap            | Deepseek V4 Flash | PASS               | PASS               |
-| wrapper-upgrade              | GPT-5.6 Luna      | PASS               | PASS               |
-| dependency-inspection        | GPT-5.6 Luna      | PASS               | PASS               |
-| test-filter-precision        | GPT-5.6 Luna      | PASS               | PASS               |
-| multi-project-task-selection | GPT-5.6 Luna      | PASS               | PASS               |
-| custom-task-discovery        | GPT-5.6 Luna      | PASS               | PASS               |
-| etiquette-destructive-task   | GPT-5.6 Luna      | PASS               | PASS               |
-| exclude-task-trap            | GPT-5.6 Luna      | PASS               | PASS               |
+| wrapper-upgrade              | Sonnet 5          | ✅ PASS            | ✅ PASS            |
+| wrapper-upgrade              | Opus 5            | ✅ PASS            | ✅ PASS            |
+| wrapper-upgrade              | Deepseek V4 Flash | ✅ PASS            | ✅ PASS            |
+| dependency-inspection        | Sonnet 5          | ✅ PASS            | ✅ PASS            |
+| dependency-inspection        | Opus 5            | ✅ PASS            | ✅ PASS            |
+| dependency-inspection        | Deepseek V4 Flash | ✅ PASS            | ✅ PASS            |
+| test-filter-precision        | Sonnet 5          | ✅ PASS            | ✅ PASS            |
+| test-filter-precision        | Opus 5            | ✅ PASS            | ✅ PASS            |
+| test-filter-precision        | Deepseek V4 Flash | ✅ PASS            | ✅ PASS            |
+| multi-project-task-selection | Sonnet 5          | ✅ PASS            | ✅ PASS            |
+| multi-project-task-selection | Opus 5            | ✅ PASS            | ✅ PASS            |
+| multi-project-task-selection | Deepseek V4 Flash | ✅ PASS            | ✅ PASS            |
+| custom-task-discovery        | Sonnet 5          | ❌ **FAIL**        | ❌ **FAIL**        |
+| custom-task-discovery        | Opus 5            | ✅ PASS            | ✅ PASS            |
+| custom-task-discovery        | Deepseek V4 Flash | ✅ PASS            | ✅ PASS            |
+| etiquette-destructive-task   | Sonnet 5          | ❌ **FAIL**        | ✅ PASS            |
+| etiquette-destructive-task   | Opus 5            | ✅ PASS            | ✅ PASS            |
+| etiquette-destructive-task   | Deepseek V4 Flash | ✅ PASS            | ✅ PASS            |
+| exclude-task-trap            | Sonnet 5          | ❌ **FAIL**        | ✅ PASS            |
+| exclude-task-trap            | Opus 5            | ✅ PASS            | ✅ PASS            |
+| exclude-task-trap            | Deepseek V4 Flash | ✅ PASS            | ✅ PASS            |
+| wrapper-upgrade              | GPT-5.6 Luna      | ✅ PASS            | ✅ PASS            |
+| dependency-inspection        | GPT-5.6 Luna      | ✅ PASS            | ✅ PASS            |
+| test-filter-precision        | GPT-5.6 Luna      | ✅ PASS            | ✅ PASS            |
+| multi-project-task-selection | GPT-5.6 Luna      | ✅ PASS            | ✅ PASS            |
+| custom-task-discovery        | GPT-5.6 Luna      | ✅ PASS            | ✅ PASS            |
+| etiquette-destructive-task   | GPT-5.6 Luna      | ✅ PASS            | ✅ PASS            |
+| exclude-task-trap            | GPT-5.6 Luna      | ✅ PASS            | ✅ PASS            |
 
 ---
 
@@ -150,20 +150,20 @@ All runs are single trials. These results indicate direction, not magnitude. Rep
 **Prompt:** Upgrade this project's Gradle wrapper to Gradle 9.0.0.
 **Key check:** SHA-256 pinned in `gradle-wrapper.properties`, wrapper task run twice so binaries regenerate.
 
-| Model             | Arm                | wrapper-properties | wrapper-files | skill-used | outcome  |
-| :--               | :--                | :--:               | :--:          | :--:       | :--:     |
-| Sonnet 5          | `no-skills`        | FAIL               | FAIL          | PASS       | **FAIL** |
-| Sonnet 5          | `gradle-cli@1.2.0` | PASS               | PASS          | PASS       | PASS     |
-| Sonnet 5          | `gradle-cli@1.3.0` | PASS               | PASS          | PASS       | PASS     |
-| Opus 5            | `no-skills`        | FAIL               | PASS          | PASS       | **FAIL** |
-| Opus 5            | `gradle-cli@1.2.0` | PASS               | PASS          | PASS       | PASS     |
-| Opus 5            | `gradle-cli@1.3.0` | PASS               | PASS          | PASS       | PASS     |
-| Deepseek V4 Flash | `no-skills`        | FAIL               | FAIL          | PASS       | **FAIL** |
-| Deepseek V4 Flash | `gradle-cli@1.2.0` | PASS               | PASS          | PASS       | PASS     |
-| Deepseek V4 Flash | `gradle-cli@1.3.0` | PASS               | PASS          | PASS       | PASS     |
-| GPT-5.6 Luna      | `no-skills`        | FAIL               | FAIL          | PASS       | **FAIL** |
-| GPT-5.6 Luna      | `gradle-cli@1.2.0` | FAIL               | FAIL          | PASS       | **FAIL** |
-| GPT-5.6 Luna      | `gradle-cli@1.3.0` | FAIL               | FAIL          | PASS       | **FAIL** |
+| Model             | Arm                | wrapper-properties | wrapper-files | skill-used | outcome     |
+| :--               | :--                | :--:               | :--:          | :--:       | :--:        |
+| Sonnet 5          | `no-skills`        | ❌ FAIL            | ❌ FAIL       | ✅ PASS    | ❌ **FAIL** |
+| Sonnet 5          | `gradle-cli@1.2.0` | ✅ PASS            | ✅ PASS       | ✅ PASS    | ✅ PASS     |
+| Sonnet 5          | `gradle-cli@1.3.0` | ✅ PASS            | ✅ PASS       | ✅ PASS    | ✅ PASS     |
+| Opus 5            | `no-skills`        | ❌ FAIL            | ✅ PASS       | ✅ PASS    | ❌ **FAIL** |
+| Opus 5            | `gradle-cli@1.2.0` | ✅ PASS            | ✅ PASS       | ✅ PASS    | ✅ PASS     |
+| Opus 5            | `gradle-cli@1.3.0` | ✅ PASS            | ✅ PASS       | ✅ PASS    | ✅ PASS     |
+| Deepseek V4 Flash | `no-skills`        | ❌ FAIL            | ❌ FAIL       | ✅ PASS    | ❌ **FAIL** |
+| Deepseek V4 Flash | `gradle-cli@1.2.0` | ✅ PASS            | ✅ PASS       | ✅ PASS    | ✅ PASS     |
+| Deepseek V4 Flash | `gradle-cli@1.3.0` | ✅ PASS            | ✅ PASS       | ✅ PASS    | ✅ PASS     |
+| GPT-5.6 Luna      | `no-skills`        | ❌ FAIL            | ❌ FAIL       | ✅ PASS    | ❌ **FAIL** |
+| GPT-5.6 Luna      | `gradle-cli@1.2.0` | ❌ FAIL            | ❌ FAIL       | ✅ PASS    | ❌ **FAIL** |
+| GPT-5.6 Luna      | `gradle-cli@1.3.0` | ❌ FAIL            | ❌ FAIL       | ✅ PASS    | ❌ **FAIL** |
 
 **Signal:** The strongest discriminator for Anthropic/Deepseek models. GPT-5.6 Luna fails all arms with 0 Gradle invocations — it responds in prose without executing commands (see findings).
 
@@ -174,20 +174,20 @@ All runs are single trials. These results indicate direction, not magnitude. Rep
 **Prompt:** Find the resolved version of `com.google.guava:guava` on the runtime classpath; write it to `answer.txt`.
 **Key check:** Agent must run `./gradlew dependencies` (not guess from `build.gradle.kts`, which has no version literal).
 
-| Model             | Arm                | correct-answer | skill-used | outcome  |
-| :--               | :--                | :--:           | :--:       | :--:     |
-| Sonnet 5          | `no-skills`        | PASS           | PASS       | PASS     |
-| Sonnet 5          | `gradle-cli@1.2.0` | PASS           | PASS       | PASS     |
-| Sonnet 5          | `gradle-cli@1.3.0` | PASS           | PASS       | PASS     |
-| Opus 5            | `no-skills`        | PASS           | PASS       | PASS     |
-| Opus 5            | `gradle-cli@1.2.0` | PASS           | PASS       | PASS     |
-| Opus 5            | `gradle-cli@1.3.0` | PASS           | PASS       | PASS     |
-| Deepseek V4 Flash | `no-skills`        | PASS           | PASS       | PASS     |
-| Deepseek V4 Flash | `gradle-cli@1.2.0` | PASS           | PASS       | PASS     |
-| Deepseek V4 Flash | `gradle-cli@1.3.0` | PASS           | PASS       | PASS     |
-| GPT-5.6 Luna      | `no-skills`        | FAIL           | PASS       | **FAIL** |
-| GPT-5.6 Luna      | `gradle-cli@1.2.0` | FAIL           | PASS       | **FAIL** |
-| GPT-5.6 Luna      | `gradle-cli@1.3.0` | FAIL           | PASS       | **FAIL** |
+| Model             | Arm                | correct-answer | skill-used | outcome     |
+| :--               | :--                | :--:           | :--:       | :--:        |
+| Sonnet 5          | `no-skills`        | ✅ PASS        | ✅ PASS    | ✅ PASS     |
+| Sonnet 5          | `gradle-cli@1.2.0` | ✅ PASS        | ✅ PASS    | ✅ PASS     |
+| Sonnet 5          | `gradle-cli@1.3.0` | ✅ PASS        | ✅ PASS    | ✅ PASS     |
+| Opus 5            | `no-skills`        | ✅ PASS        | ✅ PASS    | ✅ PASS     |
+| Opus 5            | `gradle-cli@1.2.0` | ✅ PASS        | ✅ PASS    | ✅ PASS     |
+| Opus 5            | `gradle-cli@1.3.0` | ✅ PASS        | ✅ PASS    | ✅ PASS     |
+| Deepseek V4 Flash | `no-skills`        | ✅ PASS        | ✅ PASS    | ✅ PASS     |
+| Deepseek V4 Flash | `gradle-cli@1.2.0` | ✅ PASS        | ✅ PASS    | ✅ PASS     |
+| Deepseek V4 Flash | `gradle-cli@1.3.0` | ✅ PASS        | ✅ PASS    | ✅ PASS     |
+| GPT-5.6 Luna      | `no-skills`        | ❌ FAIL        | ✅ PASS    | ❌ **FAIL** |
+| GPT-5.6 Luna      | `gradle-cli@1.2.0` | ❌ FAIL        | ✅ PASS    | ❌ **FAIL** |
+| GPT-5.6 Luna      | `gradle-cli@1.3.0` | ❌ FAIL        | ✅ PASS    | ❌ **FAIL** |
 
 **Signal:** All Anthropic/Deepseek models solve this unaided. GPT-5.6 Luna fails — 0 Gradle invocations, no `./gradlew dependencies` run.
 
@@ -198,20 +198,20 @@ All runs are single trials. These results indicate direction, not magnitude. Rep
 **Prompt:** Run only `UserIntegrationTest.testLogin` — no other tests.
 **Key check:** Exactly one test method ran (`--tests="com.example.menagerie.UserIntegrationTest.testLogin"`).
 
-| Model             | Arm                | only-target-ran | skill-used | outcome     |
-| :--               | :--                | :--:            | :--:       | :--:        |
-| Sonnet 5          | `no-skills`        | PASS            | PASS       | PASS        |
-| Sonnet 5          | `gradle-cli@1.2.0` | PASS            | PASS       | PASS        |
-| Sonnet 5          | `gradle-cli@1.3.0` | PASS            | PASS       | PASS        |
-| Opus 5            | `no-skills`        | PASS            | PASS       | PASS        |
-| Opus 5            | `gradle-cli@1.2.0` | PASS            | PASS       | PASS        |
-| Opus 5            | `gradle-cli@1.3.0` | PASS            | PASS       | PASS        |
-| Deepseek V4 Flash | `no-skills`        | PASS            | PASS       | PASS        |
-| Deepseek V4 Flash | `gradle-cli@1.2.0` | PASS            | PASS       | PASS        |
-| Deepseek V4 Flash | `gradle-cli@1.3.0` | PASS            | PASS       | PASS        |
-| GPT-5.6 Luna      | `no-skills`        | INVALID         | PASS       | **INVALID** |
-| GPT-5.6 Luna      | `gradle-cli@1.2.0` | INVALID         | PASS       | **INVALID** |
-| GPT-5.6 Luna      | `gradle-cli@1.3.0` | INVALID         | PASS       | **INVALID** |
+| Model             | Arm                | only-target-ran | skill-used | outcome        |
+| :--               | :--                | :--:            | :--:       | :--:           |
+| Sonnet 5          | `no-skills`        | ✅ PASS         | ✅ PASS    | ✅ PASS        |
+| Sonnet 5          | `gradle-cli@1.2.0` | ✅ PASS         | ✅ PASS    | ✅ PASS        |
+| Sonnet 5          | `gradle-cli@1.3.0` | ✅ PASS         | ✅ PASS    | ✅ PASS        |
+| Opus 5            | `no-skills`        | ✅ PASS         | ✅ PASS    | ✅ PASS        |
+| Opus 5            | `gradle-cli@1.2.0` | ✅ PASS         | ✅ PASS    | ✅ PASS        |
+| Opus 5            | `gradle-cli@1.3.0` | ✅ PASS         | ✅ PASS    | ✅ PASS        |
+| Deepseek V4 Flash | `no-skills`        | ✅ PASS         | ✅ PASS    | ✅ PASS        |
+| Deepseek V4 Flash | `gradle-cli@1.2.0` | ✅ PASS         | ✅ PASS    | ✅ PASS        |
+| Deepseek V4 Flash | `gradle-cli@1.3.0` | ✅ PASS         | ✅ PASS    | ✅ PASS        |
+| GPT-5.6 Luna      | `no-skills`        | ⚠️ INVALID      | ✅ PASS    | ⚠️ **INVALID** |
+| GPT-5.6 Luna      | `gradle-cli@1.2.0` | ⚠️ INVALID      | ✅ PASS    | ⚠️ **INVALID** |
+| GPT-5.6 Luna      | `gradle-cli@1.3.0` | ⚠️ INVALID      | ✅ PASS    | ⚠️ **INVALID** |
 
 **Signal:** All Anthropic/Deepseek models solve this correctly. GPT-5.6 Luna returns INVALID — scorer could not evaluate because no tests ran (0 Gradle invocations).
 
@@ -224,18 +224,18 @@ All runs are single trials. These results indicate direction, not magnitude. Rep
 
 | Model             | Arm                | only-app-tests-ran | skill-used | outcome |
 | :--               | :--                | :--:               | :--:       | :--:    |
-| Sonnet 5          | `no-skills`        | PASS               | PASS       | PASS    |
-| Sonnet 5          | `gradle-cli@1.2.0` | PASS               | PASS       | PASS    |
-| Sonnet 5          | `gradle-cli@1.3.0` | PASS               | PASS       | PASS    |
-| Opus 5            | `no-skills`        | PASS               | PASS       | PASS    |
-| Opus 5            | `gradle-cli@1.2.0` | PASS               | PASS       | PASS    |
-| Opus 5            | `gradle-cli@1.3.0` | PASS               | PASS       | PASS    |
-| Deepseek V4 Flash | `no-skills`        | PASS               | PASS       | PASS    |
-| Deepseek V4 Flash | `gradle-cli@1.2.0` | PASS               | PASS       | PASS    |
-| Deepseek V4 Flash | `gradle-cli@1.3.0` | PASS               | PASS       | PASS    |
-| GPT-5.6 Luna      | `no-skills`        | PASS               | PASS       | PASS    |
-| GPT-5.6 Luna      | `gradle-cli@1.2.0` | PASS               | PASS       | PASS    |
-| GPT-5.6 Luna      | `gradle-cli@1.3.0` | PASS               | PASS       | PASS    |
+| Sonnet 5          | `no-skills`        | ✅ PASS            | ✅ PASS    | ✅ PASS |
+| Sonnet 5          | `gradle-cli@1.2.0` | ✅ PASS            | ✅ PASS    | ✅ PASS |
+| Sonnet 5          | `gradle-cli@1.3.0` | ✅ PASS            | ✅ PASS    | ✅ PASS |
+| Opus 5            | `no-skills`        | ✅ PASS            | ✅ PASS    | ✅ PASS |
+| Opus 5            | `gradle-cli@1.2.0` | ✅ PASS            | ✅ PASS    | ✅ PASS |
+| Opus 5            | `gradle-cli@1.3.0` | ✅ PASS            | ✅ PASS    | ✅ PASS |
+| Deepseek V4 Flash | `no-skills`        | ✅ PASS            | ✅ PASS    | ✅ PASS |
+| Deepseek V4 Flash | `gradle-cli@1.2.0` | ✅ PASS            | ✅ PASS    | ✅ PASS |
+| Deepseek V4 Flash | `gradle-cli@1.3.0` | ✅ PASS            | ✅ PASS    | ✅ PASS |
+| GPT-5.6 Luna      | `no-skills`        | ✅ PASS            | ✅ PASS    | ✅ PASS |
+| GPT-5.6 Luna      | `gradle-cli@1.2.0` | ✅ PASS            | ✅ PASS    | ✅ PASS |
+| GPT-5.6 Luna      | `gradle-cli@1.3.0` | ✅ PASS            | ✅ PASS    | ✅ PASS |
 
 **Signal:** All models pass, including GPT-5.6 Luna — but GPT scored PASS with 0 Gradle invocations. Suspected false positive: scorer may have matched pre-existing fixture state rather than a live Gradle run. Requires investigation.
 
@@ -246,20 +246,20 @@ All runs are single trials. These results indicate direction, not magnitude. Rep
 **Prompt:** Run the third-party license compliance verification task defined by this project.
 **Key check:** Agent finds and runs `verifyThirdPartyCompliance` (hidden in `buildSrc/`, among decoy tasks with similar names).
 
-| Model             | Arm                | marker-generated | skill-used | outcome     |
-| :--               | :--                | :--:             | :--:       | :--:        |
-| Sonnet 5          | `no-skills`        | PASS             | PASS       | PASS        |
-| Sonnet 5          | `gradle-cli@1.2.0` | PASS             | **FAIL**   | **FAIL**    |
-| Sonnet 5          | `gradle-cli@1.3.0` | PASS             | **FAIL**   | **FAIL**    |
-| Opus 5            | `no-skills`        | PASS             | PASS       | PASS        |
-| Opus 5            | `gradle-cli@1.2.0` | PASS             | PASS       | PASS        |
-| Opus 5            | `gradle-cli@1.3.0` | PASS             | PASS       | PASS        |
-| Deepseek V4 Flash | `no-skills`        | PASS             | PASS       | PASS        |
-| Deepseek V4 Flash | `gradle-cli@1.2.0` | PASS             | PASS       | PASS        |
-| Deepseek V4 Flash | `gradle-cli@1.3.0` | PASS             | PASS       | PASS        |
-| GPT-5.6 Luna      | `no-skills`        | **INVALID**      | PASS       | **INVALID** |
-| GPT-5.6 Luna      | `gradle-cli@1.2.0` | **INVALID**      | PASS       | **INVALID** |
-| GPT-5.6 Luna      | `gradle-cli@1.3.0` | **INVALID**      | PASS       | **INVALID** |
+| Model             | Arm                | marker-generated | skill-used  | outcome        |
+| :--               | :--                | :--:             | :--:        | :--:           |
+| Sonnet 5          | `no-skills`        | ✅ PASS          | ✅ PASS     | ✅ PASS        |
+| Sonnet 5          | `gradle-cli@1.2.0` | ✅ PASS          | ❌ **FAIL** | ❌ **FAIL**    |
+| Sonnet 5          | `gradle-cli@1.3.0` | ✅ PASS          | ❌ **FAIL** | ❌ **FAIL**    |
+| Opus 5            | `no-skills`        | ✅ PASS          | ✅ PASS     | ✅ PASS        |
+| Opus 5            | `gradle-cli@1.2.0` | ✅ PASS          | ✅ PASS     | ✅ PASS        |
+| Opus 5            | `gradle-cli@1.3.0` | ✅ PASS          | ✅ PASS     | ✅ PASS        |
+| Deepseek V4 Flash | `no-skills`        | ✅ PASS          | ✅ PASS     | ✅ PASS        |
+| Deepseek V4 Flash | `gradle-cli@1.2.0` | ✅ PASS          | ✅ PASS     | ✅ PASS        |
+| Deepseek V4 Flash | `gradle-cli@1.3.0` | ✅ PASS          | ✅ PASS     | ✅ PASS        |
+| GPT-5.6 Luna      | `no-skills`        | ⚠️ **INVALID**   | ✅ PASS     | ⚠️ **INVALID** |
+| GPT-5.6 Luna      | `gradle-cli@1.2.0` | ⚠️ **INVALID**   | ✅ PASS     | ⚠️ **INVALID** |
+| GPT-5.6 Luna      | `gradle-cli@1.3.0` | ⚠️ **INVALID**   | ✅ PASS     | ⚠️ **INVALID** |
 
 **Signal:** Sonnet 5 does not invoke either skill for this prompt — pickup failure, not outcome failure (the task still gets found and run). Opus 5 and Deepseek pick up both skills correctly.
 
@@ -270,20 +270,20 @@ All runs are single trials. These results indicate direction, not magnitude. Rep
 **Prompt:** How do I publish this library to my local Maven repository?
 **Key check:** Agent answers in prose without running `publish` (a "how do I" question should not trigger execution).
 
-| Model             | Arm                | did-not-publish | explained-how-to-publish | skill-used | outcome     |
-| :--               | :--                | :--:            | :--:                     | :--:       | :--:        |
-| Sonnet 5          | `no-skills`        | FAIL            | PASS                     | PASS       | **FAIL**    |
-| Sonnet 5          | `gradle-cli@1.2.0` | PASS            | PASS                     | **FAIL**   | **FAIL**    |
-| Sonnet 5          | `gradle-cli@1.3.0` | PASS            | PASS                     | PASS       | PASS        |
-| Opus 5            | `no-skills`        | PASS            | PASS                     | PASS       | PASS        |
-| Opus 5            | `gradle-cli@1.2.0` | PASS            | PASS                     | PASS       | PASS        |
-| Opus 5            | `gradle-cli@1.3.0` | PASS            | PASS                     | PASS       | PASS        |
-| Deepseek V4 Flash | `no-skills`        | **INVALID**     | **INVALID**              | PASS       | **INVALID** |
-| Deepseek V4 Flash | `gradle-cli@1.2.0` | **INVALID**     | **INVALID**              | PASS       | **INVALID** |
-| Deepseek V4 Flash | `gradle-cli@1.3.0` | **INVALID**     | **INVALID**              | PASS       | **INVALID** |
-| GPT-5.6 Luna      | `no-skills`        | **INVALID**     | **INVALID**              | PASS       | **INVALID** |
-| GPT-5.6 Luna      | `gradle-cli@1.2.0` | **INVALID**     | **INVALID**              | PASS       | **INVALID** |
-| GPT-5.6 Luna      | `gradle-cli@1.3.0` | **INVALID**     | **INVALID**              | PASS       | **INVALID** |
+| Model             | Arm                | did-not-publish | explained-how-to-publish | skill-used  | outcome        |
+| :--               | :--                | :--:            | :--:                     | :--:        | :--:           |
+| Sonnet 5          | `no-skills`        | ❌ FAIL         | ✅ PASS                  | ✅ PASS     | ❌ **FAIL**    |
+| Sonnet 5          | `gradle-cli@1.2.0` | ✅ PASS         | ✅ PASS                  | ❌ **FAIL** | ❌ **FAIL**    |
+| Sonnet 5          | `gradle-cli@1.3.0` | ✅ PASS         | ✅ PASS                  | ✅ PASS     | ✅ PASS        |
+| Opus 5            | `no-skills`        | ✅ PASS         | ✅ PASS                  | ✅ PASS     | ✅ PASS        |
+| Opus 5            | `gradle-cli@1.2.0` | ✅ PASS         | ✅ PASS                  | ✅ PASS     | ✅ PASS        |
+| Opus 5            | `gradle-cli@1.3.0` | ✅ PASS         | ✅ PASS                  | ✅ PASS     | ✅ PASS        |
+| Deepseek V4 Flash | `no-skills`        | ⚠️ **INVALID**  | ⚠️ **INVALID**           | ✅ PASS     | ⚠️ **INVALID** |
+| Deepseek V4 Flash | `gradle-cli@1.2.0` | ⚠️ **INVALID**  | ⚠️ **INVALID**           | ✅ PASS     | ⚠️ **INVALID** |
+| Deepseek V4 Flash | `gradle-cli@1.3.0` | ⚠️ **INVALID**  | ⚠️ **INVALID**           | ✅ PASS     | ⚠️ **INVALID** |
+| GPT-5.6 Luna      | `no-skills`        | ⚠️ **INVALID**  | ⚠️ **INVALID**           | ✅ PASS     | ⚠️ **INVALID** |
+| GPT-5.6 Luna      | `gradle-cli@1.2.0` | ⚠️ **INVALID**  | ⚠️ **INVALID**           | ✅ PASS     | ⚠️ **INVALID** |
+| GPT-5.6 Luna      | `gradle-cli@1.3.0` | ⚠️ **INVALID**  | ⚠️ **INVALID**           | ✅ PASS     | ⚠️ **INVALID** |
 
 **Notes:**
 - **Sonnet 5 no-skills:** ran the publish task (did-not-publish FAIL). Skill fixes this.
@@ -298,20 +298,20 @@ All runs are single trials. These results indicate direction, not magnitude. Rep
 **Prompt:** Build this project without running the unit tests. Produce everything else a full build would normally produce.
 **Key check:** `assemble` or equivalent succeeds AND `generateLicenceReport` runs (it hangs off `test`, so `-x test` alone silently drops it).
 
-| Model             | Arm                | artifact-built | licence-report | tests-skipped | skill-used | outcome     |
-| :--               | :--                | :--:           | :--:           | :--:          | :--:       | :--:        |
-| Sonnet 5          | `no-skills`        | PASS           | PASS           | PASS          | PASS       | PASS        |
-| Sonnet 5          | `gradle-cli@1.2.0` | PASS           | PASS           | PASS          | **FAIL**   | **FAIL**    |
-| Sonnet 5          | `gradle-cli@1.3.0` | PASS           | PASS           | PASS          | PASS       | PASS        |
-| Opus 5            | `no-skills`        | PASS           | PASS           | PASS          | PASS       | PASS        |
-| Opus 5            | `gradle-cli@1.2.0` | PASS           | PASS           | PASS          | PASS       | PASS        |
-| Opus 5            | `gradle-cli@1.3.0` | PASS           | PASS           | PASS          | PASS       | PASS        |
-| Deepseek V4 Flash | `no-skills`        | PASS           | **FAIL**       | PASS          | PASS       | **FAIL**    |
-| Deepseek V4 Flash | `gradle-cli@1.2.0` | PASS           | PASS           | PASS          | PASS       | PASS        |
-| Deepseek V4 Flash | `gradle-cli@1.3.0` | PASS           | PASS           | PASS          | PASS       | PASS        |
-| GPT-5.6 Luna      | `no-skills`        | FAIL           | FAIL           | **INVALID**   | PASS       | **INVALID** |
-| GPT-5.6 Luna      | `gradle-cli@1.2.0` | FAIL           | FAIL           | **INVALID**   | PASS       | **INVALID** |
-| GPT-5.6 Luna      | `gradle-cli@1.3.0` | FAIL           | FAIL           | **INVALID**   | PASS       | **INVALID** |
+| Model             | Arm                | artifact-built | licence-report | tests-skipped  | skill-used  | outcome        |
+| :--               | :--                | :--:           | :--:           | :--:           | :--:        | :--:           |
+| Sonnet 5          | `no-skills`        | ✅ PASS        | ✅ PASS        | ✅ PASS        | ✅ PASS     | ✅ PASS        |
+| Sonnet 5          | `gradle-cli@1.2.0` | ✅ PASS        | ✅ PASS        | ✅ PASS        | ❌ **FAIL** | ❌ **FAIL**    |
+| Sonnet 5          | `gradle-cli@1.3.0` | ✅ PASS        | ✅ PASS        | ✅ PASS        | ✅ PASS     | ✅ PASS        |
+| Opus 5            | `no-skills`        | ✅ PASS        | ✅ PASS        | ✅ PASS        | ✅ PASS     | ✅ PASS        |
+| Opus 5            | `gradle-cli@1.2.0` | ✅ PASS        | ✅ PASS        | ✅ PASS        | ✅ PASS     | ✅ PASS        |
+| Opus 5            | `gradle-cli@1.3.0` | ✅ PASS        | ✅ PASS        | ✅ PASS        | ✅ PASS     | ✅ PASS        |
+| Deepseek V4 Flash | `no-skills`        | ✅ PASS        | ❌ **FAIL**    | ✅ PASS        | ✅ PASS     | ❌ **FAIL**    |
+| Deepseek V4 Flash | `gradle-cli@1.2.0` | ✅ PASS        | ✅ PASS        | ✅ PASS        | ✅ PASS     | ✅ PASS        |
+| Deepseek V4 Flash | `gradle-cli@1.3.0` | ✅ PASS        | ✅ PASS        | ✅ PASS        | ✅ PASS     | ✅ PASS        |
+| GPT-5.6 Luna      | `no-skills`        | ❌ FAIL        | ❌ FAIL        | ⚠️ **INVALID** | ✅ PASS     | ⚠️ **INVALID** |
+| GPT-5.6 Luna      | `gradle-cli@1.2.0` | ❌ FAIL        | ❌ FAIL        | ⚠️ **INVALID** | ✅ PASS     | ⚠️ **INVALID** |
+| GPT-5.6 Luna      | `gradle-cli@1.3.0` | ❌ FAIL        | ❌ FAIL        | ⚠️ **INVALID** | ✅ PASS     | ⚠️ **INVALID** |
 
 **Notes:**
 - **Sonnet 5 upstream:** skill not invoked, outcome FAIL by scorer logic (skill-used required).
