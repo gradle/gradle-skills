@@ -20,7 +20,7 @@ Each scenario runs two arms against the same Gradle project and prompt:
 | Arm                | Skill                                                |
 | :--                | :--                                                  |
 | `no-skills`        | Baseline — no skill provided                         |
-| `gradle-cli@1.0.0` | Local `skills/gradle-cli` — branch under development |
+| `gradle-cli@1.0.0` | Local `skills/gradle-cli`                            |
 
 ### Models tested
 
