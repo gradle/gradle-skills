@@ -21,7 +21,7 @@ Audits a Gradle build against the [official best practices](https://docs.gradle.
 - "Best practices review"
 - "Apply best practices to my build"
 
-### gradle-cli [![v1.0.0](https://img.shields.io/badge/v1.0.0-02303A?logo=gradle&logoColor=white)](skills/gradle-cli) [![Evaluated: 7 scenarios, 3 models](https://img.shields.io/badge/evaluated-7%20scenarios%20%C3%97%203%20models-2ea44f)](evals/gradle-cli-1.3.0.md)
+### gradle-cli [![v1.0.0](https://img.shields.io/badge/v1.0.0-02303A?logo=gradle&logoColor=white)](skills/gradle-cli) [![Evaluated: 7 scenarios, 3 models](https://img.shields.io/badge/evaluated-7%20scenarios%20%C3%97%203%20models-2ea44f)](evals/gradle-cli-1.0.0.md)
 
 Runs Gradle builds and tasks via `./gradlew`, and produces the exact command for any invocation. Knows the right flags, task ordering, and invocation patterns for the project's Gradle version.
 
@@ -32,7 +32,7 @@ Runs Gradle builds and tasks via `./gradlew`, and produces the exact command for
 - "How do I run …" / "what's the gradle command for …"
 - "List the gradle tasks"
 
-> 📊 [Evaluation results for v1.0.0 →](evals/gradle-cli-1.3.0.md)
+> 📊 [Evaluation results for v1.0.0 →](evals/gradle-cli-1.0.0.md)
 >
 > Scored across 7 scenarios on Sonnet 5, Opus 5, and Deepseek V4 Flash.
 
