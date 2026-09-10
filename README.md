@@ -64,7 +64,7 @@ The standard deliberately leaves the installation procedure to each client, so c
 
 Two things follow from installing the plugin rather than the skills directly:
 
-- **It is all or nothing.** The plugin's only contents are the two skills above, and it installs both. Unlike `skills.sh`, it cannot install one.
+- **It is all or nothing.** The plugin's only contents are the two skills above, and it installs both. Unlike [`skills.sh`](https://skills.sh/), it cannot install one.
 - **Skill names are client-specific.** The standard does not prescribe how a client names a skill it loads from a plugin. Claude Code prefixes them with the plugin name; other agents may expose them under their bare names.
 
 #### Claude Code Plugin Installation Details
