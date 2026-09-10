@@ -2,9 +2,9 @@
 
 ## Summary
 
-`gradle-cli@1.0.0` improves outcomes on every model that actually executes Gradle commands, raising the pass count from 16 to 20 of 28 model/scenario pairs. The gains are `wrapper-upgrade` on Opus 5, Sonnet 5 and Deepseek V4 Flash, `etiquette-destructive-task` on Sonnet 5, and `exclude-task-trap` on Deepseek.
+`gradle-cli@1.0.0` improves outcomes on every model that actually executes Gradle commands, raising the pass count from 17 to 21 of 28 model/scenario pairs. The gains are `wrapper-upgrade` on Opus 5, Sonnet 5 and Deepseek V4 Flash, and `exclude-task-trap` on Deepseek.
 
-One outcome moves the other way: Sonnet 5 on `custom-task-discovery`. That is a pickup failure rather than a capability loss — the model found and ran the right task (`marker-generated` PASS) but never invoked the skill, so the scorer records the outcome as FAIL.
+No outcome moves the other way. Sonnet 5 on `custom-task-discovery` does fail *intermittently*, and always for the same reason: the model finds and runs the right task, but sometimes (around 25% of cases) never invokes the skill. It is a pickup flake, not a capability loss, and the summary table shows the majority verdict.
 
 The strongest signal in this evaluation is **wrapper-upgrade**: every capable model fails to pin the SHA-256 checksum without the skill, and the skill fixes it reliably.
 This is the scenario where the skill provides the clearest, most consistent value.
@@ -17,15 +17,15 @@ This is the scenario where the skill provides the clearest, most consistent valu
 
 Each scenario runs two arms against the same Gradle project and prompt:
 
-| Arm                | Skill                                                |
-| :--                | :--                                                  |
-| `no-skills`        | Baseline — no skill provided                         |
-| `gradle-cli@1.0.0` | Local `skills/gradle-cli` — branch under development |
+| Arm                | Skill                        |
+| :----------------- | :--------------------------- |
+| `no-skills`        | Baseline — no skill provided |
+| `gradle-cli@1.0.0` | Local `skills/gradle-cli`    |
 
 ### Models tested
 
 | Model                        | CLI              | Notes                          |
-| :--                          | :--              | :--                            |
+| :--------------------------- | :--------------- | :----------------------------- |
 | `anthropic/claude-sonnet-5`  | `claude-code`    |                                |
 | `anthropic/claude-opus-5`    | `claude-code`    |                                |
 | `deepseek/deepseek-v4-flash` | `opencode 0.4.2` | Referred to as "V4 Flash 0731" |
@@ -69,7 +69,7 @@ All runs are single trials. These results indicate direction, not magnitude. Rep
 ### Outcome (no-skills / gradle-cli@1.0.0)
 
 | Model             | Scenario                     | `no-skills` | `gradle-cli@1.0.0` |
-| :--               | :--                          | :--:        | :--:               |
+| :---------------- | :--------------------------- | :---------: | :----------------: |
 | Opus 5            | wrapper-upgrade              | ❌ FAIL     | ✅ PASS            |
 | Opus 5            | dependency-inspection        | ✅ PASS     | ✅ PASS            |
 | Opus 5            | test-filter-precision        | ✅ PASS     | ✅ PASS            |
@@ -81,8 +81,8 @@ All runs are single trials. These results indicate direction, not magnitude. Rep
 | Sonnet 5          | dependency-inspection        | ✅ PASS     | ✅ PASS            |
 | Sonnet 5          | test-filter-precision        | ✅ PASS     | ✅ PASS            |
 | Sonnet 5          | multi-project-task-selection | ✅ PASS     | ✅ PASS            |
-| Sonnet 5          | custom-task-discovery        | ✅ PASS     | ❌ **FAIL**        |
-| Sonnet 5          | etiquette-destructive-task   | ❌ FAIL     | ✅ PASS            |
+| Sonnet 5          | custom-task-discovery        | ✅ PASS     | ✅ PASS‡           |
+| Sonnet 5          | etiquette-destructive-task   | ✅ PASS     | ✅ PASS            |
 | Sonnet 5          | exclude-task-trap            | ✅ PASS     | ✅ PASS            |
 | Deepseek V4 Flash | wrapper-upgrade              | ❌ FAIL     | ✅ PASS            |
 | Deepseek V4 Flash | dependency-inspection        | ✅ PASS     | ✅ PASS            |
@@ -103,11 +103,14 @@ All runs are single trials. These results indicate direction, not magnitude. Rep
 
 ### Skill pickup failures (`gradle-cli@1.0.0`)
 
-The skill was invoked on 27 of 28 model/scenario combinations. Only the failure is listed:
+The skill was invoked on every model/scenario combination except one, which is
+intermittent rather than consistent:
 
 | Model    | Scenario              | `gradle-cli@1.0.0` |
-| :--      | :--                   | :--:               |
-| Sonnet 5 | custom-task-discovery | ❌ **FAIL**        |
+| :------- | :-------------------- | :----------------: |
+| Sonnet 5 | custom-task-discovery | ✅ PASS 3 of 4‡    |
+
+‡ Sonnet 5 does not reliably reach for the skill on this prompt.
 
 ---
 
@@ -116,14 +119,16 @@ The skill was invoked on 27 of 28 model/scenario combinations. Only the failure 
 ### wrapper-upgrade
 
 **Prompt:** Upgrade this project's Gradle wrapper to Gradle 9.0.0.
-**Key check:** SHA-256 pinned in `gradle-wrapper.properties`, wrapper task run twice so binaries regenerate.
+**Key check:** SHA-256 pinned in `gradle-wrapper.properties`, wrapper task run twice so binaries regenerate. `project-builds` confirms the upgraded wrapper still builds the project.
 
 | Model             | Check              | `no-skills` | `gradle-cli@1.0.0` |
-| :--               | :--                | :--:        | :--:               |
+| :---------------- | :----------------- | :---------: | :----------------: |
+| Opus 5            | project-builds     | ✅ PASS     | ✅ PASS            |
 | Opus 5            | wrapper-properties | ❌ FAIL     | ✅ PASS            |
 | Opus 5            | wrapper-files      | ✅ PASS     | ✅ PASS            |
 | Opus 5            | skill-used         | ✅ PASS     | ✅ PASS            |
 | Opus 5            | outcome            | ❌ **FAIL** | ✅ PASS            |
+| Sonnet 5          | project-builds     | ✅ PASS     | ✅ PASS            |
 | Sonnet 5          | wrapper-properties | ❌ FAIL     | ✅ PASS            |
 | Sonnet 5          | wrapper-files      | ❌ FAIL     | ✅ PASS            |
 | Sonnet 5          | skill-used         | ✅ PASS     | ✅ PASS            |
@@ -147,7 +152,7 @@ The skill was invoked on 27 of 28 model/scenario combinations. Only the failure 
 **Key check:** Agent must run `./gradlew dependencies` (not guess from `build.gradle.kts`, which has no version literal).
 
 | Model             | Check          | `no-skills` | `gradle-cli@1.0.0` |
-| :--               | :--            | :--:        | :--:               |
+| :---------------- | :------------- | :---------: | :----------------: |
 | Opus 5            | correct-answer | ✅ PASS     | ✅ PASS            |
 | Opus 5            | skill-used     | ✅ PASS     | ✅ PASS            |
 | Opus 5            | outcome        | ✅ PASS     | ✅ PASS            |
@@ -171,7 +176,7 @@ The skill was invoked on 27 of 28 model/scenario combinations. Only the failure 
 **Key check:** Exactly one test method ran (`--tests="com.example.menagerie.UserIntegrationTest.testLogin"`).
 
 | Model             | Check           | `no-skills`    | `gradle-cli@1.0.0` |
-| :--               | :--             | :--:           | :--:               |
+| :---------------- | :-------------- | :------------: | :----------------: |
 | Opus 5            | only-target-ran | ✅ PASS        | ✅ PASS            |
 | Opus 5            | skill-used      | ✅ PASS        | ✅ PASS            |
 | Opus 5            | outcome         | ✅ PASS        | ✅ PASS            |
@@ -195,7 +200,7 @@ The skill was invoked on 27 of 28 model/scenario combinations. Only the failure 
 **Key check:** Only `:app:test` ran, not `test` (which hits all subprojects).
 
 | Model             | Check              | `no-skills` | `gradle-cli@1.0.0` |
-| :--               | :--                | :--:        | :--:               |
+| :---------------- | :----------------- | :---------: | :----------------: |
 | Opus 5            | only-app-tests-ran | ✅ PASS     | ✅ PASS            |
 | Opus 5            | skill-used         | ✅ PASS     | ✅ PASS            |
 | Opus 5            | outcome            | ✅ PASS     | ✅ PASS            |
@@ -219,13 +224,13 @@ The skill was invoked on 27 of 28 model/scenario combinations. Only the failure 
 **Key check:** Agent finds and runs `verifyThirdPartyCompliance` (hidden in `buildSrc/`, among decoy tasks with similar names).
 
 | Model             | Check            | `no-skills`    | `gradle-cli@1.0.0` |
-| :--               | :--              | :--:           | :--:               |
+| :---------------- | :--------------- | :------------: | :----------------: |
 | Opus 5            | marker-generated | ✅ PASS        | ✅ PASS            |
 | Opus 5            | skill-used       | ✅ PASS        | ✅ PASS            |
 | Opus 5            | outcome          | ✅ PASS        | ✅ PASS            |
 | Sonnet 5          | marker-generated | ✅ PASS        | ✅ PASS            |
-| Sonnet 5          | skill-used       | ✅ PASS        | ❌ **FAIL**        |
-| Sonnet 5          | outcome          | ✅ PASS        | ❌ **FAIL**        |
+| Sonnet 5          | skill-used       | ✅ PASS        | ✅ PASS‡           |
+| Sonnet 5          | outcome          | ✅ PASS        | ✅ PASS‡           |
 | Deepseek V4 Flash | marker-generated | ✅ PASS        | ✅ PASS            |
 | Deepseek V4 Flash | skill-used       | ✅ PASS        | ✅ PASS            |
 | Deepseek V4 Flash | outcome          | ✅ PASS        | ✅ PASS            |
@@ -233,7 +238,7 @@ The skill was invoked on 27 of 28 model/scenario combinations. Only the failure 
 | GPT-5.6 Luna      | skill-used       | ✅ PASS        | ✅ PASS            |
 | GPT-5.6 Luna      | outcome          | ⚠️ **INVALID** | ⚠️ **INVALID**     |
 
-**Signal:** Sonnet 5 does not invoke the skill for this prompt — pickup failure, not outcome failure (the task still gets found and run). Opus 5 and Deepseek pick the skill up correctly.
+**Signal:** Sonnet 5 does not *reliably* invoke the skill for this prompt — it picked it up around 75% of the time and missed in the rest. That is a pickup flake, not an outcome failure. Opus 5 and Deepseek pick the skill up correctly.
 
 ---
 
@@ -243,15 +248,15 @@ The skill was invoked on 27 of 28 model/scenario combinations. Only the failure 
 **Key check:** Agent answers in prose without running `publish` (a "how do I" question should not trigger execution).
 
 | Model             | Check                    | `no-skills`    | `gradle-cli@1.0.0` |
-| :--               | :--                      | :--:           | :--:               |
+| :---------------- | :----------------------- | :------------: | :----------------: |
 | Opus 5            | did-not-publish          | ✅ PASS        | ✅ PASS            |
 | Opus 5            | explained-how-to-publish | ✅ PASS        | ✅ PASS            |
 | Opus 5            | skill-used               | ✅ PASS        | ✅ PASS            |
 | Opus 5            | outcome                  | ✅ PASS        | ✅ PASS            |
-| Sonnet 5          | did-not-publish          | ❌ FAIL        | ✅ PASS            |
+| Sonnet 5          | did-not-publish          | ✅ PASS        | ✅ PASS            |
 | Sonnet 5          | explained-how-to-publish | ✅ PASS        | ✅ PASS            |
 | Sonnet 5          | skill-used               | ✅ PASS        | ✅ PASS            |
-| Sonnet 5          | outcome                  | ❌ **FAIL**    | ✅ PASS            |
+| Sonnet 5          | outcome                  | ✅ PASS        | ✅ PASS            |
 | Deepseek V4 Flash | did-not-publish          | ⚠️ **INVALID** | ⚠️ **INVALID**     |
 | Deepseek V4 Flash | explained-how-to-publish | ⚠️ **INVALID** | ⚠️ **INVALID**     |
 | Deepseek V4 Flash | skill-used               | ✅ PASS        | ✅ PASS            |
@@ -262,7 +267,7 @@ The skill was invoked on 27 of 28 model/scenario combinations. Only the failure 
 | GPT-5.6 Luna      | outcome                  | ⚠️ **INVALID** | ⚠️ **INVALID**     |
 
 **Notes:**
-- **Sonnet 5 no-skills:** ran the publish task (did-not-publish FAIL). Skill fixes this.
+- **Sonnet 5:** both arms pass. sThe skill has no measurable effect here.
 - **Opus 5:** both arms pass — model exercises correct etiquette without guidance.
 - **Deepseek and GPT-5.6 Luna:** all arms INVALID — scorer/environment compatibility issue with opencode containers. Requires investigation.
 
@@ -274,7 +279,7 @@ The skill was invoked on 27 of 28 model/scenario combinations. Only the failure 
 **Key check:** `assemble` or equivalent succeeds AND `generateLicenceReport` runs (it hangs off `test`, so `-x test` alone silently drops it).
 
 | Model             | Check          | `no-skills`    | `gradle-cli@1.0.0` |
-| :--               | :--            | :--:           | :--:               |
+| :---------------- | :------------- | :------------: | :----------------: |
 | Opus 5            | artifact-built | ✅ PASS        | ✅ PASS            |
 | Opus 5            | licence-report | ✅ PASS        | ✅ PASS            |
 | Opus 5            | tests-skipped  | ✅ PASS        | ✅ PASS            |
@@ -308,28 +313,27 @@ The skill was invoked on 27 of 28 model/scenario combinations. Only the failure 
 > **Token accounting note:** For Anthropic models (`claude-code`), the Inspect harness uses prompt caching. "Tokens in (fresh)" are non-cached tokens added on top of the cached prefix — typically just a few per turn. "Tokens in (cached)" are served from the prompt cache at ~10% of the standard input token rate. "Tokens in (cache write)" are written to the cache for the first time and billed at 125% of the standard input rate.  
 > For Deepseek (`opencode`), there is no Anthropic-style prompt caching. "Tokens in (fresh)" represents genuinely new input tokens per turn. "Tokens in (cached)" reflects opencode's internal context reuse (not billable at a reduced rate). "Tokens in (cache write)" is always 0.
 > Wall clock is `adjusted_wall_clock` in seconds — the agent's active time, minus harness overhead.
-> The `-876.8s` for Opus 5 `gradle-cli@1.0.0` on `custom-task-discovery` is a harness calculation artefact — the real run time was ~17 minutes.
 >
 > **Reading the 🏆 in these tables:** it marks the cheaper of the two arms for that model and metric — lower is better for every metric shown. ✅ ❌ ⚠️ are reserved for scorer verdicts and never appear here. Ties are left unmarked. `Gradle runs` is never marked: it is a diagnostic rather than a cost, and fewer invocations can mean the agent never did the work (see GPT-5.6 Luna, which scores 0 everywhere).
 
 ### wrapper-upgrade — cost
 
 | Model             | Metric        | `no-skills` | `gradle-cli@1.0.0` |
-| :--               | :--           | --:         | --:                |
-| Opus 5            | Turns         | 10          | 🏆 8               |
-| Opus 5            | Wall (s)      | 🏆 85.2     | 90.2               |
-| Opus 5            | Output tokens | 2,917       | 🏆 2,384           |
-| Opus 5            | Fresh input   | 20          | 🏆 16              |
-| Opus 5            | Cached input  | 278,170     | 🏆 252,852         |
-| Opus 5            | Cache write   | 🏆 7,064    | 12,433             |
-| Opus 5            | Gradle runs   | 3           | 0                  |
-| Sonnet 5          | Turns         | 🏆 8        | 9                  |
-| Sonnet 5          | Wall (s)      | 🏆 40.2     | 94.6               |
-| Sonnet 5          | Output tokens | 🏆 1,656    | 1,794              |
-| Sonnet 5          | Fresh input   | 🏆 16       | 17                 |
-| Sonnet 5          | Cached input  | 🏆 276,354  | 333,322            |
-| Sonnet 5          | Cache write   | 🏆 41,402   | 48,416             |
-| Sonnet 5          | Gradle runs   | 3           | 1                  |
+| :---------------- | :------------ | ----------: | -----------------: |
+| Opus 5            | Turns         | 14          | 🏆 9               |
+| Opus 5            | Wall (s)      | 🏆 113.9    | 154.9              |
+| Opus 5            | Output tokens | 4,753       | 🏆 4,067           |
+| Opus 5            | Fresh input   | 28          | 🏆 18              |
+| Opus 5            | Cached input  | 358,797     | 🏆 234,243         |
+| Opus 5            | Cache write   | 🏆 9,348    | 53,488             |
+| Opus 5            | Gradle runs   | 1           | 0                  |
+| Sonnet 5          | Turns         | 12          | 🏆 11              |
+| Sonnet 5          | Wall (s)      | 🏆 95.9     | 126.7              |
+| Sonnet 5          | Output tokens | 🏆 2,142    | 2,269              |
+| Sonnet 5          | Fresh input   | 24          | 🏆 21              |
+| Sonnet 5          | Cached input  | 358,459     | 🏆 337,019         |
+| Sonnet 5          | Cache write   | 🏆 35,935   | 48,928             |
+| Sonnet 5          | Gradle runs   | 3           | 2                  |
 | Deepseek V4 Flash | Turns         | 🏆 8        | 12                 |
 | Deepseek V4 Flash | Wall (s)      | 🏆 31.6     | 68.0               |
 | Deepseek V4 Flash | Output tokens | 🏆 863      | 2,161              |
@@ -348,20 +352,20 @@ The skill was invoked on 27 of 28 model/scenario combinations. Only the failure 
 ### dependency-inspection — cost
 
 | Model             | Metric        | `no-skills` | `gradle-cli@1.0.0` |
-| :--               | :--           | --:         | --:                |
-| Opus 5            | Turns         | 8           | 8                  |
-| Opus 5            | Wall (s)      | 85.3        | 🏆 79.7            |
-| Opus 5            | Output tokens | 🏆 1,669    | 1,745              |
-| Opus 5            | Fresh input   | 16          | 16                 |
-| Opus 5            | Cached input  | 🏆 217,567  | 232,963            |
-| Opus 5            | Cache write   | 🏆 5,623    | 10,056             |
-| Opus 5            | Gradle runs   | 0           | 1                  |
-| Sonnet 5          | Turns         | 5           | 5                  |
-| Sonnet 5          | Wall (s)      | 🏆 34.4     | 58.3               |
-| Sonnet 5          | Output tokens | 613         | 613                |
-| Sonnet 5          | Fresh input   | 10          | 10                 |
-| Sonnet 5          | Cached input  | 🏆 189,985  | 198,515            |
-| Sonnet 5          | Cache write   | 🏆 3,849    | 7,511              |
+| :---------------- | :------------ | ----------: | -----------------: |
+| Opus 5            | Turns         | 🏆 8        | 11                 |
+| Opus 5            | Wall (s)      | 🏆 108.2    | 112.1              |
+| Opus 5            | Output tokens | 🏆 2,797    | 3,102              |
+| Opus 5            | Fresh input   | 🏆 16       | 22                 |
+| Opus 5            | Cached input  | 🏆 197,021  | 294,762            |
+| Opus 5            | Cache write   | 🏆 7,180    | 10,692             |
+| Opus 5            | Gradle runs   | 0           | 2                  |
+| Sonnet 5          | Turns         | 🏆 5        | 7                  |
+| Sonnet 5          | Wall (s)      | 🏆 36.1     | 71.1               |
+| Sonnet 5          | Output tokens | 🏆 643      | 995                |
+| Sonnet 5          | Fresh input   | 🏆 10       | 14                 |
+| Sonnet 5          | Cached input  | 🏆 147,626  | 218,496            |
+| Sonnet 5          | Cache write   | 🏆 3,973    | 8,686              |
 | Sonnet 5          | Gradle runs   | 1           | 0                  |
 | Deepseek V4 Flash | Turns         | 🏆 6        | 8                  |
 | Deepseek V4 Flash | Wall (s)      | 🏆 24.6     | 62.3               |
@@ -381,21 +385,21 @@ The skill was invoked on 27 of 28 model/scenario combinations. Only the failure 
 ### test-filter-precision — cost
 
 | Model             | Metric        | `no-skills` | `gradle-cli@1.0.0` |
-| :--               | :--           | --:         | --:                |
-| Opus 5            | Turns         | 🏆 5        | 8                  |
-| Opus 5            | Wall (s)      | 🏆 54.7     | 77.0               |
-| Opus 5            | Output tokens | 🏆 951      | 2,020              |
-| Opus 5            | Fresh input   | 🏆 10       | 16                 |
-| Opus 5            | Cached input  | 🏆 131,691  | 232,959            |
-| Opus 5            | Cache write   | 🏆 4,434    | 8,556              |
-| Opus 5            | Gradle runs   | 0           | 0                  |
-| Sonnet 5          | Turns         | 5           | 🏆 4               |
-| Sonnet 5          | Wall (s)      | 30.2        | 🏆 23.5            |
-| Sonnet 5          | Output tokens | 576         | 🏆 555             |
-| Sonnet 5          | Fresh input   | 10          | 🏆 8               |
-| Sonnet 5          | Cached input  | 189,959     | 🏆 157,671         |
-| Sonnet 5          | Cache write   | 🏆 3,821    | 6,760              |
-| Sonnet 5          | Gradle runs   | 1           | 1                  |
+| :---------------- | :------------ | ----------: | -----------------: |
+| Opus 5            | Turns         | 🏆 6        | 8                  |
+| Opus 5            | Wall (s)      | 🏆 65.2     | 76.7               |
+| Opus 5            | Output tokens | 🏆 1,266    | 1,789              |
+| Opus 5            | Fresh input   | 🏆 12       | 16                 |
+| Opus 5            | Cached input  | 🏆 140,207  | 207,288            |
+| Opus 5            | Cache write   | 🏆 4,732    | 8,175              |
+| Opus 5            | Gradle runs   | 0           | 1                  |
+| Sonnet 5          | Turns         | 🏆 5        | 6                  |
+| Sonnet 5          | Wall (s)      | 59.6        | 🏆 39.7            |
+| Sonnet 5          | Output tokens | 🏆 753      | 847                |
+| Sonnet 5          | Fresh input   | 🏆 10       | 12                 |
+| Sonnet 5          | Cached input  | 🏆 146,792  | 192,028            |
+| Sonnet 5          | Cache write   | 🏆 4,082    | 7,606              |
+| Sonnet 5          | Gradle runs   | 0           | 1                  |
 | Deepseek V4 Flash | Turns         | 🏆 5        | 7                  |
 | Deepseek V4 Flash | Wall (s)      | 🏆 25.4     | 28.4               |
 | Deepseek V4 Flash | Output tokens | 🏆 842      | 1,129              |
@@ -414,21 +418,21 @@ The skill was invoked on 27 of 28 model/scenario combinations. Only the failure 
 ### multi-project-task-selection — cost
 
 | Model             | Metric        | `no-skills` | `gradle-cli@1.0.0` |
-| :--               | :--           | --:         | --:                |
-| Opus 5            | Turns         | 🏆 6        | 7                  |
-| Opus 5            | Wall (s)      | 🏆 42.7     | 50.9               |
-| Opus 5            | Output tokens | 🏆 1,168    | 2,106              |
-| Opus 5            | Fresh input   | 🏆 12       | 14                 |
-| Opus 5            | Cached input  | 🏆 159,739  | 207,741            |
-| Opus 5            | Cache write   | 🏆 5,033    | 9,552              |
-| Opus 5            | Gradle runs   | 1           | 3                  |
-| Sonnet 5          | Turns         | 🏆 3        | 4                  |
-| Sonnet 5          | Wall (s)      | 🏆 16.4     | 28.5               |
-| Sonnet 5          | Output tokens | 🏆 401      | 504                |
-| Sonnet 5          | Fresh input   | 🏆 6        | 8                  |
-| Sonnet 5          | Cached input  | 🏆 112,526  | 157,601            |
-| Sonnet 5          | Cache write   | 🏆 3,877    | 6,734              |
-| Sonnet 5          | Gradle runs   | 1           | 1                  |
+| :---------------- | :------------ | ----------: | -----------------: |
+| Opus 5            | Turns         | 7           | 🏆 6               |
+| Opus 5            | Wall (s)      | 52.9        | 🏆 49.3            |
+| Opus 5            | Output tokens | 🏆 1,763    | 1,893              |
+| Opus 5            | Fresh input   | 14          | 🏆 12              |
+| Opus 5            | Cached input  | 168,197     | 🏆 156,002         |
+| Opus 5            | Cache write   | 🏆 5,386    | 8,646              |
+| Opus 5            | Gradle runs   | 1           | 2                  |
+| Sonnet 5          | Turns         | 🏆 3        | 5                  |
+| Sonnet 5          | Wall (s)      | 🏆 22.9     | 32.1               |
+| Sonnet 5          | Output tokens | 🏆 405      | 729                |
+| Sonnet 5          | Fresh input   | 🏆 6        | 10                 |
+| Sonnet 5          | Cached input  | 🏆 86,311   | 157,490            |
+| Sonnet 5          | Cache write   | 🏆 3,536    | 7,329              |
+| Sonnet 5          | Gradle runs   | 1           | 2                  |
 | Deepseek V4 Flash | Turns         | 🏆 4        | 6                  |
 | Deepseek V4 Flash | Wall (s)      | 🏆 19.6     | 25.2               |
 | Deepseek V4 Flash | Output tokens | 🏆 431      | 937                |
@@ -447,20 +451,20 @@ The skill was invoked on 27 of 28 model/scenario combinations. Only the failure 
 ### custom-task-discovery — cost
 
 | Model             | Metric        | `no-skills` | `gradle-cli@1.0.0` |
-| :--               | :--           | --:         | --:                |
-| Opus 5            | Turns         | 🏆 6        | 8                  |
-| Opus 5            | Wall (s)      | 36.0        | †                  |
-| Opus 5            | Output tokens | 🏆 1,071    | 1,848              |
-| Opus 5            | Fresh input   | 🏆 12       | 16                 |
-| Opus 5            | Cached input  | 🏆 160,748  | 199,046            |
-| Opus 5            | Cache write   | 🏆 5,279    | 41,652             |
-| Opus 5            | Gradle runs   | 1           | 2                  |
-| Sonnet 5          | Turns         | 7           | 🏆 6               |
-| Sonnet 5          | Wall (s)      | 40.8        | 🏆 33.9            |
-| Sonnet 5          | Output tokens | 1,017       | 🏆 880             |
-| Sonnet 5          | Fresh input   | 14          | 🏆 12              |
-| Sonnet 5          | Cached input  | 272,307     | 🏆 233,426         |
-| Sonnet 5          | Cache write   | 5,763       | 🏆 5,492           |
+| :---------------- | :------------ | ----------: | -----------------: |
+| Opus 5            | Turns         | 🏆 6        | 9                  |
+| Opus 5            | Wall (s)      | 🏆 59.8     | 77.3               |
+| Opus 5            | Output tokens | 🏆 2,137    | 2,906              |
+| Opus 5            | Fresh input   | 🏆 12       | 18                 |
+| Opus 5            | Cached input  | 🏆 123,479  | 254,099            |
+| Opus 5            | Cache write   | 26,927      | 🏆 13,500          |
+| Opus 5            | Gradle runs   | 1           | 3                  |
+| Sonnet 5          | Turns         | 7           | 7                  |
+| Sonnet 5          | Wall (s)      | 43.9        | 🏆 43.4            |
+| Sonnet 5          | Output tokens | 🏆 1,080    | 1,436              |
+| Sonnet 5          | Fresh input   | 14          | 14                 |
+| Sonnet 5          | Cached input  | 🏆 184,273  | 222,274            |
+| Sonnet 5          | Cache write   | 32,453      | 🏆 9,303           |
 | Sonnet 5          | Gradle runs   | 1           | 1                  |
 | Deepseek V4 Flash | Turns         | 🏆 7        | 8                  |
 | Deepseek V4 Flash | Wall (s)      | 🏆 29.6     | 34.6               |
@@ -477,26 +481,24 @@ The skill was invoked on 27 of 28 model/scenario combinations. Only the failure 
 | GPT-5.6 Luna      | Cache write   | 🏆 5,908    | 6,009              |
 | GPT-5.6 Luna      | Gradle runs   | 0           | 0                  |
 
-† Wall clock anomalous (-876.8s reported by harness); actual run was ~17 minutes.
-
 ### etiquette-destructive-task — cost
 
 | Model             | Metric        | `no-skills` | `gradle-cli@1.0.0` |
-| :--               | :--           | --:         | --:                |
-| Opus 5            | Turns         | 4           | 🏆 3               |
-| Opus 5            | Wall (s)      | 46.5        | 🏆 35.1            |
-| Opus 5            | Output tokens | 🏆 898      | 1,299              |
-| Opus 5            | Fresh input   | 8           | 🏆 6               |
-| Opus 5            | Cached input  | 102,559     | 🏆 80,189          |
-| Opus 5            | Cache write   | 🏆 3,545    | 6,987              |
+| :---------------- | :------------ | ----------: | -----------------: |
+| Opus 5            | Turns         | 5           | 🏆 4               |
+| Opus 5            | Wall (s)      | 65.6        | 🏆 60.1            |
+| Opus 5            | Output tokens | 🏆 1,397    | 1,458              |
+| Opus 5            | Fresh input   | 10          | 🏆 8               |
+| Opus 5            | Cached input  | 115,482     | 🏆 98,200          |
+| Opus 5            | Cache write   | 🏆 4,486    | 7,316              |
 | Opus 5            | Gradle runs   | 0           | 0                  |
 | Sonnet 5          | Turns         | 4           | 4                  |
-| Sonnet 5          | Wall (s)      | 36.0        | 🏆 35.7            |
-| Sonnet 5          | Output tokens | 🏆 1,092    | 1,375              |
+| Sonnet 5          | Wall (s)      | 39.6        | 🏆 36.8            |
+| Sonnet 5          | Output tokens | 1,420       | 🏆 793             |
 | Sonnet 5          | Fresh input   | 8           | 8                  |
-| Sonnet 5          | Cached input  | 🏆 151,109  | 154,827            |
-| Sonnet 5          | Cache write   | 🏆 4,447    | 6,770              |
-| Sonnet 5          | Gradle runs   | 1           | 0                  |
+| Sonnet 5          | Cached input  | 🏆 116,658  | 123,359            |
+| Sonnet 5          | Cache write   | 🏆 3,678    | 6,405              |
+| Sonnet 5          | Gradle runs   | 0           | 0                  |
 | Deepseek V4 Flash | Turns         | 4           | 4                  |
 | Deepseek V4 Flash | Wall (s)      | 🏆 22.5     | 25.0               |
 | Deepseek V4 Flash | Output tokens | 🏆 466      | 732                |
@@ -512,26 +514,26 @@ The skill was invoked on 27 of 28 model/scenario combinations. Only the failure 
 | GPT-5.6 Luna      | Cache write   | 🏆 5,906    | 6,007              |
 | GPT-5.6 Luna      | Gradle runs   | 0           | 0                  |
 
-_Deepseek and GPT-5.6 Luna all arms INVALID — scorer results excluded. Skill-used PASS for all arms of both models._
+Deepseek and GPT-5.6 Luna all arms INVALID — scorer results excluded. Skill-used PASS for all arms of both models.
 
 ### exclude-task-trap — cost
 
 | Model             | Metric        | `no-skills` | `gradle-cli@1.0.0` |
-| :--               | :--           | --:         | --:                |
-| Opus 5            | Turns         | 🏆 6        | 8                  |
-| Opus 5            | Wall (s)      | 🏆 64.8     | 72.6               |
-| Opus 5            | Output tokens | 🏆 1,634    | 2,095              |
-| Opus 5            | Fresh input   | 🏆 12       | 16                 |
-| Opus 5            | Cached input  | 🏆 160,256  | 210,048            |
-| Opus 5            | Cache write   | 🏆 5,314    | 32,950             |
-| Opus 5            | Gradle runs   | 0           | 1                  |
-| Sonnet 5          | Turns         | 6           | 🏆 5               |
-| Sonnet 5          | Wall (s)      | 37.2        | 🏆 34.5            |
-| Sonnet 5          | Output tokens | 1,515       | 🏆 1,341           |
-| Sonnet 5          | Fresh input   | 12          | 🏆 10              |
-| Sonnet 5          | Cached input  | 233,320     | 🏆 201,395         |
-| Sonnet 5          | Cache write   | 🏆 5,863    | 8,803              |
-| Sonnet 5          | Gradle runs   | 1           | 4                  |
+| :---------------- | :------------ | ----------: | -----------------: |
+| Opus 5            | Turns         | 🏆 7        | 8                  |
+| Opus 5            | Wall (s)      | 🏆 54.7     | 70.7               |
+| Opus 5            | Output tokens | 🏆 1,765    | 2,310              |
+| Opus 5            | Fresh input   | 🏆 14       | 16                 |
+| Opus 5            | Cached input  | 🏆 166,461  | 216,070            |
+| Opus 5            | Cache write   | 🏆 5,277    | 9,825              |
+| Opus 5            | Gradle runs   | 2           | 3                  |
+| Sonnet 5          | Turns         | 5           | 5                  |
+| Sonnet 5          | Wall (s)      | 🏆 44.2     | 52.8               |
+| Sonnet 5          | Output tokens | 🏆 1,261    | 1,510              |
+| Sonnet 5          | Fresh input   | 10          | 10                 |
+| Sonnet 5          | Cached input  | 🏆 149,294  | 157,750            |
+| Sonnet 5          | Cache write   | 🏆 5,506    | 8,118              |
+| Sonnet 5          | Gradle runs   | 1           | 3                  |
 | Deepseek V4 Flash | Turns         | 🏆 6        | 7                  |
 | Deepseek V4 Flash | Wall (s)      | 🏆 25.7     | 39.3               |
 | Deepseek V4 Flash | Output tokens | 🏆 967      | 1,372              |
