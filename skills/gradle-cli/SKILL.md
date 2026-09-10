@@ -4,7 +4,7 @@ description: "Produce or run the exact `./gradlew` command for any Gradle CLI in
 license: Apache-2.0
 metadata:
   author: gradle
-  version: "1.3.0"
+  version: "1.0.0"
 ---
 
 # Gradle CLI
