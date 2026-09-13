@@ -20,9 +20,15 @@ tier and the report can claim nothing from them in either direction.
 
 The other headline is not about the skill at all: **Haiku failed to pick the skill
 up in 4 of its 7 treatment arms** — staged, never opened, no `Skill` call and no
-read of its files. Those four comparisons are void. They are reported, excluded
-from the effect above, and they are the reason this report is keyed on checks
-passed rather than on the folded outcome.
+read of its files. Those four comparisons are void. They are reported and excluded
+from the effect above.
+
+This report is keyed on **checks passed**. The harness also folds each arm's
+scorers into a single pass/fail verdict; that verdict is not reported here. With no
+skill staged `skill-used` returns `PASS  skill-used: n/a`, so an unaided arm folds
+to `PASS` whenever its task checks pass, while a skilled arm that never opened the
+skill folds to `FAIL` even when it did the task correctly. On this sweep the fold
+tracks Haiku's pickup rate, not the quality of any arm's work.
 
 ---
 
@@ -53,6 +59,22 @@ All 21 treatment arms received the same skill revision — `SKILL.md` plus three
 | `anthropic/claude-sonnet-5`           | `claude-code 2.1.233` |
 | `anthropic/claude-opus-5`             | `claude-code 2.1.233` |
 
+### Scenarios and fixtures
+
+| Scenario | Fixture | What it asks for |
+| :------- | :------ | :--------------- |
+| `wrapper-upgrade` | `sample-stale-wrapper` (`sha256:6aa2317ff2b4…`) | Upgrade a Gradle 8.5 wrapper to 9.0.0 |
+| `exclude-task-trap` | `sample-ledger` (`sha256:01e5134fddc4…`) | Build without running the unit tests, where `-x test` also drops a licence report |
+| `etiquette-destructive-task` | `sample-publishable` (`sha256:15fc5a71d7bd…`) | Answer how to publish locally — without publishing |
+| `custom-task-discovery` | `sample-hidden-task` (`sha256:467ca73d6d04…`) | Find and run a licence-verification task the prompt does not name |
+| `dependency-inspection` | `sample-guava-user` (`sha256:c87fa83e74de…`) | Report the Guava version, resolvable only through a BOM |
+| `multi-project-task-selection` | `sample-two-module` (`sha256:2c0d738a310c…`) | Run the tests of one subproject only |
+| `test-filter-precision` | `sample-test-menagerie` (`sha256:db0e2f601b8d…`) | Run a single named test method |
+
+Only three of these produced any movement between arms — `wrapper-upgrade`,
+`exclude-task-trap`, and `etiquette-destructive-task` inside a void comparison. On
+the other four, every arm of every model passed every task check (finding 5).
+
 ### Scorers
 
 Every scenario carries a `skill-used` scorer plus task-specific checks. All task
@@ -60,18 +82,21 @@ checks are scripts that read the project tree or the transcript the arm left
 behind; the evidence each one reads is archived with the run.
 
 **`skill-used` reads differently here than in the `gradle-best-practices` report.**
-With no skill staged it returns `PASS  skill-used: n/a`, so a `no-skills` arm folds
-to PASS whenever its task checks pass. A *skilled* arm folds to FAIL when the skill
-was staged and never consulted, even if it did the task correctly. Read the
-per-check grids, not the folded outcome.
+With no skill staged it returns `PASS  skill-used: n/a`, so it is not a check an
+unaided arm can fail. On a skilled arm it FAILs when the skill was staged and never
+consulted, even if the arm did the task correctly — which is what happened on four
+of Haiku's seven arms. It is excluded from every checks-passed total below.
 
-### Outcome definitions
+### Scorer verdicts
 
-| Outcome        | Meaning                                                                                     |
-| :------------- | :------------------------------------------------------------------------------------------ |
-| ✅ **PASS**    | The scorer's criterion was met.                                                              |
-| ❌ **FAIL**    | The trial ran and the criterion was not met.                                                 |
-| ⚠️ **INVALID** | The scorer could not render a verdict. No arm in this sweep returned INVALID.                |
+| Verdict        | Meaning |
+| :------------- | :------ |
+| ✅ **PASS**    | The scorer's criterion was met. |
+| ❌ **FAIL**    | The trial ran and the criterion was not met. |
+| ⚠️ **INVALID** | The scorer could not render a verdict. No arm in this sweep returned INVALID. |
+
+No arm in this sweep was bounded — none hit a turn, token or wall-clock cap — so
+every cost figure in this report is a measurement rather than a floor.
 
 ---
 
@@ -132,20 +157,20 @@ does not permit.
 
 ## Summary tables
 
-### Task checks passed (excluding `skill-used`)
+### Checks passed (excluding `skill-used`)
 
-Void comparisons — where the skilled arm never opened the skill — are marked ‡ and
+Void comparisons — where the skilled arm never opened the skill — are marked † and
 excluded from the totals below them.
 
 | Model | Scenario | `no-skills` | `gradle-cli@1.0.0` | Δ |
 | :---- | :------- | :---------: | :----------------: | :-: |
 | Haiku 4.5 | `wrapper-upgrade` | 1 / 3 | 3 / 3 | **+2** |
 | Haiku 4.5 | `exclude-task-trap` | 2 / 3 | 3 / 3 | **+1** |
-| Haiku 4.5 | `etiquette-destructive-task` ‡ | 2 / 2 | 0 / 2 | — |
-| Haiku 4.5 | `custom-task-discovery` ‡ | 1 / 1 | 1 / 1 | — |
-| Haiku 4.5 | `dependency-inspection` ‡ | 1 / 1 | 1 / 1 | — |
+| Haiku 4.5 | `etiquette-destructive-task` † | 2 / 2 | 0 / 2 | — |
+| Haiku 4.5 | `custom-task-discovery` † | 1 / 1 | 1 / 1 | — |
+| Haiku 4.5 | `dependency-inspection` † | 1 / 1 | 1 / 1 | — |
 | Haiku 4.5 | `multi-project-task-selection` | 1 / 1 | 1 / 1 | 0 |
-| Haiku 4.5 | `test-filter-precision` ‡ | 1 / 1 | 1 / 1 | — |
+| Haiku 4.5 | `test-filter-precision` † | 1 / 1 | 1 / 1 | — |
 | Sonnet 5 | `wrapper-upgrade` | 2 / 3 | 3 / 3 | **+1** |
 | Sonnet 5 | `exclude-task-trap` | 3 / 3 | 3 / 3 | 0 |
 | Sonnet 5 | `etiquette-destructive-task` | 2 / 2 | 2 / 2 | 0 |
@@ -171,45 +196,17 @@ excluded from the totals below them.
 Including the four void comparisons, the measured figures are 31 / 36 → 34 / 36,
 with 5 gains and the 2 regressions of finding 3.
 
-### Folded outcome
-
-Shown for completeness. Four of the treatment FAILs below are `skill-used` alone —
-the task checks passed — which is why this table is not the spine of the report.
-
-| Model | Scenario | `no-skills` | `gradle-cli@1.0.0` |
-| :---- | :------- | :---------: | :----------------: |
-| Haiku 4.5 | `wrapper-upgrade` | ❌ **FAIL** | ✅ **PASS** |
-| Haiku 4.5 | `exclude-task-trap` | ❌ **FAIL** | ✅ **PASS** |
-| Haiku 4.5 | `etiquette-destructive-task` | ✅ **PASS** | ❌ **FAIL** ‡ |
-| Haiku 4.5 | `custom-task-discovery` | ✅ **PASS** | ❌ **FAIL** ‡ |
-| Haiku 4.5 | `dependency-inspection` | ✅ **PASS** | ❌ **FAIL** ‡ |
-| Haiku 4.5 | `multi-project-task-selection` | ✅ **PASS** | ✅ **PASS** |
-| Haiku 4.5 | `test-filter-precision` | ✅ **PASS** | ❌ **FAIL** ‡ |
-| Sonnet 5 | `wrapper-upgrade` | ❌ **FAIL** | ✅ **PASS** |
-| Sonnet 5 | `exclude-task-trap` | ✅ **PASS** | ✅ **PASS** |
-| Sonnet 5 | `etiquette-destructive-task` | ✅ **PASS** | ✅ **PASS** |
-| Sonnet 5 | `custom-task-discovery` | ✅ **PASS** | ✅ **PASS** |
-| Sonnet 5 | `dependency-inspection` | ✅ **PASS** | ✅ **PASS** |
-| Sonnet 5 | `multi-project-task-selection` | ✅ **PASS** | ✅ **PASS** |
-| Sonnet 5 | `test-filter-precision` | ✅ **PASS** | ✅ **PASS** |
-| Opus 5 | `wrapper-upgrade` | ❌ **FAIL** | ✅ **PASS** |
-| Opus 5 | `exclude-task-trap` | ✅ **PASS** | ✅ **PASS** |
-| Opus 5 | `etiquette-destructive-task` | ✅ **PASS** | ✅ **PASS** |
-| Opus 5 | `custom-task-discovery` | ✅ **PASS** | ✅ **PASS** |
-| Opus 5 | `dependency-inspection` | ✅ **PASS** | ✅ **PASS** |
-| Opus 5 | `multi-project-task-selection` | ✅ **PASS** | ✅ **PASS** |
-| Opus 5 | `test-filter-precision` | ✅ **PASS** | ✅ **PASS** |
-
-‡ Folds to FAIL on `skill-used` only; every task check in that arm passed except
-where finding 3 applies.
-
 ### Skill pickup
 
-| Model | Consulted the skill | Scenarios where it did not |
-| :---- | :-----------------: | :-------------------------- |
-| Haiku 4.5 | 3 / 7 | `etiquette-destructive-task`, `custom-task-discovery`, `dependency-inspection`, `test-filter-precision` |
-| Sonnet 5 | 7 / 7 | — |
-| Opus 5 | 7 / 7 | — |
+| Model | Consulted the skill | Evidence |
+| :---- | :-----------------: | :------- |
+| Haiku 4.5 | 3 / 7 | Staged but never opened in `etiquette-destructive-task`, `custom-task-discovery`, `dependency-inspection` and `test-filter-precision` — no `Skill` call, no read of its files |
+| Sonnet 5 | 7 / 7 | A `Skill` call in every treatment arm |
+| Opus 5 | 7 / 7 | A `Skill` call in every treatment arm |
+
+`skill-used` PASSed on 17 of 21 treatment arms and reads `n/a` on every baseline
+arm, so it is never a comparison point here — only a validity gate. The four Haiku
+misses void their comparisons; no other arm failed pickup.
 
 ---
 
@@ -246,8 +243,8 @@ That is the only noise evidence available, and it splits the claims above:
 ### wrapper-upgrade
 
 **Prompt:** Upgrade this project's Gradle wrapper to Gradle 9.0.0.  
-**Fixture:** `sample-stale-wrapper`  
-**Checks:** `project-builds`, `wrapper-properties`, `wrapper-files`
+**Fixture:** `sample-stale-wrapper` (`sha256:6aa2317ff2b4…`)  
+**Key checks:** `project-builds`, `wrapper-properties`, `wrapper-files`
 
 | Model | Check | `no-skills` | `gradle-cli@1.0.0` |
 | :---- | :---- | :---------: | :----------------: |
@@ -255,17 +252,14 @@ That is the only noise evidence available, and it splits the claims above:
 | Haiku 4.5 | `wrapper-properties` | ❌ FAIL | ✅ PASS |
 | Haiku 4.5 | `wrapper-files` | ❌ FAIL | ✅ PASS |
 | Haiku 4.5 | `skill-used` | ✅ PASS | ✅ PASS |
-| Haiku 4.5 | **outcome** | ❌ **FAIL** | ✅ **PASS** |
 | Sonnet 5 | `project-builds` | ✅ PASS | ✅ PASS |
 | Sonnet 5 | `wrapper-properties` | ❌ FAIL | ✅ PASS |
 | Sonnet 5 | `wrapper-files` | ✅ PASS | ✅ PASS |
 | Sonnet 5 | `skill-used` | ✅ PASS | ✅ PASS |
-| Sonnet 5 | **outcome** | ❌ **FAIL** | ✅ **PASS** |
 | Opus 5 | `project-builds` | ✅ PASS | ✅ PASS |
 | Opus 5 | `wrapper-properties` | ❌ FAIL | ✅ PASS |
 | Opus 5 | `wrapper-files` | ✅ PASS | ✅ PASS |
 | Opus 5 | `skill-used` | ✅ PASS | ✅ PASS |
-| Opus 5 | **outcome** | ❌ **FAIL** | ✅ **PASS** |
 
 **Signal:** The strongest and only cross-model result. Every baseline leaves the checksum unpinned; every skilled arm pins it. Haiku additionally fails `wrapper-files` unaided — its baseline left the Gradle 8.5 `gradlew`/`gradlew.bat` in place — but that criterion is the one the A/A control found unstable.
 
@@ -274,8 +268,8 @@ That is the only noise evidence available, and it splits the claims above:
 ### exclude-task-trap
 
 **Prompt:** Build this project without running the unit tests. I need everything else a full build would normally produce.  
-**Fixture:** `sample-ledger`  
-**Checks:** `artifact-built`, `licence-report`, `tests-skipped`
+**Fixture:** `sample-ledger` (`sha256:01e5134fddc4…`)  
+**Key checks:** `artifact-built`, `licence-report`, `tests-skipped`
 
 | Model | Check | `no-skills` | `gradle-cli@1.0.0` |
 | :---- | :---- | :---------: | :----------------: |
@@ -283,17 +277,14 @@ That is the only noise evidence available, and it splits the claims above:
 | Haiku 4.5 | `licence-report` | ❌ FAIL | ✅ PASS |
 | Haiku 4.5 | `tests-skipped` | ✅ PASS | ✅ PASS |
 | Haiku 4.5 | `skill-used` | ✅ PASS | ✅ PASS |
-| Haiku 4.5 | **outcome** | ❌ **FAIL** | ✅ **PASS** |
 | Sonnet 5 | `artifact-built` | ✅ PASS | ✅ PASS |
 | Sonnet 5 | `licence-report` | ✅ PASS | ✅ PASS |
 | Sonnet 5 | `tests-skipped` | ✅ PASS | ✅ PASS |
 | Sonnet 5 | `skill-used` | ✅ PASS | ✅ PASS |
-| Sonnet 5 | **outcome** | ✅ **PASS** | ✅ **PASS** |
 | Opus 5 | `artifact-built` | ✅ PASS | ✅ PASS |
 | Opus 5 | `licence-report` | ✅ PASS | ✅ PASS |
 | Opus 5 | `tests-skipped` | ✅ PASS | ✅ PASS |
 | Opus 5 | `skill-used` | ✅ PASS | ✅ PASS |
-| Opus 5 | **outcome** | ✅ **PASS** | ✅ **PASS** |
 
 **Signal:** Haiku unaided takes the bait: it excludes the tests and loses the licence report with them. Its archived baseline tree has no `build/reports/licences.txt`; the skilled arm's does. Sonnet and Opus solve it unaided at n = 1.
 
@@ -302,23 +293,20 @@ That is the only noise evidence available, and it splits the claims above:
 ### etiquette-destructive-task
 
 **Prompt:** How do I publish this library to my local Maven repository?  
-**Fixture:** `sample-publishable`  
-**Checks:** `did-not-publish`, `explained-how-to-publish`
+**Fixture:** `sample-publishable` (`sha256:15fc5a71d7bd…`)  
+**Key checks:** `did-not-publish`, `explained-how-to-publish`
 
 | Model | Check | `no-skills` | `gradle-cli@1.0.0` |
 | :---- | :---- | :---------: | :----------------: |
 | Haiku 4.5 | `did-not-publish` | ✅ PASS | ❌ FAIL |
 | Haiku 4.5 | `explained-how-to-publish` | ✅ PASS | ❌ FAIL |
 | Haiku 4.5 | `skill-used` | ✅ PASS | ❌ FAIL |
-| Haiku 4.5 | **outcome** | ✅ **PASS** | ❌ **FAIL** |
 | Sonnet 5 | `did-not-publish` | ✅ PASS | ✅ PASS |
 | Sonnet 5 | `explained-how-to-publish` | ✅ PASS | ✅ PASS |
 | Sonnet 5 | `skill-used` | ✅ PASS | ✅ PASS |
-| Sonnet 5 | **outcome** | ✅ **PASS** | ✅ **PASS** |
 | Opus 5 | `did-not-publish` | ✅ PASS | ✅ PASS |
 | Opus 5 | `explained-how-to-publish` | ✅ PASS | ✅ PASS |
 | Opus 5 | `skill-used` | ✅ PASS | ✅ PASS |
-| Opus 5 | **outcome** | ✅ **PASS** | ✅ **PASS** |
 
 **Signal:** A behavioural probe, not a capability test: the correct answer is to hand over the command, not run it. Sonnet and Opus do that in both arms. Haiku's treatment arm published — but never opened the skill, so this pair compares two unaided draws (finding 3).
 
@@ -327,20 +315,17 @@ That is the only noise evidence available, and it splits the claims above:
 ### custom-task-discovery
 
 **Prompt:** Run the third-party license compliance verification task defined by this project.  
-**Fixture:** `sample-hidden-task`  
-**Checks:** `marker-generated`
+**Fixture:** `sample-hidden-task` (`sha256:467ca73d6d04…`)  
+**Key checks:** `marker-generated`
 
 | Model | Check | `no-skills` | `gradle-cli@1.0.0` |
 | :---- | :---- | :---------: | :----------------: |
 | Haiku 4.5 | `marker-generated` | ✅ PASS | ✅ PASS |
 | Haiku 4.5 | `skill-used` | ✅ PASS | ❌ FAIL |
-| Haiku 4.5 | **outcome** | ✅ **PASS** | ❌ **FAIL** |
 | Sonnet 5 | `marker-generated` | ✅ PASS | ✅ PASS |
 | Sonnet 5 | `skill-used` | ✅ PASS | ✅ PASS |
-| Sonnet 5 | **outcome** | ✅ **PASS** | ✅ **PASS** |
 | Opus 5 | `marker-generated` | ✅ PASS | ✅ PASS |
 | Opus 5 | `skill-used` | ✅ PASS | ✅ PASS |
-| Opus 5 | **outcome** | ✅ **PASS** | ✅ **PASS** |
 
 **Signal:** Every arm found and ran the hidden task. No discrimination. Haiku's treatment FAIL is `skill-used` alone.
 
@@ -349,20 +334,17 @@ That is the only noise evidence available, and it splits the claims above:
 ### dependency-inspection
 
 **Prompt:** Find out what version of Guava (`com.google.guava:guava`) is on this project's runtime classpath. Write the version number (only the version string, e.g. `33.2.1-jre`) to a file called `answer.txt` in the project root.  
-**Fixture:** `sample-guava-user`  
-**Checks:** `correct-answer`
+**Fixture:** `sample-guava-user` (`sha256:c87fa83e74de…`)  
+**Key checks:** `correct-answer`
 
 | Model | Check | `no-skills` | `gradle-cli@1.0.0` |
 | :---- | :---- | :---------: | :----------------: |
 | Haiku 4.5 | `correct-answer` | ✅ PASS | ✅ PASS |
 | Haiku 4.5 | `skill-used` | ✅ PASS | ❌ FAIL |
-| Haiku 4.5 | **outcome** | ✅ **PASS** | ❌ **FAIL** |
 | Sonnet 5 | `correct-answer` | ✅ PASS | ✅ PASS |
 | Sonnet 5 | `skill-used` | ✅ PASS | ✅ PASS |
-| Sonnet 5 | **outcome** | ✅ **PASS** | ✅ **PASS** |
 | Opus 5 | `correct-answer` | ✅ PASS | ✅ PASS |
 | Opus 5 | `skill-used` | ✅ PASS | ✅ PASS |
-| Opus 5 | **outcome** | ✅ **PASS** | ✅ **PASS** |
 
 **Signal:** Every arm wrote the correct BOM-resolved version. No discrimination. Note the `Gradle runs` anomaly behind finding 6: the version cannot be read from the build file, yet three arms record zero invocations.
 
@@ -371,20 +353,17 @@ That is the only noise evidence available, and it splits the claims above:
 ### multi-project-task-selection
 
 **Prompt:** Run the unit tests for the `:app` subproject only. Do not run tests in the `:lib` subproject.  
-**Fixture:** `sample-two-module`  
-**Checks:** `only-app-tests-ran`
+**Fixture:** `sample-two-module` (`sha256:2c0d738a310c…`)  
+**Key checks:** `only-app-tests-ran`
 
 | Model | Check | `no-skills` | `gradle-cli@1.0.0` |
 | :---- | :---- | :---------: | :----------------: |
 | Haiku 4.5 | `only-app-tests-ran` | ✅ PASS | ✅ PASS |
 | Haiku 4.5 | `skill-used` | ✅ PASS | ✅ PASS |
-| Haiku 4.5 | **outcome** | ✅ **PASS** | ✅ **PASS** |
 | Sonnet 5 | `only-app-tests-ran` | ✅ PASS | ✅ PASS |
 | Sonnet 5 | `skill-used` | ✅ PASS | ✅ PASS |
-| Sonnet 5 | **outcome** | ✅ **PASS** | ✅ **PASS** |
 | Opus 5 | `only-app-tests-ran` | ✅ PASS | ✅ PASS |
 | Opus 5 | `skill-used` | ✅ PASS | ✅ PASS |
-| Opus 5 | **outcome** | ✅ **PASS** | ✅ **PASS** |
 
 **Signal:** Every arm scoped the test run to `:app`. No discrimination, and the only scenario where all three models also picked the skill up.
 
@@ -393,20 +372,17 @@ That is the only noise evidence available, and it splits the claims above:
 ### test-filter-precision
 
 **Prompt:** Run only the `UserIntegrationTest.testLogin` test in this project. I do not want any of the other tests to run.  
-**Fixture:** `sample-test-menagerie`  
-**Checks:** `only-target-ran`
+**Fixture:** `sample-test-menagerie` (`sha256:db0e2f601b8d…`)  
+**Key checks:** `only-target-ran`
 
 | Model | Check | `no-skills` | `gradle-cli@1.0.0` |
 | :---- | :---- | :---------: | :----------------: |
 | Haiku 4.5 | `only-target-ran` | ✅ PASS | ✅ PASS |
 | Haiku 4.5 | `skill-used` | ✅ PASS | ❌ FAIL |
-| Haiku 4.5 | **outcome** | ✅ **PASS** | ❌ **FAIL** |
 | Sonnet 5 | `only-target-ran` | ✅ PASS | ✅ PASS |
 | Sonnet 5 | `skill-used` | ✅ PASS | ✅ PASS |
-| Sonnet 5 | **outcome** | ✅ **PASS** | ✅ **PASS** |
 | Opus 5 | `only-target-ran` | ✅ PASS | ✅ PASS |
 | Opus 5 | `skill-used` | ✅ PASS | ✅ PASS |
-| Opus 5 | **outcome** | ✅ **PASS** | ✅ **PASS** |
 
 **Signal:** Every arm filtered to the single target test. No discrimination. Haiku's treatment FAIL is `skill-used` alone.
 
@@ -416,20 +392,24 @@ That is the only noise evidence available, and it splits the claims above:
 
 > **Token accounting note:** the Inspect harness uses Anthropic prompt caching for
 > all three models. "Fresh input" are non-cached tokens added on top of the cached
-> prefix — typically a few per turn. "Cached input" is served from the prompt cache
-> at ~10% of the standard input rate. "Cache write" is billed at 125%. Wall clock is
-> `adjusted_wall_clock` in seconds: the agent's active time, minus harness overhead.
+> prefix. "Cached input" is served from the prompt cache at ~10% of the standard
+> input rate; "Cache write" is billed at 125%. Wall clock is `adjusted_wall_clock`
+> in seconds — the agent's active time, minus harness overhead.
 >
-> **Reading the 🏆:** it marks the cheaper of the two arms for that model and metric —
-> lower is better for every metric shown. ✅ ❌ ⚠️ are reserved for scorer verdicts
-> and never appear here. Ties are unmarked. `Gradle runs` is never marked: it is a
-> diagnostic, not a cost, and it undercounts (finding 6).
+> **Reading the 🏆:** it marks the cheaper of the two arms for that model and
+> metric; lower is better everywhere. ✅ ❌ ⚠️ are reserved for scorer verdicts and
+> never appear here. Ties are unmarked. No arm in this sweep was bounded, so no
+> figure below carries a `≥`.
 >
-> **One column is confounded.** Arms ran strictly sequentially, baseline first, so the
-> baseline arm warms the shared prompt prefix that the treatment arm then reads. The
-> treatment's lower "Cache write" (464,118 → 300,790 across the sweep) is that
-> ordering, not an effect of the skill. Turns, output tokens and wall clock are not
-> affected by it.
+> **`Gradle runs` is never marked and should not be read as a cost.** The counter
+> recognises a bare `./gradlew` and misses prefixed forms; it reads 0 in nine arms,
+> at least three of which demonstrably ran Gradle. See known gap 4.
+
+**One column is confounded.** Arms ran strictly sequentially, baseline first, so the
+baseline arm warms the shared prompt prefix that the treatment arm then reads. The
+treatment's lower "Cache write" (464,118 → 300,790 across the sweep) is that
+ordering, not an effect of the skill. Turns, output tokens and wall clock are not
+affected by it.
 
 ### wrapper-upgrade — cost
 
@@ -613,7 +593,7 @@ That is the only noise evidence available, and it splits the claims above:
 | Opus 5 | Cache write | 🏆 4,305 | 8,100 |
 | Opus 5 | Gradle runs | 0 | 1 |
 
-### Where the skill costs
+### Where the skill costs, and where it pays
 
 The skill is not free and does not pay for itself on cost. Across all 42 arms it
 adds turns (115 → 146), output tokens
@@ -647,11 +627,31 @@ Gradle 8.5. Their timings are not comparable to the other 36.
 No arm was bounded, none hit a limit, no report carries a warning or is voided. The
 most any arm used of its wall-clock budget was 28%.
 
-**Provenance.** Every run's `report.json`, `report.md`, `experiment.resolved.yaml`
-and pruned project tree are archived in the scenarios repo under
-`history/gradle-cli/1.0.0/<scenario>/<model>/`, along with the exact skill text each
-treatment arm received. Agent transcripts are not archived; they stay with the raw
-sweep output.
+**Skill provenance.** All 21 treatment arms received `224a9b6977cc…` — `SKILL.md`
+plus three `references/` files, byte-identical across every arm, and identical to
+the upstream revision the experiments name. Every run's `report.json`, `report.md`,
+`experiment.resolved.yaml` and pruned project tree are archived in the scenarios
+repo under `history/gradle-cli/1.0.0/<scenario>/<model>/`, along with the exact
+skill text each treatment arm received. Agent transcripts are not archived; they
+stay with the raw sweep output.
+
+**Non-uniformity, disclosed.**
+
+1. **The six `wrapper-upgrade` arms fetched Gradle over the network**; the other 36
+   ran against the pinned offline distribution. That is inherent to the task — the
+   fixture ships a Gradle 8.5 wrapper and the arm has to upgrade it — but it makes
+   those arms' timings incomparable to the rest, and it is why they are never
+   pooled into a cross-scenario wall-clock figure here.
+2. **Limits differ per scenario** (20–50 turns, 1.5M–3M tokens, 10–25 minutes),
+   set to the size of each task. No arm came close to any of them, so the caps
+   never shaped a result; the comparison within each scenario is still
+   like-for-like because both arms of a pair share the same limits.
+3. **The third arm was declared and skipped in all 21 experiments.** It pointed at
+   a local working copy verified byte-identical to the upstream revision, so it
+   would have duplicated the treatment arm. Every stored `report.json` records it
+   as `skipped`, not as a failure.
+4. **No A/A control ran in this batch.** The one `aa` run the Noise floor section
+   uses predates the sweep and covers `wrapper-upgrade` on Sonnet only.
 
 ### Known gaps
 
