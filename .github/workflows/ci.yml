@@ -31,3 +31,13 @@ jobs:
         run: |
           find . -name '*.json' -not -path './.git/*' -print0 \
             | xargs -0 -I{} sh -c 'echo "Checking {}"; jq empty "{}"'
+
+  consistency:
+    name: Check Metadata Consistency
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check manifests, skill versions, and README links
+        run: python3 .github/scripts/check-consistency.py
