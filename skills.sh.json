@@ -15,6 +15,13 @@
       "skills": [
         "gradle-cli"
       ]
+    },
+    {
+      "title": "Wrapper",
+      "description": "Skill for upgrading a project's Gradle wrapper to a new version.",
+      "skills": [
+        "gradle-wrapper-upgrade"
+      ]
     }
   ]
 }
