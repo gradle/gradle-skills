@@ -34,7 +34,7 @@ Runs Gradle builds and tasks via `./gradlew`, and produces the exact command for
 
 > 📊 [Evaluation results for v1.0.0 →](evals/gradle-cli-1.0.0.md)
 >
-> Scored across 7 scenarios on Sonnet 5, Opus 5, and Deepseek V4 Flash.
+> Scored across 7 scenarios on Haiku 4.5, Sonnet 5, and Opus 5.
 
 ## Installation
 
@@ -59,6 +59,7 @@ This is the expected path for every agent, Claude Code included.
 ### Installation as a Plugin
 
 [Agent Plugins](https://agent-plugins.org/) is the vendor-neutral standard for bundling skills and MCP servers into one installable package.
+This repository conforms to [Agent Plugins 1.0.0](https://github.com/agentplugins/agent-plugins-spec/blob/main/spec/1.0.0.md): the manifest is `plugin.json` at the repository root, and the two skills are discovered from `skills/`.
 Installing the plugin is the easiest way to keep your local copies current with each release.
 The standard deliberately leaves the installation procedure to each client, so consult your agent's documentation, or the [list of compatible clients](https://agent-plugins.org/compatible-clients), for the exact steps.
 
@@ -71,7 +72,8 @@ Two things follow from installing the plugin rather than the skills directly:
 
 Claude Code does not yet implement the Agent Plugins standard.
 This repository is therefore also a Claude Code plugin, published through a marketplace catalog in the same repository.
-Its descriptor uses Claude Code's own plugin format, which puts the manifest at `.claude-plugin/plugin.json` rather than the package root.
+Claude Code's own plugin format puts the manifest at `.claude-plugin/plugin.json` rather than the package root, so that descriptor exists alongside the root `plugin.json` and carries the same metadata.
+CI fails the build if the two ever disagree.
 
 For teams that already distribute tooling as Claude Code plugins:
 
@@ -122,7 +124,11 @@ Check this Gradle project against best practices
 
 ## Repository Structure
 
-Even though all the skills here are harness-agnostic, this repository is laid out as a [Claude Code plugin marketplace](https://code.claude.com/docs/en/plugin-marketplaces): `.claude-plugin/` holds the marketplace catalog and the plugin manifest, and the plugin's contents — the `skills/` directory — sit at the repository root. `skills.sh.json` groups the skills by topic for `skills.sh`.
+The repository root is an [Agent Plugins](https://agent-plugins.org/) package: `plugin.json` is the portable manifest and `skills/` is the standard's fixed discovery location for skills. There is no `mcp.json`, which the standard permits.
+
+The same tree is also laid out as a [Claude Code plugin marketplace](https://code.claude.com/docs/en/plugin-marketplaces): `.claude-plugin/` holds the marketplace catalog and Claude Code's own copy of the plugin manifest. `skills.sh.json` groups the skills by topic for `skills.sh`.
+
+Three files therefore restate the same plugin metadata — `plugin.json`, `.claude-plugin/plugin.json`, and the entry in `.claude-plugin/marketplace.json`. They are hand-written rather than generated, so `.github/scripts/check-consistency.py` runs in CI and fails the build if they drift apart. It also checks each skill's `SKILL.md` frontmatter against its `metadata.json`, and each version badge in this README against the skill it points at.
 
 Each skill follows the [Agent Skills](https://agentskills.io/home) layout, plus a `metadata.json` recording its version, owning organization, abstract, and references.
 
