@@ -33,34 +33,18 @@ Upgrades an existing Gradle wrapper — to the latest release, or to a version y
 
 ## Installation
 
-### Any Agent (Recommended)
-
-Install into Claude Code, Codex, Gemini, Cursor, and other supported agents via [`skills.sh`](https://skills.sh/):
-
-```bash
-npx skills add gradle/gradle-skills
-```
-
-To install a specific skill only:
-
-```bash
-npx skills add gradle/gradle-skills --skill gradle-best-practices
-```
-
-If `npx` is not found, install Node first (e.g. `brew install node`).
-
-This is the expected path for every agent, Claude Code included.
-
-### Installation as a Plugin
+### As a Plugin (Recommended)
 
 [Agent Plugins](https://agent-plugins.org/) is the vendor-neutral standard for bundling skills and MCP servers into one installable package.
 This repository conforms to [Agent Plugins 1.0.0](https://github.com/agentplugins/agent-plugins-spec/blob/main/spec/1.0.0.md): the manifest is `plugin.json` at the repository root, and the skills are discovered from `skills/`.
-Installing the plugin is the easiest way to keep your local copies current with each release.
 The standard deliberately leaves the installation procedure to each client, so consult your agent's documentation, or the [list of compatible clients](https://agent-plugins.org/compatible-clients), for the exact steps.
 
-Two things follow from installing the plugin rather than the skills directly:
+Install the plugin rather than the individual skills.
 
-- **It is all or nothing.** The plugin's only contents are the skills above, and it installs all of them. Unlike [`skills.sh`](https://skills.sh/), it cannot install one.
+Three things follow from installing the plugin:
+
+- **It is all or nothing.** The plugin's contents are the skills above, and it installs all of them. Unlike [`skills.sh`](https://skills.sh/), it cannot install only one.
+- **New skills will be added here.** A plugin update will pick up every new one.
 - **Skill names are client-specific.** The standard does not prescribe how a client names a skill it loads from a plugin. Claude Code prefixes them with the plugin name; other agents may expose them under their bare names.
 
 #### Claude Code Plugin Installation Details
@@ -68,9 +52,8 @@ Two things follow from installing the plugin rather than the skills directly:
 Claude Code does not yet implement the Agent Plugins standard.
 This repository is therefore also a Claude Code plugin, published through a marketplace catalog in the same repository.
 Claude Code's own plugin format puts the manifest at `.claude-plugin/plugin.json` rather than the package root, so that descriptor exists alongside the root `plugin.json` and carries the same metadata.
-CI fails the build if the two ever disagree.
 
-For teams that already distribute tooling as Claude Code plugins:
+In Claude Code, install with:
 
 ```text
 /plugin marketplace add gradle/gradle-skills
@@ -106,15 +89,33 @@ claude plugin install gradle-skills@gradle-skills
 
 No `/plugin marketplace add` is needed beforehand; the settings file already registered the marketplace.
 
+### Any Agent, as Individual Skills
+
+Where a plugin is not an option, or you want exactly one skill, install into Claude Code, Codex, Gemini, Cursor, and other supported agents via [`skills.sh`](https://skills.sh/):
+
+```bash
+npx skills add gradle/gradle-skills
+```
+
+To install a specific skill only:
+
+```bash
+npx skills add gradle/gradle-skills --skill gradle-best-practices
+```
+
+If `npx` is not found, install Node first (e.g. `brew install node`).
+
+Rerun the command after a release to pick up changes, and again for any skill added since you installed.
+
 ## Usage
 
 Skills are automatically available once installed.
 The agent will use them when relevant tasks are detected.
 
-**Examples:**
+**Example prompt to trigger `gradle-best-practices`:**
 
 ```text
-Check this Gradle project against best practices
+Check this build against known best practices
 ```
 
 ## Repository Structure
@@ -123,9 +124,7 @@ The repository root is an [Agent Plugins](https://agent-plugins.org/) package: `
 
 The same tree is also laid out as a [Claude Code plugin marketplace](https://code.claude.com/docs/en/plugin-marketplaces): `.claude-plugin/` holds the marketplace catalog and Claude Code's own copy of the plugin manifest. `skills.sh.json` groups the skills by topic for `skills.sh`.
 
-Three files therefore restate the same plugin metadata — `plugin.json`, `.claude-plugin/plugin.json`, and the entry in `.claude-plugin/marketplace.json`. They are hand-written rather than generated, so `.github/scripts/check-consistency.py` runs in CI and fails the build if they drift apart. It also checks each skill's `SKILL.md` frontmatter against its `metadata.json`, and each version badge in this README against the skill it points at.
-
-Each skill follows the [Agent Skills](https://agentskills.io/home) layout, plus a `metadata.json` recording its version, owning organization, abstract, and references.
+Each skill follows the [Agent Skills](https://agentskills.io/home) layout, and add a `metadata.json` recording its version, owning organization, abstract, and references.
 
 ## License
 
