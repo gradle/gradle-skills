@@ -27,9 +27,7 @@ moves the wrong way on one fixture (15 → 7).
 This report is keyed on **checks passed**. The harness also folds each arm's
 scorers into a single pass/fail verdict; that verdict is not reported here. It is
 an AND over every check, so a fixture carrying nine or more seeded violations
-reads `FAIL` almost everywhere regardless of the skill, and a `no-skills` arm can
-never reach `PASS` because `skill-used` fails by construction when there is no
-skill to use.
+reads `FAIL` almost everywhere regardless of the skill.
 
 ---
 
@@ -77,12 +75,12 @@ cross-vendor or cross-CLI signal** (finding 8).
 | `false-positives` | `sample-init-library` |  2     |  — | Restraint on untouched `gradle init` output — audit only, no edits |
 | `aa`              | `sample-carlog`       | 10     | 10 | A/A control: two identical `no-skills` arms, same fixture and prompt as `structure` |
 
-Check counts exclude `skill-used`. `aa` runs no treatment arm and contributes no
-checks to the totals.
+Check counts cover the task-specific scorers only. `aa` runs no treatment arm and
+contributes no checks to the totals.
 
 ### Scorers
 
-Every scenario carries a `skill-used` scorer plus task-specific checks. Most are
+Every scenario carries its own task-specific checks. Most are
 `file-exists` greps over comment-stripped copies of the build sources. Four are
 behavioural or structural probes worth calling out, because they are where the
 interesting failures live:
@@ -123,8 +121,9 @@ and are marked `≥` in the cost tables.
 
 ### 1. Sonnet 5 is where the skill pays off — 11 gains, zero regressions
 Sonnet goes 22 → 33 of 35, improving on all three fixing scenarios (+3 `structure`,
-+4 `tasks`, +4 `idioms`) and regressing nowhere. Its `tasks` treatment arm is the
-only arm in the whole matrix to take every check: 12 of 12. The archived tree shows
++4 `tasks`, +4 `idioms`) and regressing nowhere. Its `tasks` treatment arm takes
+every check, 12 of 12 — one of only two arms in the whole matrix to clear a
+fixture outright, the other being its own `idioms` arm. The archived tree shows
 why — it added `@CacheableTask`, gave every registered task a `group` and
 `description`, replaced `.cacheIf` and `configurations.all`, and wired
 `inputs.files(configurations.runtimeClasspath)` lazily, all inside
@@ -247,7 +246,7 @@ specific claims it does *not* cover.
 ---
 ## Summary tables
 
-### Checks passed (excluding `skill-used`)
+### Checks passed
 
 Artifact-corrected columns apply finding 3 and are marked ‡. `false-positives`
 contributes 1/2 in every arm and never moves.
@@ -286,9 +285,9 @@ contributes 1/2 in every arm and never moves.
 | Sonnet 5  | 4 / 4 | 1 `Skill` call and 4–9 `WebFetch` calls per treatment arm |
 | Opus 5    | 4 / 4 | 1 `Skill` call and 6–8 `WebFetch` calls per treatment arm |
 
-`skill-used` PASSed on all 12 treatment arms and FAILed on all 12 baseline arms.
-No comparison in this sweep is void for non-pickup. No baseline arm made a single
-`WebFetch` call, so the fetched-catalog behaviour is attributable to the skill.
+All 12 treatment arms made exactly one `Skill` call, so no comparison in this
+sweep is void for non-pickup. No baseline arm made a single `Skill` or `WebFetch`
+call, so the fetched-catalog behaviour is attributable to the skill.
 
 ---
 
@@ -347,7 +346,6 @@ Detection count over the same pairs: 9 vs 9 (Haiku), 13 vs 11 (Sonnet), 23 vs 25
 | Haiku 4.5 | `no-source-in-root` | ❌ FAIL | ❌ FAIL |
 | Haiku 4.5 | `convention-plugins` | ❌ FAIL | ❌ FAIL |
 | Haiku 4.5 | `violations-count` | ✅ PASS | ❌ FAIL |
-| Haiku 4.5 | `skill-used` | ❌ FAIL | ✅ PASS |
 | Sonnet 5 | `project-builds` | ✅ PASS | ✅ PASS |
 | Sonnet 5 | `root-project-named` | ✅ PASS | ✅ PASS |
 | Sonnet 5 | `version-catalog` | ✅ PASS | ✅ PASS |
@@ -358,7 +356,6 @@ Detection count over the same pairs: 9 vs 9 (Haiku), 13 vs 11 (Sonnet), 23 vs 25
 | Sonnet 5 | `no-source-in-root` | ❌ FAIL | ✅ PASS |
 | Sonnet 5 | `convention-plugins` | ❌ FAIL | ✅ PASS |
 | Sonnet 5 | `violations-count` | ✅ PASS | ✅ PASS |
-| Sonnet 5 | `skill-used` | ❌ FAIL | ✅ PASS |
 | Opus 5 | `project-builds` | ✅ PASS | ✅ PASS |
 | Opus 5 | `root-project-named` | ✅ PASS | ✅ PASS |
 | Opus 5 | `version-catalog` | ✅ PASS | ✅ PASS |
@@ -369,7 +366,6 @@ Detection count over the same pairs: 9 vs 9 (Haiku), 13 vs 11 (Sonnet), 23 vs 25
 | Opus 5 | `no-source-in-root` | ✅ PASS | ✅ PASS |
 | Opus 5 | `convention-plugins` | ✅ PASS | ❌ FAIL |
 | Opus 5 | `violations-count` | ✅ PASS | ✅ PASS |
-| Opus 5 | `skill-used` | ❌ FAIL | ✅ PASS |
 
 **Signal:** Sonnet is the clear winner at +3, taking both structural probes — it moved the root project's sources into subprojects and created `build-logic/src/main/groovy/carlog.java-conventions.gradle` and `carlog.maintenance-log.gradle`, where its baseline had neither. Opus reads flat at 8/10, but that is the artifact in finding 3: its treatment arm built two *binary* convention plugins that `convention-plugins.sh` cannot see, so a correct and arguably better refactor scores as a break. Corrected, Opus is +1. Haiku picks up the two cheap textual checks and regresses on `violations-count` — 15 issue lines down to 7, under the floor of 10 — after spending under 40% of the turns its baseline did. `no-dependson` fails in all six arms: no model removes task `dependsOn` wiring with or without the skill. Opus's treatment arm hit the 5M token cap; its scorer verdicts stand and its cost figures are lower bounds.
 
@@ -395,7 +391,6 @@ Detection count over the same pairs: 9 vs 9 (Haiku), 13 vs 11 (Sonnet), 23 vs 25
 | Haiku 4.5 | `configuration-attributes` | ❌ FAIL | ✅ PASS |
 | Haiku 4.5 | `catalog-entries-named` | ✅ PASS | ❌ FAIL |
 | Haiku 4.5 | `violations-count` | ❌ FAIL | ❌ FAIL |
-| Haiku 4.5 | `skill-used` | ❌ FAIL | ✅ PASS |
 | Sonnet 5 | `project-builds` | ✅ PASS | ✅ PASS |
 | Sonnet 5 | `tasks-documented` | ❌ FAIL | ✅ PASS |
 | Sonnet 5 | `no-absolute-sensitivity` | ✅ PASS | ✅ PASS |
@@ -408,7 +403,6 @@ Detection count over the same pairs: 9 vs 9 (Haiku), 13 vs 11 (Sonnet), 23 vs 25
 | Sonnet 5 | `configuration-attributes` | ✅ PASS | ✅ PASS |
 | Sonnet 5 | `catalog-entries-named` | ✅ PASS | ✅ PASS |
 | Sonnet 5 | `violations-count` | ✅ PASS | ✅ PASS |
-| Sonnet 5 | `skill-used` | ❌ FAIL | ✅ PASS |
 | Opus 5 | `project-builds` | ✅ PASS | ✅ PASS |
 | Opus 5 | `tasks-documented` | ✅ PASS | ❌ FAIL |
 | Opus 5 | `no-absolute-sensitivity` | ✅ PASS | ✅ PASS |
@@ -421,9 +415,8 @@ Detection count over the same pairs: 9 vs 9 (Haiku), 13 vs 11 (Sonnet), 23 vs 25
 | Opus 5 | `configuration-attributes` | ✅ PASS | ✅ PASS |
 | Opus 5 | `catalog-entries-named` | ✅ PASS | ✅ PASS |
 | Opus 5 | `violations-count` | ✅ PASS | ✅ PASS |
-| Opus 5 | `skill-used` | ❌ FAIL | ✅ PASS |
 
-**Signal:** The strongest single result in the sweep and the only fixture any model cleared outright. Sonnet goes 8 → 12 of 12, adding `@CacheableTask`, descriptions on every registered task, and lazy classpath wiring. Opus's −1 is the `tasks-documented` harvest artifact (finding 3): it documented all three tasks, in Java, in a convention plugin the regex cannot read — corrected, 11 → 11. Haiku is flat at 5/12 but the composition changed: it gained `no-absolute-sensitivity` and `configuration-attributes` while *losing* two seeded defects its baseline had fixed — `google()` stayed in `settings.gradle.kts` and the opaque catalog entries `stuff`, `utils`, `theJson` and `gv` were left exactly as the fixture ships them. `cacheable-annotation` fails in both Haiku arms and both Opus arms.
+**Signal:** The strongest single result in the sweep, and the larger of the two fixtures any model cleared outright. Sonnet goes 8 → 12 of 12, adding `@CacheableTask`, descriptions on every registered task, and lazy classpath wiring. Opus's −1 is the `tasks-documented` harvest artifact (finding 3): it documented all three tasks, in Java, in a convention plugin the regex cannot read — corrected, 11 → 11. Haiku is flat at 5/12 but the composition changed: it gained `no-absolute-sensitivity` and `configuration-attributes` while *losing* two seeded defects its baseline had fixed — `google()` stayed in `settings.gradle.kts` and the opaque catalog entries `stuff`, `utils`, `theJson` and `gv` were left exactly as the fixture ships them. `cacheable-annotation` fails in both Haiku arms and both Opus arms.
 
 ---
 
@@ -446,7 +439,6 @@ Detection count over the same pairs: 9 vs 9 (Haiku), 13 vs 11 (Sonnet), 23 vs 25
 | Haiku 4.5 | `no-empty-project` | ❌ FAIL | ❌ FAIL |
 | Haiku 4.5 | `no-config-time-hashing` | ❌ FAIL | ❌ FAIL |
 | Haiku 4.5 | `violations-count` | ❌ FAIL | ✅ PASS |
-| Haiku 4.5 | `skill-used` | ❌ FAIL | ✅ PASS |
 | Sonnet 5 | `project-builds` | ✅ PASS | ✅ PASS |
 | Sonnet 5 | `plugins-block-only` | ❌ FAIL | ✅ PASS |
 | Sonnet 5 | `no-after-evaluate` | ✅ PASS | ✅ PASS |
@@ -458,7 +450,6 @@ Detection count over the same pairs: 9 vs 9 (Haiku), 13 vs 11 (Sonnet), 23 vs 25
 | Sonnet 5 | `no-empty-project` | ❌ FAIL | ✅ PASS |
 | Sonnet 5 | `no-config-time-hashing` | ✅ PASS | ✅ PASS |
 | Sonnet 5 | `violations-count` | ❌ FAIL | ✅ PASS |
-| Sonnet 5 | `skill-used` | ❌ FAIL | ✅ PASS |
 | Opus 5 | `project-builds` | ✅ PASS | ✅ PASS |
 | Opus 5 | `plugins-block-only` | ✅ PASS | ✅ PASS |
 | Opus 5 | `no-after-evaluate` | ✅ PASS | ✅ PASS |
@@ -470,9 +461,8 @@ Detection count over the same pairs: 9 vs 9 (Haiku), 13 vs 11 (Sonnet), 23 vs 25
 | Opus 5 | `no-empty-project` | ❌ FAIL | ✅ PASS |
 | Opus 5 | `no-config-time-hashing` | ✅ PASS | ✅ PASS |
 | Opus 5 | `violations-count` | ✅ PASS | ✅ PASS |
-| Opus 5 | `skill-used` | ❌ FAIL | ✅ PASS |
 
-**Signal:** Sonnet takes every check, 7 → 11 of 11, and is the only arm in the sweep to clear a fixture completely on the non-`skill-used` checks — though it hit the 5M token cap doing so, which makes its cost a lower bound. Opus is +1 as measured and +2 corrected: `no-subproject-properties` fails only because it gave its `build-logic` composite the properties file that composite genuinely needs (finding 3). Haiku is flat at 5/11 with two gains and two regressions, and both regressions trace to one action — deleting the root `gradle.properties` and leaving `core/gradle.properties` in its place, which took out `build-cache-enabled` with it. `plugins-block-only`, `utf8-in-jvmargs`, `no-empty-project` and `no-config-time-hashing` all still fail in both Haiku arms.
+**Signal:** Sonnet takes every check, 7 → 11 of 11, one of only two arms in the sweep to clear a fixture completely — though it hit the 5M token cap doing so, which makes its cost a lower bound. Opus is +1 as measured and +2 corrected: `no-subproject-properties` fails only because it gave its `build-logic` composite the properties file that composite genuinely needs (finding 3). Haiku is flat at 5/11 with two gains and two regressions, and both regressions trace to one action — deleting the root `gradle.properties` and leaving `core/gradle.properties` in its place, which took out `build-cache-enabled` with it. `plugins-block-only`, `utf8-in-jvmargs`, `no-empty-project` and `no-config-time-hashing` all still fail in both Haiku arms.
 
 ---
 
@@ -486,15 +476,12 @@ Detection count over the same pairs: 9 vs 9 (Haiku), 13 vs 11 (Sonnet), 23 vs 25
 | :---- | :---- | :---------: | :---------------------------: |
 | Haiku 4.5 | `project-builds` | ✅ PASS | ✅ PASS |
 | Haiku 4.5 | `only-defensible-findings` | ❌ FAIL | ❌ FAIL |
-| Haiku 4.5 | `skill-used` | ❌ FAIL | ✅ PASS |
 | Sonnet 5 | `project-builds` | ✅ PASS | ✅ PASS |
 | Sonnet 5 | `only-defensible-findings` | ❌ FAIL | ❌ FAIL |
-| Sonnet 5 | `skill-used` | ❌ FAIL | ✅ PASS |
 | Opus 5 | `project-builds` | ✅ PASS | ✅ PASS |
 | Opus 5 | `only-defensible-findings` | ❌ FAIL | ❌ FAIL |
-| Opus 5 | `skill-used` | ❌ FAIL | ✅ PASS |
 
-**Signal:** No signal, and the scenario cannot currently produce one — see finding 6. Every arm fails `only-defensible-findings`, and the most-reported "false positive" in all six is the wrapper `distributionUrl` the harness itself rewrote to a `file://` path. `project-builds` passes everywhere, which is the audit-only prompt being obeyed. The one thing the grid does show is pickup: `skill-used` is the sole scorer that moves, in all three models.
+**Signal:** No signal, and the scenario cannot currently produce one — see finding 6. Every arm fails `only-defensible-findings`, and the most-reported "false positive" in all six is the wrapper `distributionUrl` the harness itself rewrote to a `file://` path. `project-builds` passes everywhere, which is the audit-only prompt being obeyed. Not one scorer moves between arms in any of the three models — the grid is flat by construction, and the scenario's only remaining value is as evidence that the audit-only prompt is respected.
 
 ---
 ## Cost & Efficiency
@@ -746,7 +733,8 @@ answered from this data.
    wrapper's `distributionUrl` to a `file://` path and the scorer then counts
    reporting it as a false positive. All six arms failed, and all six flagged that
    line. Either allowlist harness-injected scaffolding or stop rewriting the
-   wrapper for this fixture; until then the scenario measures only skill pickup.
+   wrapper for this fixture; until then the scenario yields no signal at all —
+   both its scorers return the same verdict in every arm of every model.
 6. **The A/A control covers one fixture out of four.** `tasks`, `idioms` and
    `false-positives` have no noise measurement at all, and two of the `structure`
    gains sit on scorers the control found unstable. An A/A per fixture would settle
@@ -755,8 +743,10 @@ answered from this data.
    (finding 2). Opus clears the floor in both arms on every fixture, so tripling
    its recall registers as no change. A graded or delta-based recall measure would
    capture the largest reproducible effect in this sweep.
-8. **`skill-used` cannot distinguish "read the skill" from "followed the skill."**
-   An arm that opens the file and ignores it scores the same as one that applies it.
+8. **Pickup evidence cannot distinguish "read the skill" from "followed the
+   skill."** Pickup rests on the tool profiles — a `Skill` call and a run of
+   `WebFetch` calls. An arm that opens the skill and ignores it leaves the same
+   trace as one that applies it.
 9. **No cross-vendor or cross-CLI coverage** (finding 8).
 10. **n = 1.** Every number here is directional. Nothing in this report should be
     quoted as a magnitude.
