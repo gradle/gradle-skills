@@ -33,32 +33,16 @@ Upgrades an existing Gradle wrapper — to the latest release, or to a version y
 
 ## Installation
 
-### Any Agent (Recommended)
-
-Install into Claude Code, Codex, Gemini, Cursor, and other supported agents via [`skills.sh`](https://skills.sh/):
-
-```bash
-npx skills add gradle/gradle-skills
-```
-
-To install a specific skill only:
-
-```bash
-npx skills add gradle/gradle-skills --skill gradle-best-practices
-```
-
-If `npx` is not found, install Node first (e.g. `brew install node`).
-
-This is the expected path for every agent, Claude Code included.
-
-### Installation as a Plugin
+### As a Plugin (Recommended)
 
 [Agent Plugins](https://agent-plugins.org/) is the vendor-neutral standard for bundling skills and MCP servers into one installable package.
 This repository conforms to [Agent Plugins 1.0.0](https://github.com/agentplugins/agent-plugins-spec/blob/main/spec/1.0.0.md): the manifest is `plugin.json` at the repository root, and the skills are discovered from `skills/`.
-Installing the plugin is the easiest way to keep your local copies current with each release.
 The standard deliberately leaves the installation procedure to each client, so consult your agent's documentation, or the [list of compatible clients](https://agent-plugins.org/compatible-clients), for the exact steps.
 
-Two things follow from installing the plugin rather than the skills directly:
+Install the plugin rather than the individual skills.
+Skills are added to this repository over time, and a plugin update picks up every new one; skills installed one by one stay at whatever set you chose on the day you installed them.
+
+Two things follow from installing the plugin:
 
 - **It is all or nothing.** The plugin's only contents are the skills above, and it installs all of them. Unlike [`skills.sh`](https://skills.sh/), it cannot install one.
 - **Skill names are client-specific.** The standard does not prescribe how a client names a skill it loads from a plugin. Claude Code prefixes them with the plugin name; other agents may expose them under their bare names.
@@ -70,7 +54,7 @@ This repository is therefore also a Claude Code plugin, published through a mark
 Claude Code's own plugin format puts the manifest at `.claude-plugin/plugin.json` rather than the package root, so that descriptor exists alongside the root `plugin.json` and carries the same metadata.
 CI fails the build if the two ever disagree.
 
-For teams that already distribute tooling as Claude Code plugins:
+In Claude Code, install with:
 
 ```text
 /plugin marketplace add gradle/gradle-skills
@@ -105,6 +89,24 @@ claude plugin install gradle-skills@gradle-skills
 ```
 
 No `/plugin marketplace add` is needed beforehand; the settings file already registered the marketplace.
+
+### Any Agent, as Individual Skills
+
+Where a plugin is not an option, or you want exactly one skill, install into Claude Code, Codex, Gemini, Cursor, and other supported agents via [`skills.sh`](https://skills.sh/):
+
+```bash
+npx skills add gradle/gradle-skills
+```
+
+To install a specific skill only:
+
+```bash
+npx skills add gradle/gradle-skills --skill gradle-best-practices
+```
+
+If `npx` is not found, install Node first (e.g. `brew install node`).
+
+Rerun the command after a release to pick up changes, and again for any skill added since you installed.
 
 ## Usage
 
