@@ -21,21 +21,6 @@ Audits a Gradle build against the [official best practices](https://docs.gradle.
 - "Best practices review"
 - "Apply best practices to my build"
 
-### gradle-cli [![v1.0.0](https://img.shields.io/badge/v1.0.0-02303A?logo=gradle&logoColor=white)](skills/gradle-cli) [![Evaluated: 7 scenarios, 3 models](https://img.shields.io/badge/evaluated-7%20scenarios%20%C3%97%203%20models-2ea44f)](evals/gradle-cli-1.0.0.md)
-
-Runs Gradle builds and tasks via `./gradlew`, and produces the exact command for any invocation. Knows the right flags, task ordering, and invocation patterns for the project's Gradle version.
-
-**Use when:**
-
-- "Run the tests" / "build this project" / "run X task"
-- "Upgrade the gradle wrapper"
-- "How do I run …" / "what's the gradle command for …"
-- "List the gradle tasks"
-
-> 📊 [Evaluation results for v1.0.0 →](evals/gradle-cli-1.0.0.md)
->
-> Scored across 7 scenarios on Haiku 4.5, Sonnet 5, and Opus 5.
-
 ### gradle-wrapper-upgrade [![v1.0.0](https://img.shields.io/badge/v1.0.0-02303A?logo=gradle&logoColor=white)](skills/gradle-wrapper-upgrade)
 
 Upgrades an existing Gradle wrapper — to the latest release, or to a version you name. Pins the distribution's SHA-256, preserves the existing distribution type, runs the `wrapper` task twice so the launch scripts and jar are regenerated from the new version's templates, and verifies by diff. Narrow by design — it does not add a wrapper to a project that has none.
@@ -92,7 +77,7 @@ For teams that already distribute tooling as Claude Code plugins:
 /plugin install gradle-skills@gradle-skills
 ```
 
-Claude Code namespaces skills that come from a plugin, so these install as `gradle-skills:gradle-cli`, `gradle-skills:gradle-best-practices`, and `gradle-skills:gradle-wrapper-upgrade` rather than under their bare names.
+Claude Code namespaces skills that come from a plugin, so these install as `gradle-skills:gradle-best-practices` and `gradle-skills:gradle-wrapper-upgrade` rather than under their bare names.
 
 To register the marketplace for everyone working in a project, commit this to the project's `.claude/settings.json`:
 

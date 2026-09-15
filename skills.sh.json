@@ -10,13 +10,6 @@
       ]
     },
     {
-      "title": "Command Line",
-      "description": "Skill for running Gradle builds, tasks, and the wrapper from the command line.",
-      "skills": [
-        "gradle-cli"
-      ]
-    },
-    {
       "title": "Wrapper",
       "description": "Skill for upgrading a project's Gradle wrapper to a new version.",
       "skills": [
