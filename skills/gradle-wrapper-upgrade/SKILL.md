@@ -1,6 +1,6 @@
 ---
 name: gradle-wrapper-upgrade
-description: "Use whenever the user asks to upgrade, bump, or update the Gradle wrapper, `gradlew`, `distributionUrl`, `gradle-wrapper.properties`, or the project's Gradle version, on Gradle 7.0–9.x. Not for adding a wrapper to a project that has none."
+description: "Use whenever the user asks to upgrade, bump, or update the Gradle wrapper, `gradlew`, `distributionUrl`, `gradle-wrapper.properties`, or the project's Gradle version, on Gradle 7.0–9.x — or asks *how* that is done. Covers both modes: 'upgrade the wrapper' means perform it; a 'how do I upgrade' question is answered with the copy-pasteable commands rather than by running them. Not for adding a wrapper to a project that has none."
 license: Apache-2.0
 metadata:
   author: gradle
@@ -9,14 +9,18 @@ metadata:
 
 # Gradle Wrapper Upgrade
 
-Upgrading means running the built-in `wrapper` task, never hand-editing files: `gradlew`, `gradlew.bat`, and `gradle-wrapper.jar` are generated, and the next `wrapper` run reverts any edit without warning. **Scope:** a wrapper that already exists — adding one to a project with none is a different job (`gradle :wrapper` from a system Gradle install).
-
 ## Two modes — match the user's verb
 
+Decide this first; everything below is conditional on it.
+
 - **"Upgrade the wrapper", "bump Gradle to 8.14.4"** → act: work the steps, verify, report.
-- **"How do I upgrade the wrapper?"** → give the commands, name the run-it-twice gotcha, stop.
+- **"How do I upgrade the wrapper?"** → give the commands, name the run-it-twice gotcha, stop. A "how" question is answered, not executed — including when you have already opened with "I'll upgrade the wrapper." Say the commands; do not run them.
 
 If genuinely ambiguous, give the commands.
+
+The steps below are the same material either way: in act mode you run them, in answer mode you hand them over.
+
+Upgrading means running the built-in `wrapper` task, never hand-editing files: `gradlew`, `gradlew.bat`, and `gradle-wrapper.jar` are generated, and the next `wrapper` run reverts any edit without warning. **Scope:** a wrapper that already exists — adding one to a project with none is a different job (`gradle :wrapper` from a system Gradle install).
 
 ## Step 1 — Orient
 
