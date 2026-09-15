@@ -38,7 +38,7 @@ Runs Gradle builds and tasks via `./gradlew`, and produces the exact command for
 
 ### gradle-wrapper-upgrade [![v1.0.0](https://img.shields.io/badge/v1.0.0-02303A?logo=gradle&logoColor=white)](skills/gradle-wrapper-upgrade)
 
-Upgrades an existing Gradle wrapper to a target version: pins the distribution's SHA-256, runs the `wrapper` task twice so the launch scripts and jar are regenerated from the new version's templates, and verifies the result. Narrow by design — it does not add a wrapper to a project that has none.
+Upgrades an existing Gradle wrapper — to the latest release, or to a version you name. Pins the distribution's SHA-256, preserves the existing distribution type, runs the `wrapper` task twice so the launch scripts and jar are regenerated from the new version's templates, and verifies by diff. Narrow by design — it does not add a wrapper to a project that has none.
 
 **Use when:**
 

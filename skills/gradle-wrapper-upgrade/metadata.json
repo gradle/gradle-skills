@@ -2,11 +2,12 @@
   "version": "1.0.0",
   "organization": "Gradle Inc.",
   "date": "September 2026",
-  "abstract": "Upgrades an existing Gradle wrapper to a target version on Gradle 7.0 through 9.x. Orients first — confirms the wrapper is present and reads the declared version from gradle-wrapper.properties — then sources the target distribution's SHA-256 from gradle.org and runs the built-in wrapper task twice with the version and checksum pinned, so that gradlew, gradlew.bat, and gradle-wrapper.jar are regenerated from the new version's templates rather than the old ones. Explains the run-it-twice gotcha and the symptoms of a half-done upgrade, the checksum rules that apply once distributionSha256Sum is set, the version labels accepted by --gradle-version, and the Gradle 9 requirement that gradle-wrapper.properties declare a full X.Y.Z version. Distinguishes 'upgrade it' (execute) from 'how do I upgrade' (hand over the commands). Deliberately narrow: it does not add a wrapper to a project that has none, configure authenticated distributions, or customize the Wrapper task.",
+  "abstract": "Upgrades an existing Gradle wrapper to a target version on Gradle 7.0 through 9.x. Orients first — confirms the wrapper is present and reads both the declared version and the distribution type from gradle-wrapper.properties — then resolves the target version (defaulting to the latest release when the user names none), sources that distribution's SHA-256, and runs the built-in wrapper task twice with the version and checksum pinned, so that gradlew, gradlew.bat, and gradle-wrapper.jar are regenerated from the new version's templates rather than the old ones. Verification is by diff rather than by version string, because a half-done upgrade still reports the new version. Explains the run-it-twice gotcha and the symptoms of a half-done upgrade, the rule that an upgrade must preserve the existing bin or all distribution type, how to pick the right checksum among the ones published per release, the checksum rules that apply once distributionSha256Sum is set, the version labels accepted by --gradle-version, and the Gradle 9 requirement that gradle-wrapper.properties declare a full X.Y.Z version. Distinguishes 'upgrade it' (execute) from 'how do I upgrade' (hand over the commands). Deliberately narrow: it does not add a wrapper to a project that has none, configure authenticated distributions, customize the Wrapper task, or take responsibility for a build that stops working under the new Gradle version.",
   "references": [
     "https://docs.gradle.org/current/userguide/gradle_wrapper.html",
     "https://docs.gradle.org/current/userguide/gradle_wrapper_basics.html",
     "https://gradle.org/release-checksums/",
-    "https://services.gradle.org/distributions/"
+    "https://services.gradle.org/distributions/",
+    "https://services.gradle.org/versions/current"
   ]
 }
