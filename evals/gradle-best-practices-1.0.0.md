@@ -240,7 +240,7 @@ All three models are Anthropic on `claude-code`. Nothing here speaks to how the
 skill behaves on another vendor or CLI.
 
 ### 9. n = 1 per arm, but the noise floor is measured
-Single trials throughout. Unlike the `gradle-cli` benchmark, what that implies is
+Single trials throughout, but what that implies is
 quantified rather than assumed — see [Noise floor](#noise-floor), including which
 specific claims it does *not* cover.
 
