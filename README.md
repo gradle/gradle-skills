@@ -36,6 +36,16 @@ Runs Gradle builds and tasks via `./gradlew`, and produces the exact command for
 >
 > Scored across 7 scenarios on Haiku 4.5, Sonnet 5, and Opus 5.
 
+### gradle-wrapper-upgrade [![v1.0.0](https://img.shields.io/badge/v1.0.0-02303A?logo=gradle&logoColor=white)](skills/gradle-wrapper-upgrade)
+
+Upgrades an existing Gradle wrapper to a target version: pins the distribution's SHA-256, runs the `wrapper` task twice so the launch scripts and jar are regenerated from the new version's templates, and verifies the result. Narrow by design — it does not add a wrapper to a project that has none.
+
+**Use when:**
+
+- "Upgrade the Gradle wrapper" / "bump Gradle to 8.14.4"
+- "Update `distributionUrl`"
+- "How do I upgrade the wrapper?"
+
 ## Installation
 
 ### Any Agent (Recommended)
@@ -59,13 +69,13 @@ This is the expected path for every agent, Claude Code included.
 ### Installation as a Plugin
 
 [Agent Plugins](https://agent-plugins.org/) is the vendor-neutral standard for bundling skills and MCP servers into one installable package.
-This repository conforms to [Agent Plugins 1.0.0](https://github.com/agentplugins/agent-plugins-spec/blob/main/spec/1.0.0.md): the manifest is `plugin.json` at the repository root, and the two skills are discovered from `skills/`.
+This repository conforms to [Agent Plugins 1.0.0](https://github.com/agentplugins/agent-plugins-spec/blob/main/spec/1.0.0.md): the manifest is `plugin.json` at the repository root, and the skills are discovered from `skills/`.
 Installing the plugin is the easiest way to keep your local copies current with each release.
 The standard deliberately leaves the installation procedure to each client, so consult your agent's documentation, or the [list of compatible clients](https://agent-plugins.org/compatible-clients), for the exact steps.
 
 Two things follow from installing the plugin rather than the skills directly:
 
-- **It is all or nothing.** The plugin's only contents are the two skills above, and it installs both. Unlike [`skills.sh`](https://skills.sh/), it cannot install one.
+- **It is all or nothing.** The plugin's only contents are the skills above, and it installs all of them. Unlike [`skills.sh`](https://skills.sh/), it cannot install one.
 - **Skill names are client-specific.** The standard does not prescribe how a client names a skill it loads from a plugin. Claude Code prefixes them with the plugin name; other agents may expose them under their bare names.
 
 #### Claude Code Plugin Installation Details
@@ -82,7 +92,7 @@ For teams that already distribute tooling as Claude Code plugins:
 /plugin install gradle-skills@gradle-skills
 ```
 
-Claude Code namespaces skills that come from a plugin, so these install as `gradle-skills:gradle-cli` and `gradle-skills:gradle-best-practices` rather than under their bare names.
+Claude Code namespaces skills that come from a plugin, so these install as `gradle-skills:gradle-cli`, `gradle-skills:gradle-best-practices`, and `gradle-skills:gradle-wrapper-upgrade` rather than under their bare names.
 
 To register the marketplace for everyone working in a project, commit this to the project's `.claude/settings.json`:
 

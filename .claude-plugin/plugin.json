@@ -1,7 +1,7 @@
 {
   "name": "gradle-skills",
   "version": "1.0.0",
-  "description": "Official Gradle skills for AI coding agents: audit a build against Gradle best practices, and run Gradle builds, tasks, and the wrapper from the command line.",
+  "description": "Official Gradle skills for AI coding agents: audit a build against Gradle best practices, run Gradle builds and tasks from the command line, and upgrade the Gradle wrapper.",
   "author": {
     "name": "Gradle Inc.",
     "url": "https://gradle.org"
