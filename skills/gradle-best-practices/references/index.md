@@ -1,0 +1,91 @@
+# Gradle Best Practices — Catalog Index
+
+**Captured:** 2026-08-27 from `https://docs.gradle.org/current/`.
+**Verified:** 2026-09-16 — complete against the Gradle **9.7.1** documentation. The newest
+practices here were added in 9.7.0; 9.7.1 introduced none.
+**Source pages:**
+
+- https://docs.gradle.org/current/userguide/best_practices.html
+- https://docs.gradle.org/current/userguide/best_practices_index.html
+- https://docs.gradle.org/current/userguide/best_practices_general.html
+- https://docs.gradle.org/current/userguide/best_practices_structuring_builds.html
+- https://docs.gradle.org/current/userguide/best_practices_dependencies.html
+- https://docs.gradle.org/current/userguide/best_practices_tasks.html
+- https://docs.gradle.org/current/userguide/best_practices_performance.html
+- https://docs.gradle.org/current/userguide/best_practices_security.html
+- https://docs.gradle.org/current/userguide/best_practices_testing.html
+
+Anchors below were taken from the category pages themselves. Where the published
+index disagreed with the category page, the category page won — the index lists
+`best_practices_for_security` for the distribution-checksum entry, while the page
+itself uses `validate_gradle_checksum`.
+
+Severity bands (`High` / `Medium` / `Recommendation`) are this skill's editorial
+classification. The official documentation assigns none.
+
+## Applicability triage
+
+Read only the category files whose precondition this project can meet. Report the
+rest as "not applicable" with the count.
+
+| Category file | Read it when |
+|---|---|
+| `general.md` | Always — every Gradle build. |
+| `performance.md` | Always — every Gradle build. |
+| `dependencies.md` | Any `dependencies {}` block, any `repositories {}` block, or a version catalog exists. (The Kotlin-stdlib entry needs a Kotlin plugin; the attributes entry needs a custom consumable/resolvable configuration.) |
+| `structuring-builds.md` | More than one project, or source files present anywhere, or `buildSrc/` exists, or `include(` appears in settings. |
+| `tasks.md` | The build registers or configures a task, or `buildSrc/` / `build-logic/` contains task or plugin source. Skip entirely if no custom task, no task configuration and no build logic source exist. |
+| `security.md` | A Gradle wrapper exists (`gradle/wrapper/gradle-wrapper.properties`), or the build produces archives (`jar`, `war`, any `AbstractArchiveTask`). |
+| `testing.md` | The project defines a custom task type or plugin (in `buildSrc/`, `build-logic/`, or inline in a build script). Skip for a build that only consumes plugins. |
+
+## Full catalog
+
+| Title | Category | Anchor | Added in |
+|---|---|---|---|
+| Use Kotlin DSL | General | `use_kotlin_dsl` | 8.14 |
+| Use the Latest Minor Version of Gradle | General | `use_latest_minor_versions` | 8.14 |
+| Apply Plugins Using the plugins Block | General | `use_the_plugins_block` | 8.14 |
+| Don't Assume your Plugin is Applied after Another | General | `dont_assume_plugin_order` | — |
+| Do Not Use Internal APIs | General | `do_not_use_internal_apis` | 8.14 |
+| Set build flags in gradle.properties | General | `use_the_gradle_properties_file` | 9.0.0 |
+| Name Your Root Project | General | `name_your_root_project` | 9.2.0 |
+| Do not use gradle.properties in subprojects | General | `do_not_use_gradle_properties_in_subprojects` | 9.2.0 |
+| Avoid afterEvaluate | General | `avoid_after_evaluate` | 9.6.0 |
+| Consider use of @Incubating APIs carefully | General | `consider_use_of_incubating_apis_carefully` | 9.7.0 |
+| Modularize Your Builds | Structuring Builds | `modularize_builds` | 9.0.0 |
+| Do Not Put Source Files in the Root Project | Structuring Builds | `no_source_in_root` | 9.0.0 |
+| Favor build-logic Composite Builds for Build Logic | Structuring Builds | `favor_composite_builds` | 9.0.0 |
+| Avoid Unintentionally Creating Empty Projects | Structuring Builds | `avoid_empty_projects` | 9.1.0 |
+| Use Convention Plugins | Structuring Builds | `use_convention_plugins` | 9.3.0 |
+| Single GAV String | Dependencies | `single-gav-string` | 8.14 |
+| Use Version Catalogs to Centralize Dependency Versions | Dependencies | `use_version_catalogs` | 9.0.0 |
+| Name Version Catalog Entries Appropriately | Dependencies | `name_version_catalog_entries` | 9.0.0 |
+| Set up your Dependency Repositories in the Settings file | Dependencies | `set_up_repositories_in_settings` | 9.0.0 |
+| Don't Explicitly Depend on the Kotlin Standard Library | Dependencies | `dont_depend_on_kotlin_stdlib` | 9.0.0 |
+| Avoid Redundant Dependency Declarations | Dependencies | `avoid_duplicate_dependencies` | 9.0.0 |
+| Use Content Filtering with multiple Repositories | Dependencies | `use_content_filtering` | 9.1.0 |
+| Apply Exclusions Narrowly | Dependencies | `apply_exclusions_narrowly` | 9.2.0 |
+| Always Declare Attributes on Consumable and Resolvable Configurations | Dependencies | `use_attributes_on_configurations` | 9.7.0 |
+| Avoid DependsOn | Task | `avoid_depends_on` | 8.14 |
+| Favor @CacheableTask and @DisableCachingByDefault | Task | `use_cacheability_annotations` | 8.14 |
+| Group and Describe custom Tasks | Task | `group_describe_tasks` | 9.0.0 |
+| Do not call get() on a Provider outside a Task action | Task | `avoid_provider_get_outside_task_action` | 9.1.0 |
+| Don't resolve Configurations before Task Execution | Task | `dont_resolve_configurations_before_task_execution` | 9.1.0 |
+| Avoid using eager APIs on File Collections | Task | `avoid_eager_file_collection_apis` | 9.1.0 |
+| Prefer @PathSensitivity.NONE for files, RELATIVE for directories | Task | `default_path_sensitivities` | 9.2.0 |
+| Use unique output files and directories | Task | `use_unique_output_files_and_directories` | 9.3.0 |
+| Don't hardcode Task names unless they are documented as Public API | Task | `dont_hardcode_task_names` | 9.7.0 |
+| Don't access a Project instance during Task Execution | Task | `dont_access_project_instance_inside_task` | 9.7.0 |
+| Wiring Task Outputs with map and flatMap | Task | `map_versus_flatmap` | 9.7.0 |
+| Enable UTF-8 | Performance | `use_utf8_encoding` | 9.0.0 |
+| Use the Build Cache | Performance | `use_build_cache` | 9.1.0 |
+| Use the Configuration Cache | Performance | `use_configuration_cache` | 9.1.0 |
+| Avoid Expensive Computations in Configuration Phase | Performance | `avoid_computations_in_configuration_phase` | 9.0.0 |
+| Prefer the -bin Gradle Distribution | Performance | `prefer_bin_distribution` | 9.4.0 |
+| Validate the Gradle Distribution SHA-256 Checksum | Security | `validate_gradle_checksum` | 9.1.0 |
+| Validate the Gradle Wrapper on every Upgrade | Security | `validate_wrapper_checksum` | 9.3.0 |
+| Do not Run ./gradlew on Untrusted Projects | Security | `run_gradle_on_external_projects` | 9.7.0 |
+| Build Output Should Be Byte-for-Byte Reproducible | Security | `builds_should_be_reproducible` | 9.7.0 |
+| Test your custom Task and Plugins with TestKit | Testing | `test_custom_types_with_testkit` | 9.4.0 |
+
+**45 entries.** Two of them (`run_gradle_on_external_projects`, `validate_wrapper_checksum`) describe operator behaviour rather than a property of the code under audit; each entry says so in its own `Applies when`.

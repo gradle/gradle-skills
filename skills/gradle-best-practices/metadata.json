@@ -1,8 +1,11 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "organization": "Gradle Inc.",
   "date": "September 2026",
-  "abstract": "Audits a Gradle project against the official Gradle best practices, produces a prioritized findings report, and proposes code changes to bring the build into compliance. The best-practices catalog is fetched live from docs.gradle.org on every run — this skill ships no embedded list, so it always reflects the latest published documentation. Operates in audit mode (report and stop) or apply mode (proceed straight to fixes). Discovers settings, build scripts, properties, wrapper config, version catalog, and Java/Kotlin/Groovy sources under buildSrc/ and build-logic/. For each best practice it derives a detection approach (deterministic or heuristic) from the published description, applies it to the project's files, and links each finding to the specific best practice in the Gradle User Manual.",
+  "abstract": "Audits a Gradle project against the official Gradle best practices, produces a prioritized findings report, and proposes code changes to bring the build into compliance. The best-practices catalog ships with the skill under references/, pre-digested: an index plus one file per category, each entry carrying the rule, its precondition, an explicit deterministic-or-heuristic detection recipe, a severity band, and a link to the published documentation, with the fix material split into one file per practice read only when that fix is proposed. No network access is used at run time — the catalog is regenerated per Gradle release, not per run, so every run checks the same things the same way and the run is reproducible offline. Operates in audit mode (report and stop) or apply mode (proceed straight to fixes). Discovers settings, build scripts, properties, wrapper config, version catalog, and Java/Kotlin/Groovy sources under buildSrc/ and build-logic/, triages which categories can apply to the project, reads only those, applies each entry's recorded detection recipe to the project's files, and links each finding to the specific best practice in the Gradle User Manual.",
+  "catalog_captured": "2026-08-27",
+  "catalog_gradle_version": "9.7.1",
+  "catalog_verified": "2026-09-16",
   "references": [
     "https://docs.gradle.org/current/userguide/best_practices.html",
     "https://docs.gradle.org/current/userguide/best_practices_index.html",

@@ -10,9 +10,9 @@ See [Installation](#installation).
 
 ## Available Skills
 
-### gradle-best-practices [![v1.0.0](https://img.shields.io/badge/v1.0.0-02303A?logo=gradle&logoColor=white)](skills/gradle-best-practices)
+### gradle-best-practices [![v1.1.0](https://img.shields.io/badge/v1.1.0-02303A?logo=gradle&logoColor=white)](skills/gradle-best-practices)
 
-Audits a Gradle build against the [official best practices](https://docs.gradle.org/current/userguide/best_practices.html), produces a prioritized findings report, and proposes fixes. Covers build scripts and sources under `buildSrc/` and `build-logic/`. The catalog is fetched live from `docs.gradle.org` on every run. Requires network access.
+Audits a Gradle build against the [official best practices](https://docs.gradle.org/current/userguide/best_practices.html), produces a prioritized findings report, and proposes fixes. Covers build scripts and sources under `buildSrc/` and `build-logic/`. The catalog ships with the skill under `references/` — 45 practices, verified against the Gradle 9.7.1 documentation — so every run checks the same things and no network access is needed.
 
 **Use when:**
 

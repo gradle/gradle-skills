@@ -4,31 +4,32 @@ description: "Audit a Gradle project against the official Gradle best practices,
 license: Apache-2.0
 metadata:
   author: gradle
-  version: "1.0.0"
+  version: "1.1.0"
+  catalog_captured: "2026-08-27"
+  catalog_gradle_version: "9.7.1"
+  catalog_verified: "2026-09-16"
+  catalog_source: "https://docs.gradle.org/current/userguide/best_practices.html"
 ---
 
 # Gradle Best Practices
 
 Audit a project against the official Gradle best practices, produce a structured findings report, and propose concrete code changes to fix the issues. Checks and fixes cover build scripts (`*.gradle.kts`, `*.gradle`), settings files, `gradle.properties`, the wrapper config, the version catalog, and Java/Kotlin/Groovy source under `buildSrc/` and `build-logic/`.
 
-**The best-practices catalog is fetched live from `docs.gradle.org` every run.** This skill ships no embedded list. The source of truth is always the latest published documentation.
+**The best-practices catalog ships with this skill, pre-digested, under `references/`.** Read it from disk. Do not fetch anything from the network at run time.
+
+**Which catalog you have:** 45 practices, captured 2026-08-27 and verified complete against the Gradle **9.7.1** documentation on 2026-09-16. That is every practice in the published index, plus `dont_assume_plugin_order`, which the General category page documents but the index omits.
+
+**The trade-off, stated plainly:** a bundled catalog is reproducible but can go stale. Fetching the live docs would always reflect the newest practices; reading a bundled copy means every run checks the same things the same way, costs no network, and cannot be truncated or paraphrased in transit. Gradle adds practices at most once per release, so the exposure is bounded — but it is real. If the project you are auditing targets a Gradle version newer than the one above, say so in the report: there may be practices this catalog does not know about. Do not fetch them mid-run; see "Keeping the catalog current" at the end.
 
 ## Sources of truth
 
-Fetch these at runtime — do not cache them across sessions:
+Read these from the skill directory:
 
-- **Overview:** `https://docs.gradle.org/current/userguide/best_practices.html`
-- **Index (every best practice with anchor and Gradle version):** `https://docs.gradle.org/current/userguide/best_practices_index.html`
-- **Category pages** (each best practice has its own anchor on one of these):
-  - `https://docs.gradle.org/current/userguide/best_practices_general.html`
-  - `https://docs.gradle.org/current/userguide/best_practices_structuring_builds.html`
-  - `https://docs.gradle.org/current/userguide/best_practices_dependencies.html`
-  - `https://docs.gradle.org/current/userguide/best_practices_tasks.html`
-  - `https://docs.gradle.org/current/userguide/best_practices_performance.html`
-  - `https://docs.gradle.org/current/userguide/best_practices_security.html`
-  - `https://docs.gradle.org/current/userguide/best_practices_testing.html`
+- **`references/index.md`** — the full catalog: every best practice with its title, category, anchor, and the Gradle version that introduced it, plus an applicability triage table saying which category files a given project needs.
+- **`references/<category>.md`** — one file per category, holding the decoded entries: `general.md`, `structuring-builds.md`, `dependencies.md`, `tasks.md`, `performance.md`, `security.md`, `testing.md`.
+- **`references/fixes/<anchor>.md`** — one file per practice, holding the fix and, for most entries, the documentation's own `Don't`/`Do` pair in Kotlin DSL. Read one only when you are about to propose that specific fix; they total roughly 105 KB and reading them all would swamp the context for no gain.
 
-The direct link for any given best practice is `https://docs.gradle.org/current/userguide/best_practices_<category>.html#<anchor>`, where `<anchor>` is the ID listed in the index.
+The direct link for any given best practice is still `https://docs.gradle.org/current/userguide/best_practices_<category>.html#<anchor>`, where `<anchor>` is the ID recorded in `references/index.md`. Cite those URLs in the report so the reader can follow up — but read the bundled file, never fetch it.
 
 ## Modes
 
@@ -58,29 +59,30 @@ Read each discovered file — the checks depend on contents, not just existence.
 
 If no Gradle files are found at all, tell the user this doesn't appear to be a Gradle project and stop.
 
-## Step 2: Fetch the best-practices catalog
+## Step 2: Read the best-practices catalog
 
-1. Fetch the index page: `https://docs.gradle.org/current/userguide/best_practices_index.html`.
-2. Parse the index into a list of `(title, category, anchor, added-in-version)` entries. The category determines which page hosts the anchor (e.g., `General` → `best_practices_general.html`).
-3. For **each** entry, fetch its category page if not already loaded, and extract the section under that anchor — title, explanation, and any "References" / "Tags" subsections.
+1. Read `references/index.md`. It gives the full `(title, category, anchor, added-in-version)` list and an applicability triage table.
+2. Use that triage table to decide which category files this project can possibly violate. `general.md` and `performance.md` always apply; the rest have preconditions (no custom task source means `tasks.md` and `testing.md` are out, for example). Skipping a category here is a legitimate *not applicable*, and Step 5 reports it as such.
+3. Read each applicable `references/<category>.md`. Each entry carries its rule, precondition, detection recipe, and severity band — everything needed to decide.
 
-If a fetch fails, tell the user network access is required and stop. Do not fall back to memorized best practices — the point of this skill is to reflect the live docs.
+Do not read `references/fixes/` yet. Those files are fix material, not detection material; Step 6 reads them one at a time.
 
-## Step 3: Derive a detection approach for each best practice
+Say which categories you skipped and why, rather than silently dropping them. If a reference file is missing or unreadable, say so and stop — do not fall back to memorized best practices or to fetching the docs.
 
-The Gradle docs describe each best practice in prose. The skill's job is to translate that prose into a concrete check against the project's files. For each best practice, decide:
+## Step 3: Take each entry's detection approach from the catalog
 
-1. **Applicability** — does the project use the feature this best practice talks about? (Skip a Kotlin-stdlib best practice if no Kotlin plugin is applied. Skip a TestKit best practice if there are no custom tasks or plugins.)
-2. **Locus** — which file(s) discovered in Step 1 would contain a violation? Build scripts, the settings file, `gradle.properties`, the wrapper config, the version catalog, or `buildSrc/` / `build-logic/` source?
-3. **Detection kind:**
+The translation from documentation prose into a concrete check is already done, once, and recorded in the category files. **Do not re-derive it.** The recipes are this skill's fixed contract: two runs against the same project must check the same things the same way, and a re-derived check breaks that. Each entry gives you:
+
+1. **Applies when** — the precondition. If the project does not meet it, the entry is *not applicable*; count it and move on. (No Kotlin plugin applied means the Kotlin-stdlib entry is out. No custom tasks or plugins means the TestKit entry is out.)
+2. **Detect** — the check to run against the files discovered in Step 1, marked with its kind:
    - **Deterministic** — a specific string, glob, or property value answers it yes/no. Examples: any `.gradle` file present (Kotlin DSL), `distributionUrl` ends in `-all.zip` (bin distribution), `org.gradle.caching=true` missing (build cache), `apply plugin:` in a build script (plugins block), `afterEvaluate {` anywhere (avoid `afterEvaluate`), `PathSensitivity.ABSOLUTE` in custom task source.
-   - **Heuristic** — requires judgment across multiple files (e.g., "duplication across subprojects suggests a convention plugin is missing", "many source files in a single project suggests modularization is needed", "`dependsOn` is fine for lifecycle tasks but not for tasks with actions"). Flag only with clear evidence; note the uncertainty.
-4. **Severity band** (this skill's editorial classification; the official docs don't assign severity):
+   - **Heuristic** — requires judgment across multiple files (e.g., "duplication across subprojects suggests a convention plugin is missing", "many source files in a single project suggests modularization is needed", "`dependsOn` is fine for lifecycle tasks but not for tasks with actions"). Flag only on the evidence the entry names, and note the uncertainty in the finding.
+3. **Severity band** — given per entry. These bands are this skill's editorial classification; the official docs assign none, so do not present them as Gradle ranking one practice above another.
    - **High** — security risks, likely build failures, broken configuration cache, or significant correctness problems.
    - **Medium** — suboptimal builds, maintenance burden, or violations of Gradle conventions.
    - **Recommendation** — modern idioms and nice-to-have improvements.
 
-Run every applicable check.
+Run every applicable check. Batch the searching by pattern rather than by entry — one pass per pattern across the discovered files is cheaper than re-reading every file once per entry.
 
 ## Step 4: Check the project
 
@@ -97,7 +99,7 @@ Otherwise:
 ```
 # Gradle Best Practices Audit
 
-Source: https://docs.gradle.org/current/userguide/best_practices.html (fetched [timestamp])
+Catalog: bundled references/index.md — captured [catalog_captured], Gradle [catalog_gradle_version]
 Best practices evaluated: N
 Best practices not applicable: N
 
@@ -130,6 +132,7 @@ In Audit mode, ask: "Would you like me to apply any of these fixes? I can propos
 In Apply mode, skip the question and proceed directly.
 
 When applying fixes:
+- Before making a given change, read `references/fixes/<anchor>.md` for that practice. It holds the change to make and, for most entries, the documentation's own `Don't`/`Do` pair in Kotlin DSL — the **Don't** block is the shape to match, the **Do** block the shape to write. Long blocks are excerpted around the lines that actually differ, with `// ...` marking the elision; copy the shape, not the surrounding scaffolding. Read these one at a time, as you reach each fix — never up front. Five entries (`modularize_builds`, `no_source_in_root`, `favor_composite_builds`, `use_convention_plugins`, `test_custom_types_with_testkit`) carry no `Don't`/`Do` pair, because the documentation's example is a whole-project layout; their `Fix` prose is the specification.
 - Start with the highest-priority issues. Group related fixes (e.g., all `repositories {}` blocks moved at once).
 - For **straightforward fixes** (adding `org.gradle.caching=true`, renaming `-all.zip` to `-bin.zip`, adding `rootProject.name`, swapping `apply plugin:` for the `plugins {}` block, adding `group`/`description` to a task, replacing `.get()` with `.map { }`), edit the file in place and show the diff.
 - For **source-level fixes** in `buildSrc/` or `build-logic/` (replacing `PathSensitivity.ABSOLUTE`, removing `project.` access inside `@TaskAction`, adding `attributes { }` to consumable configurations), apply the edit and re-read the file to confirm it still compiles.
@@ -137,3 +140,11 @@ When applying fixes:
 - After each fix, confirm the change resolved the issue. If a fix uncovers a related issue (e.g., moving repositories to settings reveals that `FAIL_ON_PROJECT_REPOS` should be set), surface that as a follow-up.
 - After fixing a line, re-check it against the remaining findings and the full catalog: a fix for one facet often leaves a co-located violation intact, or introduces a new one.
 - If the user declines a fix, leave it as-is and move on.
+
+## Keeping the catalog current
+
+The bundled catalog is regenerated per Gradle release, not per run. When the docs move, re-capture `references/` from the URLs recorded in `index.md`, review the diff, and update this file's frontmatter: `metadata.version`, `catalog_captured`, `catalog_gradle_version`, and `catalog_verified`.
+
+Keep those honest — a fresh-looking date over an unchecked catalog is worse than an old one, because it hides the staleness instead of showing it. If a check finds the catalog already complete, bump `catalog_verified` alone and leave `catalog_captured` where it is.
+
+Never patch the catalog from inside a run.
