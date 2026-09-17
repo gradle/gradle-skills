@@ -1,8 +1,7 @@
 # Consider use of `@Incubating` APIs carefully
 `consider_use_of_incubating_apis_carefully`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Adopt incubating APIs deliberately, aware that they can change between releases.
 
 ---
 

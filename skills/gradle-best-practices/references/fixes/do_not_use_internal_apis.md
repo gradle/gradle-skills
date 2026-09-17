@@ -1,8 +1,7 @@
 # Do Not Use Internal APIs
 `do_not_use_internal_apis`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Do not use APIs from a package where any segment is `internal`, or types whose names end in `Internal` or `Impl`.
 
 ---
 

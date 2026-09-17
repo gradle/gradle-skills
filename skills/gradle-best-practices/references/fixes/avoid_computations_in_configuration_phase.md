@@ -1,8 +1,7 @@
 # Avoid Expensive Computations in Configuration Phase
 `avoid_computations_in_configuration_phase`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Move file I/O, network calls and CPU-heavy work out of the configuration phase and into task actions, so it runs only when needed.
 
 ---
 

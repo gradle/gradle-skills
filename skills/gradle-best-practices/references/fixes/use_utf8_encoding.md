@@ -1,8 +1,7 @@
 # Enable UTF-8
 `use_utf8_encoding`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Set UTF-8 as the default file encoding so behaviour is consistent across platforms and does not defeat caching through a platform-dependent default.
 
 ---
 

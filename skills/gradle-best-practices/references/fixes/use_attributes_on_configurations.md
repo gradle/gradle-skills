@@ -1,8 +1,7 @@
 # Always Declare Attributes on Consumable and Resolvable Configurations
 `use_attributes_on_configurations`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Every custom consumable or resolvable configuration must declare at least one attribute, so variant-aware resolution can match it.
 
 ---
 

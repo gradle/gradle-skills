@@ -1,8 +1,7 @@
 # Set up your Dependency Repositories in the Settings file
 `set_up_repositories_in_settings`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Declare repositories in `settings.gradle(.kts)` under `pluginManagement` and `dependencyResolutionManagement`, not in individual build scripts.
 
 ---
 

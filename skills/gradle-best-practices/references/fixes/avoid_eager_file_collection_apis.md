@@ -1,8 +1,7 @@
 # Avoid using eager APIs on File Collections
 `avoid_eager_file_collection_apis`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Do not call methods that force a `FileCollection` or `Configuration` to resolve during configuration.
 
 ---
 

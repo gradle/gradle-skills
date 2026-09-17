@@ -1,8 +1,7 @@
 # Favor `build-logic` Composite Builds for Build Logic
 `favor_composite_builds`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Put custom plugins and shared build logic in an included composite build (conventionally `build-logic/`) rather than in `buildSrc/`.
 
 ---
 

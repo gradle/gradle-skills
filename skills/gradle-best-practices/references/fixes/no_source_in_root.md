@@ -1,8 +1,7 @@
 # Do Not Put Source Files in the Root Project
 `no_source_in_root`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** The root project should carry shared settings and conventions, not source. Put source in subprojects.
 
 ---
 

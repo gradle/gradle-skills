@@ -1,8 +1,7 @@
 # Use Content Filtering with multiple Repositories
 `use_content_filtering`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** When several repositories are declared, filter which coordinates come from each, so resolution is predictable and a dependency cannot be served by an unintended repository.
 
 ---
 

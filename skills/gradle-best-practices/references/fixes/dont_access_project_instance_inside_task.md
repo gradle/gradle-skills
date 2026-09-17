@@ -1,8 +1,7 @@
 # Don't access a `Project` instance during Task Execution
 `dont_access_project_instance_inside_task`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Do not touch `Project` inside a task action; capture what you need as inputs at configuration time.
 
 ---
 

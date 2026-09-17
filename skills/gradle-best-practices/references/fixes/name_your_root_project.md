@@ -1,8 +1,7 @@
 # Name Your Root Project
 `name_your_root_project`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Always set the root project's name in the settings file, so it does not depend on the checkout directory name.
 
 ---
 

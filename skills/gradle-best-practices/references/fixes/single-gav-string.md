@@ -1,8 +1,7 @@
 # Declare Dependencies using a single GAV String
 `single-gav-string`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Use the `"group:artifact:version"` string form. The named-argument form is deprecated.
 
 ---
 

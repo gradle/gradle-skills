@@ -1,8 +1,7 @@
 # Prefer the `-bin` Gradle Distribution
 `prefer_bin_distribution`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Prefer the smaller `-bin` distribution over `-all`, which additionally carries sources and documentation.
 
 ---
 

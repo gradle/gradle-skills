@@ -1,8 +1,7 @@
 # Avoid Redundant Dependency Declarations
 `avoid_duplicate_dependencies`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Do not declare the same module more than once, or in two configurations where one already implies the other.
 
 ---
 

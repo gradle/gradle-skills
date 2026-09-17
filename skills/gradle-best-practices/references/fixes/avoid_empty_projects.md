@@ -1,8 +1,7 @@
 # Avoid Unintentionally Creating Empty Projects
 `avoid_empty_projects`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** With nested directory layouts, set `projectDir` explicitly so Gradle does not synthesize empty intermediate projects.
 
 ---
 

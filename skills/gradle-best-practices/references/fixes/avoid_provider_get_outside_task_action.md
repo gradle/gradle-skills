@@ -1,8 +1,7 @@
 # Do not call `get()` on a Provider outside a Task action
 `avoid_provider_get_outside_task_action`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Do not query a provider during configuration; transform it with `map` / `flatMap` so the value is read at execution time.
 
 ---
 

@@ -1,8 +1,7 @@
 # Don't hardcode Task names unless they are documented as Public API
 `dont_hardcode_task_names`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Prefer, in this order: (1) the plugin's own DSL extension, (2) the task *type*, (3) a task name - and only when that name is explicitly documented as public API. Most task names are internal details that may be renamed or removed.
 
 ---
 

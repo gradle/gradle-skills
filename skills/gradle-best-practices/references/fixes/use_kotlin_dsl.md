@@ -1,8 +1,7 @@
 # Use Kotlin DSL
 `use_kotlin_dsl`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Prefer the Kotlin DSL (`build.gradle.kts`, `settings.gradle.kts`) over the Groovy DSL for type safety and IDE support.
 
 ---
 

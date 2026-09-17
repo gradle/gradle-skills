@@ -1,8 +1,7 @@
 # Group and Describe custom Tasks
 `group_describe_tasks`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Give every custom task a `group` and a `description` so it is discoverable in the task report.
 
 ---
 

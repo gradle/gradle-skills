@@ -1,8 +1,7 @@
 # Name Version Catalog Entries Appropriately
 `name_version_catalog_entries`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Name catalog entries from the module coordinates: 1-3 dash-separated segments, dropping the TLD segment, converting artifact dashes to camelCase, and avoiding redundancy.
 
 ---
 

@@ -1,8 +1,7 @@
 # Validate the Gradle Wrapper on every Upgrade
 `validate_wrapper_checksum`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Treat wrapper changes as security-sensitive: verify the wrapper JAR and distribution settings whenever Gradle is upgraded.
 
 ---
 

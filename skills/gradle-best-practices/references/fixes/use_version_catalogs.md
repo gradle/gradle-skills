@@ -1,8 +1,7 @@
 # Use Version Catalogs to Centralize Dependency Versions
 `use_version_catalogs`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Centralize versions in `gradle/libs.versions.toml` rather than declaring them in build scripts or extension properties.
 
 ---
 

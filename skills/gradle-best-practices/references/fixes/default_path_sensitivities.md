@@ -1,8 +1,7 @@
 # Prefer `@PathSensitivity.NONE` for files, `RELATIVE` for directories
 `default_path_sensitivities`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Annotate file inputs `@PathSensitive(PathSensitivity.NONE)` and directory inputs `@PathSensitive(PathSensitivity.RELATIVE)`, so absolute paths do not defeat up-to-date checks and caching.
 
 ---
 

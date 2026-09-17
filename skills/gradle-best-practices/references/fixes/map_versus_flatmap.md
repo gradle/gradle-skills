@@ -1,8 +1,7 @@
 # Wiring Task Outputs with `map` and `flatMap`
 `map_versus_flatmap`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Use `flatMap` to reach a `Provider`-typed output of a task and `map` to transform a value, keeping the dependency chain intact.
 
 ---
 

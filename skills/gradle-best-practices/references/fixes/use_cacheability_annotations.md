@@ -1,8 +1,7 @@
 # Favor `@CacheableTask` / `@DisableCachingByDefault`
 `use_cacheability_annotations`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Declare cacheability on the task class with `@CacheableTask` or `@DisableCachingByDefault`, not per instance with `cacheIf` / `doNotCacheIf`.
 
 ---
 

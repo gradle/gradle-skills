@@ -1,8 +1,7 @@
 # Set Build Flags in `gradle.properties`
 `use_the_gradle_properties_file`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Set Gradle build flags in the root `gradle.properties`, checked into source control, rather than passing them per-invocation.
 
 ---
 

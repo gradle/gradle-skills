@@ -1,8 +1,7 @@
 # Modularize Your Builds
 `modularize_builds`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Split the source into several projects so Gradle can avoid and parallelize work.
 
 ---
 

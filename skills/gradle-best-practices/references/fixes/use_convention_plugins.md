@@ -1,8 +1,7 @@
 # Use Convention Plugins
 `use_convention_plugins`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Put shared build logic in reusable convention plugins instead of duplicating configuration across build scripts.
 
 ---
 

@@ -1,8 +1,7 @@
 # Do not use `gradle.properties` in subprojects
 `do_not_use_gradle_properties_in_subprojects`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Do not place a `gradle.properties` file inside a subproject to configure the build; properties there are handled inconsistently.
 
 ---
 

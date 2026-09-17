@@ -1,8 +1,7 @@
 # Do not Run `./gradlew` on Untrusted Projects
 `run_gradle_on_external_projects`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Running `./gradlew` executes arbitrary build logic; inspect an unfamiliar project before running or opening it in an IDE.
 
 ---
 

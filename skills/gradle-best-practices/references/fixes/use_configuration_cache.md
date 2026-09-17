@@ -1,8 +1,7 @@
 # Use the Configuration Cache
 `use_configuration_cache`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Enable the configuration cache so the configuration phase is skipped and the task graph is loaded from disk.
 
 ---
 

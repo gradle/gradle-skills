@@ -1,8 +1,7 @@
 # Test your custom Task and Plugins with TestKit
 `test_custom_types_with_testkit`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Test custom tasks and plugins with Gradle TestKit, so they graduate from prototypes in a build script into reusable, verified components.
 
 ---
 

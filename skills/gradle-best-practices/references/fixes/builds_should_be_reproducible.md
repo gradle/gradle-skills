@@ -1,8 +1,7 @@
 # Build Output Should Be Byte-for-Byte Reproducible
 `builds_should_be_reproducible`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Identical sources should produce byte-identical outputs on any machine at any time.
 
 ---
 

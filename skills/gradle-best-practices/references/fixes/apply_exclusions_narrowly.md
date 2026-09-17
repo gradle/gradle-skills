@@ -1,8 +1,7 @@
 # Apply Exclusions Narrowly
 `apply_exclusions_narrowly`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Attach an exclusion to the specific dependency that drags in the unwanted module, and name the module - not the whole group, and not the whole configuration.
 
 ---
 

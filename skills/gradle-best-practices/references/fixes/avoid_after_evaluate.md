@@ -1,8 +1,7 @@
 # Avoid `afterEvaluate`
 `avoid_after_evaluate`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Do not use `project.afterEvaluate {}` to configure tasks, wire properties, or react to plugin application.
 
 ---
 

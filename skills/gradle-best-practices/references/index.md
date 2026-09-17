@@ -1,5 +1,10 @@
 # Gradle Best Practices — Catalog Index
 
+> **Provenance record. Not read at run time.** This file exists so the catalog can be
+> regenerated and audited, not so a run can consult it. `SKILL.md` carries the applicability
+> triage table and the detection layer lives in the category files; a run that reads this
+> file spends roughly 7,400 characters and a turn on material it does not use.
+
 **Captured:** 2026-08-27 from `https://docs.gradle.org/current/`.
 **Verified:** 2026-09-16 — complete against the Gradle **9.7.1** documentation. The newest
 practices here were added in 9.7.0; 9.7.1 introduced none.
@@ -22,21 +27,6 @@ itself uses `validate_gradle_checksum`.
 
 Severity bands (`High` / `Medium` / `Recommendation`) are this skill's editorial
 classification. The official documentation assigns none.
-
-## Applicability triage
-
-Read only the category files whose precondition this project can meet. Report the
-rest as "not applicable" with the count.
-
-| Category file | Read it when |
-|---|---|
-| `general.md` | Always — every Gradle build. |
-| `performance.md` | Always — every Gradle build. |
-| `dependencies.md` | Any `dependencies {}` block, any `repositories {}` block, or a version catalog exists. (The Kotlin-stdlib entry needs a Kotlin plugin; the attributes entry needs a custom consumable/resolvable configuration.) |
-| `structuring-builds.md` | More than one project, or source files present anywhere, or `buildSrc/` exists, or `include(` appears in settings. |
-| `tasks.md` | The build registers or configures a task, or `buildSrc/` / `build-logic/` contains task or plugin source. Skip entirely if no custom task, no task configuration and no build logic source exist. |
-| `security.md` | A Gradle wrapper exists (`gradle/wrapper/gradle-wrapper.properties`), or the build produces archives (`jar`, `war`, any `AbstractArchiveTask`). |
-| `testing.md` | The project defines a custom task type or plugin (in `buildSrc/`, `build-logic/`, or inline in a build script). Skip for a build that only consumes plugins. |
 
 ## Full catalog
 

@@ -1,8 +1,7 @@
 # Don't resolve Configurations before Task Execution
 `dont_resolve_configurations_before_task_execution`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Do not resolve a configuration during the configuration phase; pass the configuration itself to the task input so dependency information survives.
 
 ---
 

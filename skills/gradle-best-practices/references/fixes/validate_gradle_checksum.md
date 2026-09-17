@@ -1,8 +1,7 @@
 # Validate the Gradle Distribution SHA-256 Checksum
 `validate_gradle_checksum`
 
-Fix reference for one entry. The rule, precondition and detection recipe
-stay in the category file; this is what to write once you have decided to apply it.
+**Rule:** Set `distributionSha256Sum` in `gradle-wrapper.properties` so the downloaded distribution's integrity is verified.
 
 ---
 
