@@ -25,8 +25,8 @@ Audit a project against the official Gradle best practices, produce a structured
 
 The catalog is layered so that each run reads only the layer it needs. **Read no more of it than the steps below tell you to** — every `Read` result stays in context and is re-sent on every later turn, so a file read once costs tokens on every turn after it.
 
-- **`references/<category>.md`** — one file per category, holding each entry's title, anchor, severity band, precondition and detection recipe. Terse by design: this is the layer you read to *decide*. Seven files: `general.md`, `structuring-builds.md`, `dependencies.md`, `tasks.md`, `performance.md`, `security.md`, `testing.md`.
-- **`references/fixes/<anchor>.md`** — one file per practice, holding that practice's rule, its fix, and for most entries the documentation's own `Don't`/`Do` pair in Kotlin DSL. This is the layer you read to *act*. Read one only when you are about to write up or apply that specific practice.
+- **`references/<category>.md`** — one file per category, holding each entry's title, anchor, severity band, precondition, detection recipe, and a one-line fix summary. Terse by design: this is the layer you read to *decide*, and it carries everything needed to write a finding — including its **Fix:** line. Seven files: `general.md`, `structuring-builds.md`, `dependencies.md`, `tasks.md`, `performance.md`, `security.md`, `testing.md`.
+- **`references/fixes/<anchor>.md`** — one file per practice, holding that practice's rule, the fix in full, and for most entries the documentation's own `Don't`/`Do` pair in Kotlin DSL. This is optional depth, not a required layer: read one only when the category entry's one-line summary is not enough to make the change.
 - **`references/index.md`** — provenance only: the capture date, the source URLs, and the full 45-entry listing used to regenerate the catalog. **Do not read it at run time.** Everything a run needs from it is already in this file.
 
 The direct link for any best practice is `https://docs.gradle.org/current/userguide/best_practices_<category>.html#<anchor>`. The URL segment is the category file's name with dashes as underscores, so `structuring-builds.md` → `best_practices_structuring_builds.html`. Cite those URLs so the reader can follow up — but read the bundled file, never fetch it.
@@ -83,7 +83,7 @@ If a category file is missing or unreadable, say so and stop — do not fall bac
 
 ## Step 3: Take each entry's detection approach from the catalog
 
-The translation from documentation prose into a concrete check is already done, once, and recorded in the category files. **Do not re-derive it.** The recipes are this skill's fixed contract: two runs against the same project must check the same things the same way, and a re-derived check breaks that. Each entry is three lines — a heading carrying `Title · anchor · Severity`, then:
+The translation from documentation prose into a concrete check is already done, once, and recorded in the category files. **Do not re-derive it.** The recipes are this skill's fixed contract: two runs against the same project must check the same things the same way, and a re-derived check breaks that. Each entry is a heading carrying `Title · anchor · Severity`, then:
 
 1. **`When:`** — the precondition. If the project does not meet it, the entry is *not applicable*; count it and move on. (No Kotlin plugin applied means the Kotlin-stdlib entry is out. No custom tasks or plugins means the TestKit entry is out.)
 2. **`Detect (det)` / `Detect (heur)`** — the check to run against the files discovered in Step 1:
@@ -93,6 +93,7 @@ The translation from documentation prose into a concrete check is already done, 
    - **High** — security risks, likely build failures, broken configuration cache, or significant correctness problems.
    - **Medium** — suboptimal builds, maintenance burden, or violations of Gradle conventions.
    - **Recommendation** — modern idioms and nice-to-have improvements.
+4. **`Fix:`** — a one-line summary of the change to make. This is what the report's **Fix:** line quotes, and for most practices it is enough to apply the fix directly. `references/fixes/<anchor>.md` holds the same fix in full with the documentation's `Don't`/`Do` pair; read it only when the summary is not enough.
 
 Run every applicable check. Batch the searching by pattern rather than by entry — one pass per pattern across the discovered files is cheaper than re-reading every file once per entry.
 
@@ -100,7 +101,7 @@ Run every applicable check. Batch the searching by pattern rather than by entry 
 
 Apply each detection approach by searching and reading the files discovered in Step 1. Record each finding with: best practice title, anchor URL, file(s) and line(s) where the violation appears, a one-sentence description, and the severity band.
 
-The category files deliberately do not carry the rule or the fix — those live in `references/fixes/<anchor>.md`, one file per practice. Read a fix file at the point you need it and not before: in Step 6 when you are about to apply that fix, or in Step 5 when you are about to write that finding's **Fix:** line. A practice you detected but are not reporting or fixing needs no read at all.
+The category entry's `Fix:` line is the report's **Fix:** line — no further read is needed to produce the report. `references/fixes/<anchor>.md` carries the same fix in full, with the documentation's `Don't`/`Do` pair; it is optional depth for Step 6, not a prerequisite for Step 5. A run that reports findings without opening a single fix file is working as intended.
 
 Violations are not mutually exclusive: one line can violate several practices at once, and matching a line to one practice does not exhaust it. Example: `dependsOn 'listMaintainedCars'` between two tasks with actions violates both *Don't hardcode task names* (the string) and *Avoid dependsOn* (the coupling) — fixing the string form to `dependsOn someTaskProvider` resolves the first and leaves the second. Record one finding per violated practice, even when findings share a line.
 
@@ -146,7 +147,13 @@ In Audit mode, ask: "Would you like me to apply any of these fixes? I can propos
 In Apply mode, skip the question and proceed directly.
 
 When applying fixes:
-- Before making a given change, read `references/fixes/<anchor>.md` for that practice. It holds the practice's rule, the change to make, and for most entries the documentation's own `Don't`/`Do` pair in Kotlin DSL — the **Don't** block is the shape to match, the **Do** block the shape to write. Long blocks are excerpted around the lines that actually differ, with `// ...` marking the elision; copy the shape, not the surrounding scaffolding. Read these one at a time, as you reach each fix — never up front. Five entries (`modularize_builds`, `no_source_in_root`, `favor_composite_builds`, `use_convention_plugins`, `test_custom_types_with_testkit`) carry no `Don't`/`Do` pair, because the documentation's example is a whole-project layout; their `Fix` prose is the specification.
+- `references/fixes/<anchor>.md` is **optional reference material, not a required step**. Each file holds the practice's rule, the change to make, and for most entries the documentation's own `Don't`/`Do` pair in Kotlin DSL — the **Don't** block is the shape to match, the **Do** block the shape to write. Long blocks are excerpted around the lines that actually differ, with `// ...` marking the elision; copy the shape, not the surrounding scaffolding.
+
+  **Read one only when you need it** — when the fix is not obvious from the detection entry, when you want the documentation's exact `Do` shape rather than your own phrasing, or when you are about to make a structural change and want the reference layout. If the fix is unambiguous, apply it and move on; opening the file buys nothing.
+
+  Read them **one at a time, as you reach each fix — never up front**. There are 46 of them and loading them speculatively wastes context for no gain.
+
+  Five entries (`modularize_builds`, `no_source_in_root`, `favor_composite_builds`, `use_convention_plugins`, `test_custom_types_with_testkit`) carry no `Don't`/`Do` pair, because the documentation's example is a whole-project layout; their `Fix` prose is the specification, so consult those when touching project structure.
 - Start with the highest-priority issues. Group related fixes (e.g., all `repositories {}` blocks moved at once).
 - For **straightforward fixes** (adding `org.gradle.caching=true`, renaming `-all.zip` to `-bin.zip`, adding `rootProject.name`, swapping `apply plugin:` for the `plugins {}` block, adding `group`/`description` to a task, replacing `.get()` with `.map { }`), edit the file in place and show the diff.
 - For **source-level fixes** in `buildSrc/` or `build-logic/` (replacing `PathSensitivity.ABSOLUTE`, removing `project.` access inside `@TaskAction`, adding `attributes { }` to consumable configurations), apply the edit and re-read the file to confirm it still compiles.
