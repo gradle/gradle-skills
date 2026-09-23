@@ -1,4 +1,4 @@
-# Wiring Task Outputs with `map` and `flatMap`
+# Wire lazy task outputs using `map` and `flatMap`
 `map_versus_flatmap`
 
 **Rule:** Use `flatMap` to reach a `Provider`-typed output of a task and `map` to transform a value, keeping the dependency chain intact.

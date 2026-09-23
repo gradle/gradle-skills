@@ -4,11 +4,11 @@ description: "Audit a Gradle project against the official Gradle best practices,
 license: Apache-2.0
 metadata:
   author: gradle
-  version: "1.2.0"
-  catalog_captured: "2026-08-27"
-  catalog_gradle_version: "9.7.1"
-  catalog_verified: "2026-09-16"
-  catalog_source: "https://docs.gradle.org/current/userguide/best_practices.html"
+  version: "1.3.0"
+  catalog_captured: "2026-09-23"
+  catalog_gradle_version: "9.9.0-nightly"
+  catalog_verified: "2026-09-23"
+  catalog_source: "https://docs.gradle.org/nightly/userguide/best_practices.html"
 ---
 
 # Gradle Best Practices
@@ -17,9 +17,11 @@ Audit a project against the official Gradle best practices, produce a structured
 
 **The best-practices catalog ships with this skill, pre-digested, under `references/`.** Read it from disk. Do not fetch anything from the network at run time.
 
-**Which catalog you have:** 45 practices, captured 2026-08-27 and verified complete against the Gradle **9.7.1** documentation on 2026-09-16. That is every practice in the published index, plus `dont_assume_plugin_order`, which the General category page documents but the index omits.
+**Which catalog you have:** 48 practices, verified complete on 2026-09-23 against the Gradle **9.9.0 nightly** documentation.
 
-**The trade-off, stated plainly:** a bundled catalog is reproducible but can go stale. Fetching the live docs would always reflect the newest practices; reading a bundled copy means every run checks the same things the same way, costs no network, and cannot be truncated or paraphrased in transit. Gradle adds practices at most once per release, so the exposure is bounded — but it is real. If the project you are auditing targets a Gradle version newer than the one above, say so in the report: there may be practices this catalog does not know about. Do not fetch them mid-run; see "Keeping the catalog current" at the end.
+**Three of them are not in any released Gradle.** `obtain_loggers_via_logging_get_logger`, `favor_collection_properties` and `build-published-artifacts-securely` were added in 9.8.0 and exist only in the nightly docs — `docs.gradle.org/current` was still 9.7.1 when this catalog was captured. They may change before 9.8.0 ships. Apply them like the rest, but if a project pins a Gradle older than 9.8.0, say in the report that these three describe guidance that release predates.
+
+**The trade-off, stated plainly:** a bundled catalog is reproducible but fixed at capture time. Fetching the live docs would always reflect the newest practices; reading a bundled copy means every run checks the same things the same way, costs no network, and cannot be truncated or paraphrased in transit. Gradle adds practices at most once per release, so the drift is bounded — but it is real, in both directions: this copy can fall behind a newer release, and the three pre-release entries above can move under it. If the project you are auditing targets a Gradle version newer than the one above, say so in the report — there may be practices this catalog does not know about. Never fetch them mid-run.
 
 ## Sources of truth
 
@@ -27,9 +29,11 @@ The catalog is layered so that each run reads only the layer it needs. **Read no
 
 - **`references/<category>.md`** — one file per category, holding each entry's title, anchor, severity band, precondition, detection recipe, and a one-line fix summary. Terse by design: this is the layer you read to *decide*, and it carries everything needed to write a finding — including its **Fix:** line. Seven files: `general.md`, `structuring-builds.md`, `dependencies.md`, `tasks.md`, `performance.md`, `security.md`, `testing.md`.
 - **`references/fixes/<anchor>.md`** — one file per practice, holding that practice's rule, the fix in full, and for most entries the documentation's own `Don't`/`Do` pair in Kotlin DSL. This is optional depth, not a required layer: read one only when the category entry's one-line summary is not enough to make the change.
-- **`references/index.md`** — provenance only: the capture date, the source URLs, and the full 45-entry listing used to regenerate the catalog. **Do not read it at run time.** Everything a run needs from it is already in this file.
+- **`references/index.md`** — provenance only: the capture date, the source URLs, and the full 48-entry listing used to regenerate the catalog. **Do not read it at run time.** Everything a run needs from it is already in this file.
 
 The direct link for any best practice is `https://docs.gradle.org/current/userguide/best_practices_<category>.html#<anchor>`. The URL segment is the category file's name with dashes as underscores, so `structuring-builds.md` → `best_practices_structuring_builds.html`. Cite those URLs so the reader can follow up — but read the bundled file, never fetch it.
+
+The three 9.8.0 entries named above do not resolve on `current` yet; cite them under `https://docs.gradle.org/nightly/userguide/…` and say in the finding that the link is to pre-release documentation.
 
 ## Modes
 
@@ -161,11 +165,3 @@ When applying fixes:
 - After each fix, confirm the change resolved the issue. If a fix uncovers a related issue (e.g., moving repositories to settings reveals that `FAIL_ON_PROJECT_REPOS` should be set), surface that as a follow-up.
 - After fixing a line, re-check it against the remaining findings and the full catalog: a fix for one facet often leaves a co-located violation intact, or introduces a new one.
 - If the user declines a fix, leave it as-is and move on.
-
-## Keeping the catalog current
-
-The bundled catalog is regenerated per Gradle release, not per run. When the docs move, re-capture `references/` from the URLs recorded in `index.md`, review the diff, and update this file's frontmatter: `metadata.version`, `catalog_captured`, `catalog_gradle_version`, and `catalog_verified`.
-
-Keep those honest — a fresh-looking date over an unchecked catalog is worse than an old one, because it hides the staleness instead of showing it. If a check finds the catalog already complete, bump `catalog_verified` alone and leave `catalog_captured` where it is.
-
-Never patch the catalog from inside a run.

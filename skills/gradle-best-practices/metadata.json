@@ -1,20 +1,20 @@
 {
-  "version": "1.2.0",
+  "version": "1.3.0",
   "organization": "Gradle Inc.",
   "date": "September 2026",
-  "abstract": "Audits a Gradle project against the official Gradle best practices, produces a prioritized findings report, and proposes code changes to bring the build into compliance. The best-practices catalog ships with the skill under references/, pre-digested and split into two layers that are read at different times: seven terse category files carrying each practice's anchor, severity band, precondition and deterministic-or-heuristic detection recipe, read to decide; and one fix file per practice carrying that practice's rule, its fix and the documentation's Don't/Do pair, read only when that practice is written up or applied. The applicability triage table lives in SKILL.md itself, so no catalog index is read at run time. No network access is used at run time — the catalog is regenerated per Gradle release, not per run, so every run checks the same things the same way and the run is reproducible offline. Operates in audit mode (report and stop) or apply mode (proceed straight to fixes). Discovers settings, build scripts, properties, wrapper config, version catalog, and Java/Kotlin/Groovy sources under buildSrc/ and build-logic/, triages which categories can apply, reads only those, applies each entry's recorded detection recipe, and links each finding to the specific best practice in the Gradle User Manual.",
-  "catalog_captured": "2026-08-27",
-  "catalog_gradle_version": "9.7.1",
-  "catalog_verified": "2026-09-16",
+  "abstract": "Audits a Gradle project against the official Gradle best practices, produces a prioritized findings report, and proposes code changes to bring the build into compliance. The best-practices catalog ships with the skill under references/, pre-digested and split into two layers that are read at different times: seven terse category files covering 48 practices and carrying each practice's anchor, severity band, precondition and deterministic-or-heuristic detection recipe, read to decide; and one fix file per practice carrying that practice's rule, its fix and the documentation's Don't/Do pair, read only when that practice is written up or applied. The applicability triage table lives in SKILL.md itself, so no catalog index is read at run time. No network access is used at run time — the catalog is regenerated per Gradle release, not per run, so every run checks the same things the same way and the run is reproducible offline. Operates in audit mode (report and stop) or apply mode (proceed straight to fixes). Discovers settings, build scripts, properties, wrapper config, version catalog, and Java/Kotlin/Groovy sources under buildSrc/ and build-logic/, triages which categories can apply, reads only those, applies each entry's recorded detection recipe, and links each finding to the specific best practice in the Gradle User Manual. The catalog is captured from the Gradle 9.9.0 nightly documentation; three entries (obtain_loggers_via_logging_get_logger, favor_collection_properties, build-published-artifacts-securely) were added in 9.8.0 and are not yet in a released Gradle, which SKILL.md states explicitly so a reader knows what they have.",
+  "catalog_captured": "2026-09-23",
+  "catalog_gradle_version": "9.9.0-nightly",
+  "catalog_verified": "2026-09-23",
   "references": [
-    "https://docs.gradle.org/current/userguide/best_practices.html",
-    "https://docs.gradle.org/current/userguide/best_practices_index.html",
-    "https://docs.gradle.org/current/userguide/best_practices_general.html",
-    "https://docs.gradle.org/current/userguide/best_practices_structuring_builds.html",
-    "https://docs.gradle.org/current/userguide/best_practices_dependencies.html",
-    "https://docs.gradle.org/current/userguide/best_practices_tasks.html",
-    "https://docs.gradle.org/current/userguide/best_practices_performance.html",
-    "https://docs.gradle.org/current/userguide/best_practices_security.html",
-    "https://docs.gradle.org/current/userguide/best_practices_testing.html"
+    "https://docs.gradle.org/nightly/userguide/best_practices.html",
+    "https://docs.gradle.org/nightly/userguide/best_practices_index.html",
+    "https://docs.gradle.org/nightly/userguide/best_practices_general.html",
+    "https://docs.gradle.org/nightly/userguide/best_practices_structuring_builds.html",
+    "https://docs.gradle.org/nightly/userguide/best_practices_dependencies.html",
+    "https://docs.gradle.org/nightly/userguide/best_practices_tasks.html",
+    "https://docs.gradle.org/nightly/userguide/best_practices_performance.html",
+    "https://docs.gradle.org/nightly/userguide/best_practices_security.html",
+    "https://docs.gradle.org/nightly/userguide/best_practices_testing.html"
   ]
 }

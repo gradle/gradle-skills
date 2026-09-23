@@ -1,4 +1,4 @@
-# Use Convention Plugins
+# Use Convention Plugins for Common Build Logic
 `use_convention_plugins`
 
 **Rule:** Put shared build logic in reusable convention plugins instead of duplicating configuration across build scripts.

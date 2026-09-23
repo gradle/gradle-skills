@@ -1,6 +1,6 @@
 # Dependencies
 
-## Declare Dependencies using a single GAV String · `single-gav-string` · Medium
+## Declare Dependencies using a single GAV (group:artifact:version) String · `single-gav-string` · Medium
 When: any `dependencies {}` block exists.
 Detect (det): a dependency declaration using named arguments — `group:` / `name:` / `version:` (Groovy) or `group =` / `name =` / `version =` (Kotlin) inside a dependency call.
 Fix: Replace the map form with a single `"group:name:version"` string.

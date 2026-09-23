@@ -1,4 +1,4 @@
-# Favor `@CacheableTask` / `@DisableCachingByDefault`
+# Favor `@CacheableTask` and `@DisableCachingByDefault` over `cacheIf(Spec)` and `doNotCacheIf(String, Spec)`
 `use_cacheability_annotations`
 
 **Rule:** Declare cacheability on the task class with `@CacheableTask` or `@DisableCachingByDefault`, not per instance with `cacheIf` / `doNotCacheIf`.

@@ -49,3 +49,8 @@ Fix: Use lazy `Property`/`Provider` wiring, and `pluginManager.withPlugin` to re
 When: build logic source or scripts using recent Gradle APIs.
 Detect (heur): APIs annotated `@Incubating`, or an `@OptIn`-style suppression of an incubating warning. Flag only where the usage is load-bearing, and note it as a maintenance risk rather than a defect.
 Fix: Record which incubating APIs are used and why; re-check them on every Gradle upgrade.
+
+## Obtain Loggers via `Logging.getLogger(Class)` outside of Tasks · `obtain_loggers_via_logging_get_logger` · Medium
+When: the build defines a `Plugin`, a `BuildService`, or other non-`Task` build logic that logs, in `buildSrc/`, `build-logic/`, or inline.
+Detect (det): `project.logger` / `getProject().getLogger()` outside a task; a bare `logger` used inside `Plugin.apply` or a `BuildService` with no `Logging.getLogger(…::class.java)` declared; or an `@Inject`-ed `Logger` property. `Task.getLogger()` and the `logger` inherited inside a task type are *not* violations — Gradle attributes those per task.
+Fix: Declare `private val logger = Logging.getLogger(TheClass::class.java)` in a companion object.

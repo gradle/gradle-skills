@@ -1,6 +1,6 @@
 # Performance
 
-## Enable UTF-8 · `use_utf8_encoding` · Medium
+## Use UTF-8 File Encoding · `use_utf8_encoding` · Medium
 When: always.
 Detect (det): `org.gradle.jvmargs` in the root `gradle.properties` does not contain `-Dfile.encoding=UTF-8`, including the case where `org.gradle.jvmargs` is absent entirely.
 Fix: Add `-Dfile.encoding=UTF-8` to `org.gradle.jvmargs` in the root `gradle.properties`.

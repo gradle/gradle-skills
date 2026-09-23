@@ -1,4 +1,4 @@
-# Declare Dependencies using a single GAV String
+# Declare Dependencies using a single GAV (group:artifact:version) String
 `single-gav-string`
 
 **Rule:** Use the `"group:artifact:version"` string form. The named-argument form is deprecated.

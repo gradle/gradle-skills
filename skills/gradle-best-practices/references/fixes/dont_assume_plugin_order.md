@@ -30,6 +30,19 @@
   }
   ```
 
+  ```kotlin
+  // buildSrc/src/main/kotlin/MyPlugin.kt
+  class MyPlugin : Plugin<Project> {
+      override fun apply(project: Project) {
+          // Assumes 'java' plugin is present
+          // WARNING: This will fail if the 'java' plugin hasn't been applied yet.
+          project.extensions.getByType(JavaPluginExtension::class.java).toolchain {
+              languageVersion.set(JavaLanguageVersion.of(21))
+          }
+      }
+  }
+  ```
+
 - **Do:**
 
   ```kotlin

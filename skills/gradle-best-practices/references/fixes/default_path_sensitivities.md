@@ -1,4 +1,4 @@
-# Prefer `@PathSensitivity.NONE` for files, `RELATIVE` for directories
+# Use `@PathSensitivity.NONE` for file inputs and `@PathSensitivity.RELATIVE` for directories
 `default_path_sensitivities`
 
 **Rule:** Annotate file inputs `@PathSensitive(PathSensitivity.NONE)` and directory inputs `@PathSensitive(PathSensitivity.RELATIVE)`, so absolute paths do not defeat up-to-date checks and caching.

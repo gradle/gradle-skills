@@ -20,7 +20,7 @@ When: the settings file uses a hierarchical include path.
 Detect (det): an `include(` argument with two or more colons after the first, e.g. `include(":subs:web:my-web-module")`, without a matching `project(":...").projectDir = file(...)` assignment.
 Fix: Set `project(":…").projectDir = file("…")` in settings so no empty intermediate project is synthesized.
 
-## Use Convention Plugins · `use_convention_plugins` · Medium
+## Use Convention Plugins for Common Build Logic · `use_convention_plugins` · Medium
 When: the build has more than one project with a build script.
 Detect (det where possible): the same configuration block in two or more build scripts — a `java { }` toolchain or source-compatibility block, `tasks.withType<JavaCompile>` settings, `useJUnitPlatform()`, `maxParallelForks`, or an identical `testImplementation(...)` declaration. Two occurrences is enough to report.
 Fix: Extract the duplication into a precompiled script plugin under `build-logic/src/main/kotlin/`. Structural.

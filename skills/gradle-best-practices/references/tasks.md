@@ -7,7 +7,7 @@ When: any `dependsOn` appears.
 Detect (det): `dependsOn` where the depended-on task has a `@TaskAction` or `doLast` / `doFirst` — i.e. is not a pure lifecycle task such as `build`, `check`, `assemble`.
 Fix: Wire the producer's output into the consumer's input instead of declaring `dependsOn`.
 
-## Favor `@CacheableTask` / `@DisableCachingByDefault` · `use_cacheability_annotations` · Medium
+## Favor `@CacheableTask` and `@DisableCachingByDefault` over `cacheIf(Spec)` and `doNotCacheIf(String, Spec)` · `use_cacheability_annotations` · Medium
 When: the build defines a custom task type.
 Detect (det): `outputs.cacheIf` or `outputs.doNotCacheIf` anywhere.
 Fix: Annotate the task class `@CacheableTask`, or `@DisableCachingByDefault(because = "…")`.
@@ -32,7 +32,7 @@ When: the build touches file collections or configurations.
 Detect (det): `.size`, `.isEmpty()`, `.files`, `.asPath`, `.toList()`, or arithmetic (`+`) on a `Configuration` / `FileCollection` outside a task action.
 Fix: Pass the collection through unresolved; inspect it inside the task action.
 
-## Prefer `@PathSensitivity.NONE` for files, `RELATIVE` for directories · `default_path_sensitivities` · Medium
+## Use `@PathSensitivity.NONE` for file inputs and `@PathSensitivity.RELATIVE` for directories · `default_path_sensitivities` · Medium
 When: the build defines a custom task type with file or directory inputs.
 Detect (det): `PathSensitivity.ABSOLUTE`; `PathSensitivity.NAME_ONLY` on an input; or an `@InputFile` / `@InputFiles` / `@InputDirectory` with no `@PathSensitive` at all — the default is `ABSOLUTE`.
 Fix: Add `@PathSensitive(NONE)` to `@InputFile`, `RELATIVE` to `@InputDirectory`.
@@ -52,7 +52,12 @@ When: the build defines a custom task type or uses `doLast` / `doFirst`.
 Detect (det): `project.` inside a `@TaskAction` method, or inside a `doLast {` / `doFirst {` block — e.g. `project.version`, `project.layout`, `project.file(...)`.
 Fix: Declare the value as an `@Input` property, set it at configuration time, read it in the action.
 
-## Wiring Task Outputs with `map` and `flatMap` · `map_versus_flatmap` · Medium
+## Wire lazy task outputs using `map` and `flatMap` · `map_versus_flatmap` · Medium
 When: one task consumes another's output.
 Detect (det): `.get()` inside a `map {` / `flatMap {` closure; a bare `provider { someTask.get().output.get() }`; or `map { it.property.get() }`.
 Fix: Use `flatMap` to reach a `Provider`-typed task output, `map` to transform a value.
+
+## Favor collection property types over a `Property` holding a collection · `favor_collection_properties` · Medium
+When: the build defines a custom task type, extension, or plugin with properties.
+Detect (det): `Property<Collection<…>>`, `Property<Iterable<…>>`, `Property<List<…>>`, `Property<Set<…>>` or `Property<Map<…>>`; or a plain `List` / `Set` / `Map` field serving as a task input. Gradle rejects `Property<List<T>>` outright, so the surviving forms are the `Collection` / `Iterable` / plain-field spellings.
+Fix: Replace with `ListProperty` / `SetProperty` / `MapProperty` and contribute via `add` / `addAll` / `put`.
