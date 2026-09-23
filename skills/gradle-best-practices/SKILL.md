@@ -17,12 +17,6 @@ Audit a project against the official Gradle best practices, produce a structured
 
 **The best-practices catalog ships with this skill, pre-digested, under `references/`.** Read it from disk. Do not fetch anything from the network at run time.
 
-**Which catalog you have:** 48 practices, verified complete on 2026-09-23 against the Gradle **9.9.0 nightly** documentation.
-
-**Three of them are not in any released Gradle.** `obtain_loggers_via_logging_get_logger`, `favor_collection_properties` and `build-published-artifacts-securely` were added in 9.8.0 and exist only in the nightly docs — `docs.gradle.org/current` was still 9.7.1 when this catalog was captured. They may change before 9.8.0 ships. Apply them like the rest, but if a project pins a Gradle older than 9.8.0, say in the report that these three describe guidance that release predates.
-
-**The trade-off, stated plainly:** a bundled catalog is reproducible but fixed at capture time. Fetching the live docs would always reflect the newest practices; reading a bundled copy means every run checks the same things the same way, costs no network, and cannot be truncated or paraphrased in transit. Gradle adds practices at most once per release, so the drift is bounded — but it is real, in both directions: this copy can fall behind a newer release, and the three pre-release entries above can move under it. If the project you are auditing targets a Gradle version newer than the one above, say so in the report — there may be practices this catalog does not know about. Never fetch them mid-run.
-
 ## Sources of truth
 
 The catalog is layered so that each run reads only the layer it needs. **Read no more of it than the steps below tell you to** — every `Read` result stays in context and is re-sent on every later turn, so a file read once costs tokens on every turn after it.
@@ -31,9 +25,7 @@ The catalog is layered so that each run reads only the layer it needs. **Read no
 - **`references/fixes/<anchor>.md`** — one file per practice, holding that practice's rule, the fix in full, and for most entries the documentation's own `Don't`/`Do` pair in Kotlin DSL. This is optional depth, not a required layer: read one only when the category entry's one-line summary is not enough to make the change.
 - **`references/index.md`** — provenance only: the capture date, the source URLs, and the full 48-entry listing used to regenerate the catalog. **Do not read it at run time.** Everything a run needs from it is already in this file.
 
-The direct link for any best practice is `https://docs.gradle.org/current/userguide/best_practices_<category>.html#<anchor>`. The URL segment is the category file's name with dashes as underscores, so `structuring-builds.md` → `best_practices_structuring_builds.html`. Cite those URLs so the reader can follow up — but read the bundled file, never fetch it.
-
-The three 9.8.0 entries named above do not resolve on `current` yet; cite them under `https://docs.gradle.org/nightly/userguide/…` and say in the finding that the link is to pre-release documentation.
+The direct link for any best practice is `https://docs.gradle.org/current/userguide/best_practices_<category>.html#<anchor>`. The URL segment is the category file's name with dashes as underscores, so `structuring-builds.md` → `best_practices_structuring_builds.html`. Cite those URLs so the reader can follow up — but read the bundled file, never fetch it. A handful of the newest anchors do not resolve on `current` yet; for those, cite `https://docs.gradle.org/nightly/userguide/…` instead.
 
 ## Modes
 
