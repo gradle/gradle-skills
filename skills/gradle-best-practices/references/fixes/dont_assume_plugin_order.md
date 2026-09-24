@@ -16,6 +16,7 @@
   // Do — deferred callback, fires in either application order
   project.pluginManager.withPlugin("java-library") { configureJavaModule(project) }
   ```
+
 - **Don't:**
 
   ```kotlin
