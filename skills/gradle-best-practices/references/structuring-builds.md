@@ -16,9 +16,9 @@ Detect (det): a `buildSrc/` directory containing a build script or `src/main/` s
 Fix: Move build logic into `build-logic/` with its own settings file, pulled in via `includeBuild`. Structural.
 
 ## Avoid Unintentionally Creating Empty Projects · `avoid_empty_projects` · Medium
-When: the settings file uses a hierarchical include path.
-Detect (det): an `include(` argument with two or more colons after the first, e.g. `include(":subs:web:my-web-module")`, without a matching `project(":...").projectDir = file(...)` assignment.
-Fix: Set `project(":…").projectDir = file("…")` in settings so no empty intermediate project is synthesized.
+When: the settings file includes any project by a path holding more than one segment.
+Detect (det): **one** colon after the leading one is already enough — `include(":services:exporter")` counts, not just deeply nested `include(":subs:web:my-web-module")`. Gradle creates a project for *every* segment, so `:services:exporter` synthesizes `:services` as well. Report the intermediate segment when its directory holds no build script of its own (`services/build.gradle{,.kts}` absent). Reachable from either end: scan settings for the include paths, or scan the tree for a build script at `a/b/` with none at `a/`. A `projectDir` assignment on the *nested* path does not cure this — `project(":services:exporter").projectDir = …` leaves `:services` synthesized all the same; only a flat include name does.
+Fix: Replace the nested include with a flat name and point it at the directory — `include(":exporter")` plus `project(":exporter").projectDir = file("services/exporter")` — so no empty intermediate project is synthesized.
 
 ## Use Convention Plugins for Common Build Logic · `use_convention_plugins` · Medium
 When: the build has more than one project with a build script.

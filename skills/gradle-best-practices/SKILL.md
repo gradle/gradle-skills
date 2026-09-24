@@ -107,6 +107,12 @@ until you have already opened `tasks.md` for another reason.
 Absence matters as much as presence: several rows fire on a token that is
 *missing*, and those are the easiest violations to walk straight past.
 
+So does location. A few rows fire on where a file *sits* rather than on
+anything written inside it -- a build script at `a/b/` with none at `a/` is the
+whole symptom, and no amount of reading `a/b/build.gradle` will surface it. When
+a row names a path shape, check the tree. A file you have already opened and
+filed findings against is not finished with: ask what its own directory says.
+
 | grep for | entry | category |
 |:--|:--|:--|
 | `afterEvaluate` | `avoid_after_evaluate` | general |
@@ -119,7 +125,8 @@ Absence matters as much as presence: several rows fire on a token that is
 | **no** `rootProject.name` in settings | `name_your_root_project` | general |
 | `gradle.properties` inside a subproject directory | `do_not_use_gradle_properties_in_subprojects` | general |
 | `-D` / `-P` flags where `gradle.properties` belongs | `use_the_gradle_properties_file` | general |
-| `include(":a:b")` where `a/` holds no build script | `avoid_empty_projects` | structuring-builds |
+| `include(` whose path carries a colon after the leading one -- `include(":services:exporter")` already synthesizes `:services` | `avoid_empty_projects` | structuring-builds |
+| a build script at `a/b/build.gradle{,.kts}` with **no** build script in `a/` | `avoid_empty_projects` | structuring-builds |
 | `src/main/`, `src/test/` in the **root** project | `no_source_in_root` | structuring-builds |
 | `buildSrc/` | `favor_composite_builds` | structuring-builds |
 | the same `java { }` / `tasks.withType<…>` block in several subprojects | `use_convention_plugins` | structuring-builds |
@@ -156,8 +163,10 @@ Absence matters as much as presence: several rows fire on a token that is
 | `: DefaultTask()`, `extends DefaultTask`, `: Plugin<Project>` with **no** `GradleRunner` anywhere under `src/` | `test_custom_types_with_testkit` | testing |
 
 A row is a pointer, not a verdict. Read the entry before you report: several
-rows carry a `When:` precondition that rules the entry out, and two rows fire
-on the same token for different practices.
+rows carry a `When:` precondition that rules the entry out, two rows fire
+on the same token for different practices, and one practice can carry two rows
+reachable from opposite directions -- settings text or directory layout -- so
+that missing one still leaves the other.
 
 **The index is not the catalog.** Three of the 48 entries have no row --
 `modularize_builds`, `builds_should_be_reproducible` and
