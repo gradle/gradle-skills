@@ -4,7 +4,7 @@ description: "Audit a Gradle project against the official Gradle best practices,
 license: Apache-2.0
 metadata:
   author: gradle
-  version: "1.3.0"
+  version: "1.0.0"
   catalog_captured: "2026-09-23"
   catalog_gradle_version: "9.9.0-nightly"
   catalog_verified: "2026-09-23"
