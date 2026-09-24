@@ -5,7 +5,7 @@
 
 ---
 
-- **Fix:** Move the values to the root `gradle.properties`. For genuinely per-subproject configuration, use a convention plugin with an extension type.
+- **Fix:** Copy the values into the root `gradle.properties` — creating it if it does not exist — and then **delete the subproject's `gradle.properties` outright**. The fix is not complete until that file is gone: truncating it to zero bytes leaves the violation in place, because what is wrong is a `gradle.properties` existing at that path at all, not what it holds. For genuinely per-subproject configuration, use a convention plugin with an extension type.
 - **Don't:**
 
   ```kotlin

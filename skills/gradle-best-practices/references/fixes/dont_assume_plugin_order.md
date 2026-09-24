@@ -6,6 +6,16 @@
 ---
 
 - **Fix:** Wrap in `project.pluginManager.withPlugin("plugin-id") { ... }`, or apply the prerequisite explicitly with `project.pluginManager.apply("plugin-id")`.
+
+  **A conditional is not a guard.** `if (project.plugins.hasPlugin("java-library")) { … }` looks like the fix and is the bug: `hasPlugin` answers *has it been applied by now*, so applying this plugin first yields `false`, the block never runs, and nothing is logged or thrown — the plugin just configures nothing. Same for `pluginManager.hasPlugin(…)` and `plugins.findPlugin(…)`.
+
+  ```kotlin
+  // Don't — eager test, silently skipped when this plugin is applied first
+  if (project.plugins.hasPlugin("java-library")) { configureJavaModule(project) }
+
+  // Do — deferred callback, fires in either application order
+  project.pluginManager.withPlugin("java-library") { configureJavaModule(project) }
+  ```
 - **Don't:**
 
   ```kotlin

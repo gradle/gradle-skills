@@ -17,8 +17,8 @@ Fix: Replace with `plugins { id("…") }` and delete the `buildscript { }` class
 
 ## Don't Assume your Plugin is Applied after Another · `dont_assume_plugin_order` · Medium
 When: build logic in `buildSrc/` or `build-logic/`, or a script configuring another plugin's extensions.
-Detect (heur): `extensions.getByType(` / `extensions.getByName(`, or configuration of another plugin's extension at the top level of a plugin's `apply`, with no `pluginManager.withPlugin` guard. `subprojects {}` / `allprojects {}` blocks configuring plugin extensions are the common case.
-Fix: Wrap in `pluginManager.withPlugin("id") { … }`, or apply the prerequisite explicitly.
+Detect (heur): `extensions.getByType(` / `extensions.getByName(`, or configuration of another plugin's extension at the top level of a plugin's `apply`. `subprojects {}` / `allprojects {}` blocks configuring plugin extensions are the common case. **Being guarded is not enough — check which guard.** `pluginManager.withPlugin("id") { … }` is a deferred callback and is the fix; `plugins.hasPlugin("id")` / `pluginManager.hasPlugin("id")` / `plugins.findPlugin(…)` are eager point-in-time queries and are *themselves* the violation, because applying this plugin first makes the test false and the whole block is silently skipped forever. An `if (hasPlugin)` wrapper reads like a fix and reports nothing when it fails; treat it as unguarded.
+Fix: Replace any `if (…hasPlugin(…))` test with `pluginManager.withPlugin("id") { … }`, which fires whenever the other plugin is applied, before or after. If the prerequisite is genuinely required rather than optional, apply it explicitly with `pluginManager.apply("id")` and drop the conditional.
 
 ## Do Not Use Internal APIs · `do_not_use_internal_apis` · High
 When: Java/Kotlin/Groovy source under `buildSrc/` or `build-logic/`, or scripts importing Gradle types.
@@ -38,7 +38,7 @@ Fix: Add `rootProject.name = "…"` to the settings file, after any `pluginManag
 ## Do not use `gradle.properties` in subprojects · `do_not_use_gradle_properties_in_subprojects` · Medium
 When: more than one project.
 Detect (det): a `gradle.properties` file at any path other than the root project, or an included build's own root.
-Fix: Move the values to the root `gradle.properties`; use a convention plugin for per-project config.
+Fix: Copy the values into the root `gradle.properties`, then **delete the subproject's file** — emptying it does not clear the violation, since the detection is the file's existence at that path, not its contents. Use a convention plugin for per-project config.
 
 ## Avoid `afterEvaluate` · `avoid_after_evaluate` · High
 When: always.

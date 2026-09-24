@@ -21,9 +21,10 @@ Audit a project against the official Gradle best practices, produce a structured
 
 The catalog is layered so that each run reads only the layer it needs. **Read no more of it than the steps below tell you to** — every `Read` result stays in context and is re-sent on every later turn, so a file read once costs tokens on every turn after it.
 
-- **`references/<category>.md`** — one file per category, holding each entry's title, anchor, severity band, precondition, detection recipe, and a one-line fix summary. Terse by design: this is the layer you read to *decide*, and it carries everything needed to write a finding — including its **Fix:** line. Seven files: `general.md`, `structuring-builds.md`, `dependencies.md`, `tasks.md`, `performance.md`, `security.md`, `testing.md`.
-- **`references/fixes/<anchor>.md`** — one file per practice, holding that practice's rule, the fix in full, and for most entries the documentation's own `Don't`/`Do` pair in Kotlin DSL. This is optional depth, not a required layer: read one only when the category entry's one-line summary is not enough to make the change.
-- **`references/index.md`** — provenance only: the capture date, the source URLs, and the full 48-entry listing used to regenerate the catalog. **Do not read it at run time.** Everything a run needs from it is already in this file.
+- **`references/detection.md`** — how to read an entry, plus the symptom index. Read once, in Step 3.
+- **`references/<category>.md`** — one file per category, holding each entry's title, anchor, severity band, precondition, detection recipe, and a one-line fix summary. Terse by design: this is the layer you read to *decide*, and it carries everything needed to write a finding — including its **Fix:** line. Read only the ones Step 2 selects. Seven files: `general.md`, `structuring-builds.md`, `dependencies.md`, `tasks.md`, `performance.md`, `security.md`, `testing.md`.
+- **`references/fixes/<anchor>.md`** — one file per practice: the rule, the fix in full, and for most entries the documentation's own `Don't`/`Do` pair in Kotlin DSL. Optional depth, never a required layer. Read one **only when the category entry's `Fix:` line is not enough to make the change**, and then one at a time as you reach each fix — never up front. There are 46; loading them speculatively wastes context for no gain.
+- **`references/index.md`** — provenance only: the capture date, the source URLs, and the full 48-entry listing used to regenerate the catalog. **Never read it at run time.** Everything a run needs from it is already here; it costs ~7,400 characters and a turn for nothing.
 
 The direct link for any best practice is `https://docs.gradle.org/current/userguide/best_practices_<category>.html#<anchor>`. The URL segment is the category file's name with dashes as underscores, so `structuring-builds.md` → `best_practices_structuring_builds.html`. Cite those URLs so the reader can follow up — but read the bundled file, never fetch it. A handful of the newest anchors do not resolve on `current` yet; for those, cite `https://docs.gradle.org/nightly/userguide/…` instead.
 
@@ -71,120 +72,19 @@ Triage first, from what Step 1 found. Read a category file only if its precondit
 
 A category you skip is a legitimate *not applicable* — count its entries and say which categories you skipped and why, rather than silently dropping them.
 
-**Do not read `references/index.md`.** Its triage table is the one above and its entry listing is provenance, not run-time material. Reading it costs roughly 7,400 characters and a turn, on every run, for nothing this skill needs.
-
-**Do not read `references/fixes/` yet.** Those hold rules and fix material, not detection material; Steps 5 and 6 read them one at a time, only for practices you actually found violated.
-
 If a category file is missing or unreadable, say so and stop — do not fall back to memorized best practices or to fetching the docs.
 
 ## Step 3: Take each entry's detection approach from the catalog
 
-The translation from documentation prose into a concrete check is already done, once, and recorded in the category files. **Do not re-derive it.** The recipes are this skill's fixed contract: two runs against the same project must check the same things the same way, and a re-derived check breaks that. Each entry is a heading carrying `Title · anchor · Severity`, then:
-
-1. **`When:`** — the precondition. If the project does not meet it, the entry is *not applicable*; count it and move on. (No Kotlin plugin applied means the Kotlin-stdlib entry is out. No custom tasks or plugins means the TestKit entry is out.)
-2. **`Detect (det)` / `Detect (heur)`** — the check to run against the files discovered in Step 1:
-   - **`det`, deterministic** — a specific string, glob, or property value answers it yes/no. Examples: any `.gradle` file present (Kotlin DSL), `distributionUrl` ends in `-all.zip` (bin distribution), `org.gradle.caching=true` missing (build cache), `apply plugin:` in a build script (plugins block), `afterEvaluate {` anywhere (avoid `afterEvaluate`), `PathSensitivity.ABSOLUTE` in custom task source.
-   - **`heur`, heuristic** — requires judgment across multiple files (e.g., "duplication across subprojects suggests a convention plugin is missing", "many source files in a single project suggests modularization is needed", "`dependsOn` is fine for lifecycle tasks but not for tasks with actions"). Flag only on the evidence the entry names, and note the uncertainty in the finding.
-3. **Severity band** — the third field on the heading line. These bands are this skill's editorial classification; the official docs assign none, so do not present them as Gradle ranking one practice above another.
-   - **High** — security risks, likely build failures, broken configuration cache, or significant correctness problems.
-   - **Medium** — suboptimal builds, maintenance burden, or violations of Gradle conventions.
-   - **Recommendation** — modern idioms and nice-to-have improvements.
-4. **`Fix:`** — a one-line summary of the change to make. This is what the report's **Fix:** line quotes, and for most practices it is enough to apply the fix directly. `references/fixes/<anchor>.md` holds the same fix in full with the documentation's `Don't`/`Do` pair; read it only when the summary is not enough.
-
-Run every applicable check. Batch the searching by pattern rather than by entry — one pass per pattern across the discovered files is cheaper than re-reading every file once per entry.
-
-### Symptom index
-
-The patterns to batch on. Each row is a literal you can `grep` for and the entry
-it belongs to; the entry in the category file is still the contract -- this
-table only tells you which entry to go and read, and never what to report.
-
-It exists because a token in a build script is the thing you actually see
-first. Scanning `lib/build.gradle.kts` and meeting `outputs.cacheIf { true }`
-is no use if nothing connects that string to `use_cacheability_annotations`
-until you have already opened `tasks.md` for another reason.
-
-Absence matters as much as presence: several rows fire on a token that is
-*missing*, and those are the easiest violations to walk straight past.
-
-So does location. A few rows fire on where a file *sits* rather than on
-anything written inside it -- a build script at `a/b/` with none at `a/` is the
-whole symptom, and no amount of reading `a/b/build.gradle` will surface it. When
-a row names a path shape, check the tree. A file you have already opened and
-filed findings against is not finished with: ask what its own directory says.
-
-| grep for | entry | category |
-|:--|:--|:--|
-| `afterEvaluate` | `avoid_after_evaluate` | general |
-| `apply plugin:`, `apply(plugin =`, `buildscript {`, `classpath` | `use_the_plugins_block` | general |
-| `extensions.getByType(`, `extensions.getByName(` after an `apply` | `dont_assume_plugin_order` | general |
-| `.internal.`, `org.gradle.…Internal` | `do_not_use_internal_apis` | general |
-| `@Incubating`, `@OptIn` | `consider_use_of_incubating_apis_carefully` | general |
-| `project.logger`, `getProject().getLogger()` | `obtain_loggers_via_logging_get_logger` | general |
-| a `*.gradle` file where `*.gradle.kts` is meant | `use_kotlin_dsl` | general |
-| **no** `rootProject.name` in settings | `name_your_root_project` | general |
-| `gradle.properties` inside a subproject directory | `do_not_use_gradle_properties_in_subprojects` | general |
-| `-D` / `-P` flags where `gradle.properties` belongs | `use_the_gradle_properties_file` | general |
-| `include(` whose path carries a colon after the leading one -- `include(":services:exporter")` already synthesizes `:services` | `avoid_empty_projects` | structuring-builds |
-| a build script at `a/b/build.gradle{,.kts}` with **no** build script in `a/` | `avoid_empty_projects` | structuring-builds |
-| `src/main/`, `src/test/` in the **root** project | `no_source_in_root` | structuring-builds |
-| `buildSrc/` | `favor_composite_builds` | structuring-builds |
-| the same `java { }` / `tasks.withType<…>` block in several subprojects | `use_convention_plugins` | structuring-builds |
-| `repositories {` in a build script rather than settings | `set_up_repositories_in_settings` | dependencies |
-| a hardcoded `group:artifact:version`, `val fooVersion =`, `ext`/`extra` | `use_version_catalogs` | dependencies |
-| vague catalog keys -- `stuff`, `utils`, `core`, `module` | `name_version_catalog_entries` | dependencies |
-| the same GAV under two configurations | `avoid_duplicate_dependencies` | dependencies |
-| `exclude` on `configurations {` / `configurations.configureEach {` | `apply_exclusions_narrowly` | dependencies |
-| a consumable/resolvable configuration with **no** `attributes {` | `use_attributes_on_configurations` | dependencies |
-| a dependency in map form -- `group:` / `name:` / `version:` (Groovy) or `group =` / `name =` / `version =` (Kotlin) | `single-gav-string` | dependencies |
-| `kotlin("stdlib")`, `org.jetbrains.kotlin:kotlin-stdlib` | `dont_depend_on_kotlin_stdlib` | dependencies |
-| **no** `content {` / `exclusiveContent {` on a narrow repository | `use_content_filtering` | dependencies |
-| `outputs.cacheIf`, `outputs.doNotCacheIf` | `use_cacheability_annotations` | tasks |
-| `dependsOn` between two tasks that have actions | `avoid_depends_on` | tasks |
-| `.files`, `.asPath`, `.size`, `.isEmpty()`, `.toList()` on a `FileCollection` -- including `fileTree(…).files` | `avoid_eager_file_collection_apis` | tasks |
-| `.resolve()`, `configurations.<name>.files`, `.asFileTree`, `.singleFile` | `dont_resolve_configurations_before_task_execution` | tasks |
-| `.get()`, `.getOrElse(`, `.getOrNull()`, `.isPresent` outside `@TaskAction` / `doLast` | `avoid_provider_get_outside_task_action` | tasks |
-| `project.` *inside* `@TaskAction` / `doLast {` / `doFirst {` | `dont_access_project_instance_inside_task` | tasks |
-| `PathSensitivity.ABSOLUTE` | `default_path_sensitivities` | tasks |
-| `tasks.register(` / `tasks.create(` with **no** `group` and **no** `description` | `group_describe_tasks` | tasks |
-| two tasks writing the same `outputs.dir` / `@OutputDirectory` | `use_unique_output_files_and_directories` | tasks |
-| `tasks.getByName("…")`, `tasks.named("…")` with a literal name | `dont_hardcode_task_names` | tasks |
-| `map {` whose lambda returns a `Provider` | `map_versus_flatmap` | tasks |
-| `Property<List<…>>`, `Property<Set<…>>`, `Property<Map<…>>` | `favor_collection_properties` | tasks |
-| `org.gradle.jvmargs` without `-Dfile.encoding=UTF-8` | `use_utf8_encoding` | performance |
-| **no** `org.gradle.caching=true` | `use_build_cache` | performance |
-| **no** `org.gradle.configuration-cache=true` | `use_configuration_cache` | performance |
-| `File(…).readText()`, `readLines()` at configuration time | `avoid_computations_in_configuration_phase` | performance |
-| `distributionUrl` ending `-all.zip` | `prefer_bin_distribution` | performance |
-| `distributionUrl` naming a release older than the current one | `use_latest_minor_versions` | general |
-| **no** `distributionSha256Sum` in `gradle-wrapper.properties` | `validate_gradle_checksum` | security |
-| `distributionUrl` not on `https://services.gradle.org/` | `validate_wrapper_checksum` | security |
-| `exec(`, `ProcessBuilder`, `Runtime.getRuntime().exec` | `run_gradle_on_external_projects` | security |
-| `: DefaultTask()`, `extends DefaultTask`, `: Plugin<Project>` with **no** `GradleRunner` anywhere under `src/` | `test_custom_types_with_testkit` | testing |
-
-A row is a pointer, not a verdict. Read the entry before you report: several
-rows carry a `When:` precondition that rules the entry out, two rows fire
-on the same token for different practices, and one practice can carry two rows
-reachable from opposite directions -- settings text or directory layout -- so
-that missing one still leaves the other.
-
-**The index is not the catalog.** Three of the 48 entries have no row --
-`modularize_builds`, `builds_should_be_reproducible` and
-`build-published-artifacts-securely` -- because none has a literal token to
-grep for; they are judged across the whole tree, or against CI configuration,
-from their `heur` recipes. A clean pass over this table is not a clean audit,
-and Step 2's category reading is still what decides which entries apply.
-
-Two anchors are hyphenated (`single-gav-string`,
-`build-published-artifacts-securely`) where the other 46 use underscores. That
-is upstream's own spelling, taken from the category pages, and it is preserved
-here because the anchor *is* the documentation URL fragment.
+**Read `references/detection.md` now.** It holds the anatomy of a catalog entry
+(`When:` / `Detect` / severity / `Fix:`), the rule that a recipe's listed tokens
+are examples rather than a closed set, the four entries that can only be decided
+by comparing files against each other, and the symptom index mapping build-script
+tokens to entries. It replaces re-deriving any check yourself.
 
 ## Step 4: Check the project
 
-Apply each detection approach by searching and reading the files discovered in Step 1. Record each finding with: best practice title, anchor URL, file(s) and line(s) where the violation appears, a one-sentence description, and the severity band.
-
-The category entry's `Fix:` line is the report's **Fix:** line — no further read is needed to produce the report. `references/fixes/<anchor>.md` carries the same fix in full, with the documentation's `Don't`/`Do` pair; it is optional depth for Step 6, not a prerequisite for Step 5. A run that reports findings without opening a single fix file is working as intended.
+Record each finding with: best practice title, anchor URL, file(s) and line(s) where the violation appears, a one-sentence description, and the severity band. The category entry's `Fix:` line is the report's **Fix:** line — a run that reports findings without opening a single file under `references/fixes/` is working as intended.
 
 Violations are not mutually exclusive: one line can violate several practices at once, and matching a line to one practice does not exhaust it. Example: `dependsOn 'listMaintainedCars'` between two tasks with actions violates both *Don't hardcode task names* (the string) and *Avoid dependsOn* (the coupling) — fixing the string form to `dependsOn someTaskProvider` resolves the first and leaves the second. Record one finding per violated practice, even when findings share a line.
 
@@ -230,17 +130,14 @@ In Audit mode, ask: "Would you like me to apply any of these fixes? I can propos
 In Apply mode, skip the question and proceed directly.
 
 When applying fixes:
-- `references/fixes/<anchor>.md` is **optional reference material, not a required step**. Each file holds the practice's rule, the change to make, and for most entries the documentation's own `Don't`/`Do` pair in Kotlin DSL — the **Don't** block is the shape to match, the **Do** block the shape to write. Long blocks are excerpted around the lines that actually differ, with `// ...` marking the elision; copy the shape, not the surrounding scaffolding.
-
-  **Read one only when you need it** — when the fix is not obvious from the detection entry, when you want the documentation's exact `Do` shape rather than your own phrasing, or when you are about to make a structural change and want the reference layout. If the fix is unambiguous, apply it and move on; opening the file buys nothing.
-
-  Read them **one at a time, as you reach each fix — never up front**. There are 46 of them and loading them speculatively wastes context for no gain.
+- In a `references/fixes/` file, the **Don't** block is the shape to match and the **Do** block the shape to write. Long blocks are excerpted around the lines that actually differ, with `// ...` marking the elision; copy the shape, not the surrounding scaffolding. Open one when the category entry's `Fix:` line leaves the change ambiguous, or when you want the documentation's exact `Do` shape rather than your own phrasing. If the fix is unambiguous, apply it and move on.
 
   Five entries (`modularize_builds`, `no_source_in_root`, `favor_composite_builds`, `use_convention_plugins`, `test_custom_types_with_testkit`) carry no `Don't`/`Do` pair, because the documentation's example is a whole-project layout; their `Fix` prose is the specification, so consult those when touching project structure.
 - Start with the highest-priority issues. Group related fixes (e.g., all `repositories {}` blocks moved at once).
 - For **straightforward fixes** (adding `org.gradle.caching=true`, renaming `-all.zip` to `-bin.zip`, adding `rootProject.name`, swapping `apply plugin:` for the `plugins {}` block, adding `group`/`description` to a task, replacing `.get()` with `.map { }`), edit the file in place and show the diff.
 - For **source-level fixes** in `buildSrc/` or `build-logic/` (replacing `PathSensitivity.ABSOLUTE`, removing `project.` access inside `@TaskAction`, adding `attributes { }` to consumable configurations), apply the edit and re-read the file to confirm it still compiles.
 - For **structural fixes** (migrating `buildSrc/` to `build-logic/`, modularizing a project, converting Groovy DSL to Kotlin DSL, extracting convention plugins from duplication), describe the plan first, get user confirmation — or, unattended, record the plan and proceed without it — then apply incrementally with a checkpoint after each step.
-- After each fix, confirm the change resolved the issue. If a fix uncovers a related issue (e.g., moving repositories to settings reveals that `FAIL_ON_PROJECT_REPOS` should be set), surface that as a follow-up.
+- After each fix, confirm the change resolved the issue by re-running that entry's `Detect` line against the changed tree — not by re-reading your own edit. The two differ more often than they should: a file emptied but not deleted, a provider un-`get()`-ed but handed to an API that stringifies it. **A successful build is not confirmation.** Both of those compile and pass `./gradlew build` while leaving the practice violated, so where a fix changes a *value* rather than a declaration, check the value that actually reaches the consumer. If a fix uncovers a related issue (e.g., moving repositories to settings reveals that `FAIL_ON_PROJECT_REPOS` should be set), surface that as a follow-up.
+- **Before recording any finding as unfixable, re-read the entry's `Fix:` line to the end.** Several carry more than one route, chosen by a condition — `avoid_depends_on` branches on whether an artifact flows between the tasks; `avoid_provider_get_outside_task_action` branches on the receiving parameter's type. "This can't be fixed without changing behavior" almost always means the first route was tried, found inapplicable, and the rest of the line went unread. An entry is genuinely unfixable only when every route it names has been tried and the reason each failed is recorded.
 - After fixing a line, re-check it against the remaining findings and the full catalog: a fix for one facet often leaves a co-located violation intact, or introduces a new one.
 - If the user declines a fix, leave it as-is and move on.
