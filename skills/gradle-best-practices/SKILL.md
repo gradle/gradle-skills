@@ -93,6 +93,84 @@ The translation from documentation prose into a concrete check is already done, 
 
 Run every applicable check. Batch the searching by pattern rather than by entry — one pass per pattern across the discovered files is cheaper than re-reading every file once per entry.
 
+### Symptom index
+
+The patterns to batch on. Each row is a literal you can `grep` for and the entry
+it belongs to; the entry in the category file is still the contract -- this
+table only tells you which entry to go and read, and never what to report.
+
+It exists because a token in a build script is the thing you actually see
+first. Scanning `lib/build.gradle.kts` and meeting `outputs.cacheIf { true }`
+is no use if nothing connects that string to `use_cacheability_annotations`
+until you have already opened `tasks.md` for another reason.
+
+Absence matters as much as presence: several rows fire on a token that is
+*missing*, and those are the easiest violations to walk straight past.
+
+| grep for | entry | category |
+|:--|:--|:--|
+| `afterEvaluate` | `avoid_after_evaluate` | general |
+| `apply plugin:`, `apply(plugin =`, `buildscript {`, `classpath` | `use_the_plugins_block` | general |
+| `extensions.getByType(`, `extensions.getByName(` after an `apply` | `dont_assume_plugin_order` | general |
+| `.internal.`, `org.gradle.…Internal` | `do_not_use_internal_apis` | general |
+| `@Incubating`, `@OptIn` | `consider_use_of_incubating_apis_carefully` | general |
+| `project.logger`, `getProject().getLogger()` | `obtain_loggers_via_logging_get_logger` | general |
+| a `*.gradle` file where `*.gradle.kts` is meant | `use_kotlin_dsl` | general |
+| **no** `rootProject.name` in settings | `name_your_root_project` | general |
+| `gradle.properties` inside a subproject directory | `do_not_use_gradle_properties_in_subprojects` | general |
+| `-D` / `-P` flags where `gradle.properties` belongs | `use_the_gradle_properties_file` | general |
+| `include(":a:b")` where `a/` holds no build script | `avoid_empty_projects` | structuring-builds |
+| `src/main/`, `src/test/` in the **root** project | `no_source_in_root` | structuring-builds |
+| `buildSrc/` | `favor_composite_builds` | structuring-builds |
+| the same `java { }` / `tasks.withType<…>` block in several subprojects | `use_convention_plugins` | structuring-builds |
+| `repositories {` in a build script rather than settings | `set_up_repositories_in_settings` | dependencies |
+| a hardcoded `group:artifact:version`, `val fooVersion =`, `ext`/`extra` | `use_version_catalogs` | dependencies |
+| vague catalog keys -- `stuff`, `utils`, `core`, `module` | `name_version_catalog_entries` | dependencies |
+| the same GAV under two configurations | `avoid_duplicate_dependencies` | dependencies |
+| `exclude` on `configurations {` / `configurations.configureEach {` | `apply_exclusions_narrowly` | dependencies |
+| a consumable/resolvable configuration with **no** `attributes {` | `use_attributes_on_configurations` | dependencies |
+| a dependency in map form -- `group:` / `name:` / `version:` (Groovy) or `group =` / `name =` / `version =` (Kotlin) | `single-gav-string` | dependencies |
+| `kotlin("stdlib")`, `org.jetbrains.kotlin:kotlin-stdlib` | `dont_depend_on_kotlin_stdlib` | dependencies |
+| **no** `content {` / `exclusiveContent {` on a narrow repository | `use_content_filtering` | dependencies |
+| `outputs.cacheIf`, `outputs.doNotCacheIf` | `use_cacheability_annotations` | tasks |
+| `dependsOn` between two tasks that have actions | `avoid_depends_on` | tasks |
+| `.files`, `.asPath`, `.size`, `.isEmpty()`, `.toList()` on a `FileCollection` -- including `fileTree(…).files` | `avoid_eager_file_collection_apis` | tasks |
+| `.resolve()`, `configurations.<name>.files`, `.asFileTree`, `.singleFile` | `dont_resolve_configurations_before_task_execution` | tasks |
+| `.get()`, `.getOrElse(`, `.getOrNull()`, `.isPresent` outside `@TaskAction` / `doLast` | `avoid_provider_get_outside_task_action` | tasks |
+| `project.` *inside* `@TaskAction` / `doLast {` / `doFirst {` | `dont_access_project_instance_inside_task` | tasks |
+| `PathSensitivity.ABSOLUTE` | `default_path_sensitivities` | tasks |
+| `tasks.register(` / `tasks.create(` with **no** `group` and **no** `description` | `group_describe_tasks` | tasks |
+| two tasks writing the same `outputs.dir` / `@OutputDirectory` | `use_unique_output_files_and_directories` | tasks |
+| `tasks.getByName("…")`, `tasks.named("…")` with a literal name | `dont_hardcode_task_names` | tasks |
+| `map {` whose lambda returns a `Provider` | `map_versus_flatmap` | tasks |
+| `Property<List<…>>`, `Property<Set<…>>`, `Property<Map<…>>` | `favor_collection_properties` | tasks |
+| `org.gradle.jvmargs` without `-Dfile.encoding=UTF-8` | `use_utf8_encoding` | performance |
+| **no** `org.gradle.caching=true` | `use_build_cache` | performance |
+| **no** `org.gradle.configuration-cache=true` | `use_configuration_cache` | performance |
+| `File(…).readText()`, `readLines()` at configuration time | `avoid_computations_in_configuration_phase` | performance |
+| `distributionUrl` ending `-all.zip` | `prefer_bin_distribution` | performance |
+| `distributionUrl` naming a release older than the current one | `use_latest_minor_versions` | general |
+| **no** `distributionSha256Sum` in `gradle-wrapper.properties` | `validate_gradle_checksum` | security |
+| `distributionUrl` not on `https://services.gradle.org/` | `validate_wrapper_checksum` | security |
+| `exec(`, `ProcessBuilder`, `Runtime.getRuntime().exec` | `run_gradle_on_external_projects` | security |
+| `: DefaultTask()`, `extends DefaultTask`, `: Plugin<Project>` with **no** `GradleRunner` anywhere under `src/` | `test_custom_types_with_testkit` | testing |
+
+A row is a pointer, not a verdict. Read the entry before you report: several
+rows carry a `When:` precondition that rules the entry out, and two rows fire
+on the same token for different practices.
+
+**The index is not the catalog.** Three of the 48 entries have no row --
+`modularize_builds`, `builds_should_be_reproducible` and
+`build-published-artifacts-securely` -- because none has a literal token to
+grep for; they are judged across the whole tree, or against CI configuration,
+from their `heur` recipes. A clean pass over this table is not a clean audit,
+and Step 2's category reading is still what decides which entries apply.
+
+Two anchors are hyphenated (`single-gav-string`,
+`build-published-artifacts-securely`) where the other 46 use underscores. That
+is upstream's own spelling, taken from the category pages, and it is preserved
+here because the anchor *is* the documentation URL fragment.
+
 ## Step 4: Check the project
 
 Apply each detection approach by searching and reading the files discovered in Step 1. Record each finding with: best practice title, anchor URL, file(s) and line(s) where the violation appears, a one-sentence description, and the severity band.
