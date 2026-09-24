@@ -5,7 +5,7 @@ Read this file only if the build registers or configures a task, or has task/plu
 ## Avoid DependsOn · `avoid_depends_on` · Medium
 When: any `dependsOn` appears.
 Detect (det): `dependsOn` where the depended-on task has a `@TaskAction` or `doLast` / `doFirst` — i.e. is not a pure lifecycle task such as `build`, `check`, `assemble`.
-Fix: Wire the producer's output into the consumer's input instead of declaring `dependsOn`.
+Fix: Decide first whether an artifact actually flows between the two tasks. **If it does** — the depended-on task writes something the depender reads — wire output into input (`inputs.file(tasks.named<T>("produce").map { it.outputFile })`) and delete the `dependsOn`. **If nothing flows and the edge is pure ordering**, input wiring is unavailable and is not the answer; pick by what the ordering has to guarantee: fold the first task's work into the second (extract the shared logic into a class or function both call — that is reuse, not duplication) when the follow-up must always happen; `finalizedBy` on the producer when a step must always trail it; `mustRunAfter` only when the ordering matters solely if both tasks are already in the graph. A conclusion of "cannot remove this without changing behavior" means the wrong branch was taken, not that the edge is required.
 
 ## Favor `@CacheableTask` and `@DisableCachingByDefault` over `cacheIf(Spec)` and `doNotCacheIf(String, Spec)` · `use_cacheability_annotations` · Medium
 When: the build defines a custom task type.
@@ -20,7 +20,7 @@ Fix: Set `group` and `description`, in the registration block or the task class 
 ## Do not call `get()` on a Provider outside a Task action · `avoid_provider_get_outside_task_action` · High
 When: the build uses providers or lazy properties.
 Detect (det): `.get()`, `.getOrElse(`, `.getOrNull()`, `.isPresent` on a `Provider` / `Property`, or `layout.buildDirectory.get()`, at the top level of a script or inside a task *configuration* block — as opposed to inside `@TaskAction` / `doLast`.
-Fix: Chain with `.map { }` instead of calling `.get()` during configuration.
+Fix: Chain with `.map { }` instead of calling `.get()` during configuration. Deleting the `.get()` is only half the change — check what receives the value, because handing a raw provider to the wrong API fails silently. APIs typed `Provider`/`Property` accept it (`Directory.file(Provider<CharSequence>)`, `.set(…)`, `ConfigurableFileCollection.from(…)`). APIs typed `Object` / `String` / `Any` do **not** unwrap it — `systemProperty(name, value)`, `environment(…)`, `args(…)`, `extra[…]`, and any string template `"$p"` call `toString()` at execution, so the value silently becomes the literal text `extension 'carLog' property 'logFileName'` and the build still succeeds. For those, resolve inside the task action instead: `doFirst { systemProperty("k", p.get()) }` — `.get()` inside an action is exactly where this practice permits it.
 
 ## Don't resolve Configurations before Task Execution · `dont_resolve_configurations_before_task_execution` · High
 When: the build passes a configuration to a task.
