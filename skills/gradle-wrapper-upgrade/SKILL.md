@@ -22,6 +22,8 @@ The steps below are the same material either way: in act mode you run them, in a
 
 Upgrading means running the built-in `wrapper` task, never hand-editing files: `gradlew`, `gradlew.bat`, and `gradle-wrapper.jar` are generated, and the next `wrapper` run reverts any edit without warning. **Scope:** a wrapper that already exists — adding one to a project with none is a different job (`gradle :wrapper` from a system Gradle install).
 
+One reference ships beside this file: **`references/rollback.md`**, for an upgrade the build cannot take. **Open it only when Step 6 says to** — most upgrades never need it.
+
 ## Step 1 — Orient
 
 Confirm `gradlew` is in the project root and read `distributionUrl` from `gradle/wrapper/gradle-wrapper.properties`. It carries both things you need: the **current version** (`gradle-8.14-bin.zip` → 8.14) and the **distribution type** (`-bin` or `-all`).
@@ -36,13 +38,54 @@ Use the version the user named. **If they named none, upgrade to the latest rele
 curl -s https://services.gradle.org/versions/current     # → version + checksumUrl
 ```
 
-Resolve before you pin — no checksum can be looked up for `--gradle-version=latest`. Pinning the sum is standard on every upgrade, not an add-on; it is what verifies the download. Take it from that `checksumUrl`, or from https://gradle.org/release-checksums/.
+Resolve before you pin — no checksum can be looked up for `--gradle-version=latest`. Pinning the sum is standard on every upgrade, not an add-on; it is what verifies the download.
+
+**The sum is the distribution URL with `.sha256` appended**, and that one line is the whole lookup:
+
+```
+curl -sL https://services.gradle.org/distributions/gradle-9.0.0-bin.zip.sha256
+```
+
+`.sha256`, **not `.sha256sum`** — that one 404s on every version and reads like the release doesn't exist. `-L` is required: the URL `301`s to `downloads.gradle.org`, and `-f` won't catch that because it only fails on 4xx and 5xx, so HTML back means you didn't follow the redirect. The body is the bare hex sum. A genuine 404 → the `checksumUrl` in the JSON above, or https://gradle.org/release-checksums/ — not another guessed URL.
 
 **Match the sum to the zip named in `distributionUrl`.** Each release publishes separate sums for the `-bin` zip, the `-all` zip, and the wrapper JAR. The wrong one fails with `Verification of Gradle distribution failed!`, which reads like a tampered download rather than the copy-paste error it usually is.
 
 Once `distributionSha256Sum` is set, any later `wrapper` run that *changes* `--gradle-version` must pass a new matching sum — the build fails rather than reuse the stale one. If the version doesn't change, the sum is preserved automatically.
 
-## Step 3 — Run the `wrapper` task twice
+## Step 3 — Baseline the build, then snapshot the wrapper
+
+First, establish that the build works *before* you touch it:
+
+```
+./gradlew --console=plain tasks
+```
+
+Keep the exit code. This is the canary, and Steps 5 and 6 re-run it: **a red canary after an upgrade means nothing if it was red beforehand.**
+
+**`tasks`, not `build`.** `tasks` applies every plugin and registers every task — the exact surface a new major breaks — while compiling and running nothing, so it is fast and fails only for reasons the upgrade caused. `build` goes red on a flaky test or an unreachable repository, and rolling back on that would revert upgrades that were fine.
+
+If the build sets `org.gradle.configuration-on-demand=true`, use `tasks --all` instead — plain `tasks` configures the root project and little else, so it would pass while a subproject is broken. **Whichever form you pick, use that identical command every later time**; `tasks` before against `tasks --all` after is not a comparison.
+
+**If the canary fails here, stop and do not upgrade.** `:wrapper` configures the build too, so Step 4 will fail for the same reason — there is no supported way to upgrade a build that will not configure. Report what broke; getting it green on its current version comes first.
+
+Then copy the four wrapper files somewhere outside the project:
+
+```
+SNAP=$(mktemp -d) && mkdir -p "$SNAP/gradle/wrapper" \
+  && cp gradlew gradlew.bat "$SNAP/" \
+  && cp gradle/wrapper/gradle-wrapper.{properties,jar} "$SNAP/gradle/wrapper/" \
+  && echo "snapshot: $SNAP"
+```
+
+**One command, and write down the path it prints.** Shell variables do not survive into your next command, so `$SNAP` is empty by the time you would restore — and unset, `cp -a "$SNAP"/. .` becomes `cp -a /. .`. Use the literal path from there on.
+
+**All four, not just the properties.** Run 1 rewrites the scripts and jar from the old templates, run 2 from the new, so a failure between them leaves a mixture. Reverting `gradle-wrapper.properties` alone moves the version back while leaving the new `gradlew` and jar in place — the half-done state of Step 5, reached by trying to undo one.
+
+**Outside the project.** A `.bak` beside the original is a file you added to the user's tree. Delete the snapshot once Step 5 passes.
+
+In git, `git checkout -- gradlew gradlew.bat gradle/wrapper` restores the same four and needs no copy — but only if they were committed and clean. Check `git status --short` on those paths first; copy if it prints anything, or if the project is not in git.
+
+## Step 4 — Run the `wrapper` task twice
 
 ```
 ./gradlew --console=plain :wrapper --gradle-version=8.14.4 --gradle-distribution-sha256-sum=<sha256>
@@ -55,17 +98,38 @@ Same command, twice: the first regenerates the scripts and jar from the *old* Gr
 
 Running as an agent:
 
-- **Trust the exit code; never grep for `BUILD SUCCESSFUL`.** A failed checksum must not read as a successful upgrade.
-- **The second run downloads the full distribution (100 MB+).** A long silence is normal, not a hang — abandoning it leaves exactly the half-done state described below.
+- **Trust the exit code; never grep for `BUILD SUCCESSFUL`.** A failed checksum must not read as a successful upgrade. A nonzero exit from either run sends you to Step 6, not to a third attempt.
+- **The second run downloads the full distribution (100 MB+).** A long silence is normal, not a hang — abandoning it leaves the half-done state described below, and is the one rollback with no error message to quote.
 - **`--console=plain`** keeps the output parseable: no progress bar, no colors.
 
-## Step 4 — Verify
+## Step 5 — Verify the files, then run the canary
 
 ```
 git status --short gradle/wrapper gradlew gradlew.bat
 ```
 
-On a real version change, all four files show as modified: `gradle-wrapper.properties`, `gradle-wrapper.jar`, `gradlew`, `gradlew.bat`. **Only the properties moved → the second run didn't happen.** Then `./gradlew --version` should report the target version. That check can't stand alone: the version it prints comes from `distributionUrl`, so it looks correct even while the scripts and jar are stale.
+On a real version change, all four files show as modified: `gradle-wrapper.properties`, `gradle-wrapper.jar`, `gradlew`, `gradlew.bat`. **Only the properties moved → the second run didn't happen.** Not in git? `diff -r <snapshot> .` over the four paths instead; all four must differ. Then `./gradlew --version` should report the target version. That check can't stand alone either way: the version it prints comes from `distributionUrl`, so it looks correct even while the scripts and jar are stale.
+
+Those check that the upgrade *landed*. They say nothing about whether the build still works, so re-run the canary — **the same command as Step 3**:
+
+```
+./gradlew --console=plain tasks
+```
+
+**Nonzero exit → Step 6.** Green here, against the green baseline from Step 3, is the upgrade verified: delete the snapshot and report.
+
+## Step 6 — If the build no longer configures, roll back and stop
+
+Two ways to get here, and the second is the one that matters:
+
+- **The `wrapper` task itself failed.** Run 2 *is* the new version, so a build it cannot configure takes the second invocation down with it. Obvious, and it leaves the properties pointing at a version the project cannot run.
+- **The `wrapper` task succeeded and the canary failed.** The upgrade landed cleanly, all four files are correct, and the build is now unusable. This is the dangerous one, because every file-level check in Step 5 passes and the agent that stops there reports a successful upgrade over a broken project.
+
+Either way the cause is the same: a new major removes APIs, raises the minimum JVM, and ships a new Groovy, and a build script, a plugin, or a `buildSrc` that relies on what went away no longer configures. That is a blocked upgrade, not a partial one.
+
+**Read `references/rollback.md` now and follow it** — restoring the four files without scattering them, verifying the restore, and the four things the closing report must say. Do not improvise it from this page.
+
+Nothing else here applies once you are on this branch. Do not retry the upgrade, and do not edit build scripts to force it through.
 
 ## Why run the task TWICE — the #1 real-world gotcha
 
@@ -79,6 +143,8 @@ Symptoms of a half-done upgrade, very common in support questions: wrapper or de
 
 ## Out of scope
 
-A mechanically correct upgrade can still leave a build that doesn't run: new versions remove deprecated APIs, raise the minimum JVM, and break plugins that haven't caught up. That is an expected outcome, not a failed upgrade. Finish and verify the wrapper upgrade, then report any build failure as the separate problem it is.
+**Fixing the build is out of scope in both directions** — neither to force a blocked upgrade through, nor to repair what the new version broke. A mechanically correct upgrade that leaves the build unusable is still a failed job, and the answer is Step 6, not a patch.
+
+**The dividing line is the build phase, not the command.** No longer *configures* — the `wrapper` task dies, or the canary does — the upgrade is blocked: roll back. Configures and then fails during *execution* — a compile error, a failing test — the upgrade landed and the build has a separate problem: leave the new wrapper in place and report it. Rolling back on a red test is as wrong as leaving behind a build that cannot configure. The line sits there because configuration failure is unambiguous and cheap to check and execution failure is neither; `tasks` passing does not promise the build compiles.
 
 Canonical: https://docs.gradle.org/current/userguide/gradle_wrapper.html.
