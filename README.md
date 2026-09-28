@@ -23,7 +23,7 @@ Audits a Gradle build against the [official best practices](https://docs.gradle.
 
 ### gradle-wrapper-upgrade [![v1.0.0](https://img.shields.io/badge/v1.0.0-02303A?logo=gradle&logoColor=white)](skills/gradle-wrapper-upgrade)
 
-Upgrades an existing Gradle wrapper — to the latest release, or to a version you name. Pins the distribution's SHA-256, preserves the existing distribution type, runs the `wrapper` task twice so the launch scripts and jar are regenerated from the new version's templates, and verifies by diff. Narrow by design — it does not add a wrapper to a project that has none.
+Upgrades an existing Gradle wrapper — to the latest release, or to a version you name. Pins the distribution's SHA-256, preserves the existing distribution type, runs the `wrapper` task twice so the launch scripts and jar are regenerated from the new version's templates, and verifies by diff. Then it runs `tasks` as a canary: an upgrade whose files all land correctly but leaves a build that no longer configures is a failed upgrade, not a successful one. When that happens it restores all four wrapper files from a snapshot taken beforehand, confirms the restore by re-running the canary, says plainly that the version is not reachable, and points you at the next minor release, that version's release notes, and the upgrade guide. Narrow by design — it does not add a wrapper to a project that has none, and it does not edit build scripts in either direction.
 
 **Use when:**
 
