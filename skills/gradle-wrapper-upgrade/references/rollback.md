@@ -2,23 +2,17 @@
 
 Step 6 of `SKILL.md` sends you here: the `wrapper` task failed, or it succeeded and the canary failed. The target version cannot run this build. Put the project back exactly as you found it and tell the user what you learned — no retrying the upgrade, no editing build scripts to force it through.
 
-## 1. Restore all four files, in one command, without naming them
-
-From the project root, using the literal snapshot path Step 3 printed:
+## 1. Restore all four files
 
 ```
-cp -a /tmp/tmp.XXXX/. .
+git checkout -- gradlew gradlew.bat gradle/wrapper
 ```
 
-In git, `git checkout -- gradlew gradlew.bat gradle/wrapper` does the same and cannot be got wrong.
-
-**Do not expand that into a list of the four files.** `cp` with several sources and a directory target puts *every* source in that directory, so naming them individually drops `gradle-wrapper.properties` and `gradle-wrapper.jar` into the project root while `gradle/wrapper/` keeps the failed upgrade — two stray files, a wrapper never actually restored, and a step 2 canary that now fails for an unrelated reason. The trailing `/.` copies the tree instead, putting each file back where it came from.
-
-Never with an unexpanded variable either: `$SNAP` does not survive between commands, and unset it turns that into `cp -a /. .`.
+That is the whole step, and it cannot be got wrong. If Step 3 had you take a copy instead — a dirty tree, or no git — restore from it as `references/snapshot.md` describes, and heed the warning there about naming the four files individually: doing so scatters two of them into the project root and leaves the failed upgrade in place.
 
 ## 2. Confirm the restore, then re-run the canary
 
-`git status --short gradle/wrapper gradlew gradlew.bat` prints nothing. Without git, `diff -r` against the snapshot is silent and `distributionUrl` names the original version.
+`git status --short gradlew gradlew.bat gradle/wrapper` prints nothing — or, from a snapshot, `diff -r` is silent and `distributionUrl` names the original version.
 
 Then run the Step 3 canary command again — the same form, `tasks` or `tasks --all`. It passed then and must pass now, which is what proves you restored a working build rather than four plausible-looking files. A rollback you did not verify is the same as none.
 

@@ -22,7 +22,7 @@ The steps below are the same material either way: in act mode you run them, in a
 
 Upgrading means running the built-in `wrapper` task, never hand-editing files: `gradlew`, `gradlew.bat`, and `gradle-wrapper.jar` are generated, and the next `wrapper` run reverts any edit without warning. **Scope:** a wrapper that already exists — adding one to a project with none is a different job (`gradle :wrapper` from a system Gradle install).
 
-One reference ships beside this file: **`references/rollback.md`**, for an upgrade the build cannot take. **Open it only when Step 6 says to** — most upgrades never need it.
+Two references ship beside this file, for branches most upgrades never hit: **`references/snapshot.md`** (Step 3 — securing the wrapper where git cannot) and **`references/rollback.md`** (Step 6 — undoing an upgrade the build cannot take). **Open either only when the step says to.**
 
 ## Step 1 — Orient
 
@@ -52,7 +52,7 @@ curl -sL https://services.gradle.org/distributions/gradle-9.0.0-bin.zip.sha256
 
 Once `distributionSha256Sum` is set, any later `wrapper` run that *changes* `--gradle-version` must pass a new matching sum — the build fails rather than reuse the stale one. If the version doesn't change, the sum is preserved automatically.
 
-## Step 3 — Baseline the build, then snapshot the wrapper
+## Step 3 — Baseline the build, then secure the wrapper
 
 First, establish that the build works *before* you touch it:
 
@@ -68,22 +68,15 @@ If the build sets `org.gradle.configuration-on-demand=true`, use `tasks --all` i
 
 **If the canary fails here, stop and do not upgrade.** `:wrapper` configures the build too, so Step 4 will fail for the same reason — there is no supported way to upgrade a build that will not configure. Report what broke; getting it green on its current version comes first.
 
-Then copy the four wrapper files somewhere outside the project:
+Then make sure you can get the four wrapper files back:
 
 ```
-SNAP=$(mktemp -d) && mkdir -p "$SNAP/gradle/wrapper" \
-  && cp gradlew gradlew.bat "$SNAP/" \
-  && cp gradle/wrapper/gradle-wrapper.{properties,jar} "$SNAP/gradle/wrapper/" \
-  && echo "snapshot: $SNAP"
+git status --short gradlew gradlew.bat gradle/wrapper
 ```
 
-**One command, and write down the path it prints.** Shell variables do not survive into your next command, so `$SNAP` is empty by the time you would restore — and unset, `cp -a "$SNAP"/. .` becomes `cp -a /. .`. Use the literal path from there on.
+**Silent output is all you need.** Git is the snapshot: `git checkout -- gradlew gradlew.bat gradle/wrapper` restores all four at any point, so there is nothing to copy and nothing to clean up afterwards.
 
-**All four, not just the properties.** Run 1 rewrites the scripts and jar from the old templates, run 2 from the new, so a failure between them leaves a mixture. Reverting `gradle-wrapper.properties` alone moves the version back while leaving the new `gradlew` and jar in place — the half-done state of Step 5, reached by trying to undo one.
-
-**Outside the project.** A `.bak` beside the original is a file you added to the user's tree. Delete the snapshot once Step 5 passes.
-
-In git, `git checkout -- gradlew gradlew.bat gradle/wrapper` restores the same four and needs no copy — but only if they were committed and clean. Check `git status --short` on those paths first; copy if it prints anything, or if the project is not in git.
+**Anything else — output, or not a git repository — read `references/snapshot.md` and take a copy before going on.** Do not skip it. Without a snapshot there is no rollback, and Step 6 assumes one exists.
 
 ## Step 4 — Run the `wrapper` task twice
 
@@ -108,7 +101,7 @@ Running as an agent:
 git status --short gradle/wrapper gradlew gradlew.bat
 ```
 
-On a real version change, all four files show as modified: `gradle-wrapper.properties`, `gradle-wrapper.jar`, `gradlew`, `gradlew.bat`. **Only the properties moved → the second run didn't happen.** Not in git? `diff -r <snapshot> .` over the four paths instead; all four must differ. Then `./gradlew --version` should report the target version. That check can't stand alone either way: the version it prints comes from `distributionUrl`, so it looks correct even while the scripts and jar are stale.
+On a real version change, all four files show as modified: `gradle-wrapper.properties`, `gradle-wrapper.jar`, `gradlew`, `gradlew.bat`. **Only the properties moved → the second run didn't happen.** Working from a snapshot instead of git? Compare against it as `references/snapshot.md` describes. Then `./gradlew --version` should report the target version. That check can't stand alone either way: the version it prints comes from `distributionUrl`, so it looks correct even while the scripts and jar are stale.
 
 Those check that the upgrade *landed*. They say nothing about whether the build still works, so re-run the canary — **the same command as Step 3**:
 
