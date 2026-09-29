@@ -48,12 +48,14 @@ Each scenario runs two arms against the same Gradle project and the same prompt:
 
 All 35 treatment arms received the same skill revision.
 
-The four fixing prompts ask the agent to investigate the build, write a
-`VIOLATIONS.md` with one `<file>: <line>: <description>` line per issue before
-changing anything, then apply the fixes while keeping `./gradlew build` green, and
-record anything left over in `REMAINING-UNFIXED.md`. `false-positives` is audit-only
-and forbids edits. **All five fixing prompts are textually identical**, and the `aa`
-prompt matches them exactly.
+The four fixing scenarios — `structure`, `tasks`, `idioms` and `plugin-authoring` —
+ask the agent to investigate the build, write a `VIOLATIONS.md` with one
+`<file>: <line>: <description>` line per issue before changing anything, then apply
+the fixes while keeping `./gradlew build` green, and record anything left over in
+`REMAINING-UNFIXED.md`. **Those four prompts and the `aa` control's prompt are all
+textually identical** — five arms sharing one prompt — so every fixing scenario is
+prompt-comparable to every other. `false-positives` is the exception: it uses its own
+audit-only prompt, which forbids edits.
 
 ### Models tested
 
@@ -109,7 +111,7 @@ the two meta-scorers:
 - **`tasks-documented`** (`tasks`) — harvests script-defined task names, then runs
   `./gradlew tasks --all` and demands every harvested name Gradle lists carry a
   description. **Cannot see Java-style registration**, which cost one arm a check it had
-  earned; see `analysis.md`.
+  earned.
 - **`plugin-order-agnostic`** / **`convention-order-agnostic`** (`plugin-authoring`) —
   behavioural probes that apply the plugin before and after the `java` plugin and
   demand the same result.
@@ -689,9 +691,10 @@ treatment, at 100% of tokens.
 bundled catalog was captured from the Gradle 9.9.0-nightly documentation on
 2026-09-23 and covers 48 practices.
 
-**Prompt uniformity.** All five fixing prompts — including `aa` — are textually
-identical, so every fixing scenario is prompt-comparable to every other.
-`false-positives` uses its own audit-only prompt, as designed.
+**Prompt uniformity.** The four fixing prompts and the `aa` control's prompt are
+textually identical — five arms, one prompt — so every fixing scenario is
+prompt-comparable to every other. `false-positives` uses its own audit-only prompt,
+as designed.
 
 **Non-uniformity, disclosed.**
 
@@ -703,14 +706,16 @@ identical, so every fixing scenario is prompt-comparable to every other.
 4. **Qwen3.6-35B has no configured price**, so its cost rows read `n/a`. The harness
    reports this as a warning rather than guessing.
 
-**Provenance.** Every run's `report.json`, `report.md`, `experiment.resolved.yaml` and
-pruned project tree are archived under
-`test-runs/bp-skill-testing-complete-2026-09-24/<model>/runs/<run-id>/`. Agent
-transcripts are not archived.
+**Provenance.** The sweep ran on 2026-09-24. Each run's machine-readable result, its
+resolved experiment configuration and a pruned copy of the project tree it left behind
+were retained, and every figure in this report is taken from them. Agent transcripts were
+not retained, so the behavioural claims here rest on scorer output and final project state
+rather than on step-by-step traces. The scenarios, fixtures and scorers live in a separate
+repository that is not public.
 
-**Harness analysis.** Scorer defects, coverage holes, measurement limits and the catalog
-edits this run data argues for are recorded separately, in `analysis.md` beside the archived
-runs. Three things from it bear on figures quoted above: `tasks-documented.sh` cannot parse
-Java-style task registration, which cost Opus 5.5 one check it had earned; `violations-count`
-is a one-sided floor, so Opus's detection gains register as zero delta; and the A/A control
-covers one fixture out of five, with Gemini's control void.
+**Harness caveats bearing on the figures above.** Three are worth stating outright.
+The `tasks-documented` scorer cannot parse Java-style task registration, which cost
+Opus 5.5 one check it had earned. `violations-count` is a one-sided floor, so Opus's
+detection gains register as zero delta. And the A/A control covers one fixture out of
+five, with Gemini's control void — the noise floor is therefore narrower evidence than
+the aggregate deltas it is used to qualify.

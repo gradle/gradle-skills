@@ -39,8 +39,8 @@ that band.
 This report is keyed on **checks passed**. The harness also folds each arm's scorers into a
 single pass/fail verdict; that verdict is reported here too, because these fixtures are
 small enough that an outright PASS is achievable and informative. Harness-side caveats —
-scorer defects, coverage holes, measurement limits — are recorded in `analysis.md` beside
-the archived run data rather than here.
+scorer defects, coverage holes, measurement limits — are collected at the end of this
+report rather than interleaved with the results.
 
 ---
 
@@ -444,8 +444,8 @@ ratios in finding 4 sum 175 arm-scenario pairs and are the figures to read.
 ### 9. n = 1 per arm
 
 Single trials throughout, with the noise floor measured on one fixture out of three. Every
-magnitude in this report is directional. Harness limits, scorer defects and the coverage
-holes behind them are recorded in `analysis.md` beside the run data.
+magnitude in this report is directional. The harness limits, scorer defects and coverage
+holes behind that caveat are set out under "Non-uniformity, disclosed" below.
 
 ---
 
@@ -861,8 +861,8 @@ No arm was bounded; the heaviest reached 54% of its turn limit.
 `git+https://github.com/gradle/gradle-skills@main#skills/gradle-wrapper-upgrade` — the
 merge of [#24](https://github.com/gradle/gradle-skills/pull/24), carrying Step 3's baseline
 canary and snapshot branch, Step 6, and both `references/` files. `@main` is a moving ref,
-so the scenario files do not say what a future run will fetch; the recorded
-`skills_revision` per run is the authority.
+so it does not say what a future run would fetch; the revision recorded per run, quoted
+above, is the authority for what this sweep measured.
 
 **Prompt uniformity.** Four of the five scenario prompts — `upgrade`,
 `sha-already-pinned`, `upgrade-blocked`, `upgrade-blocked-git` — and the `aa` control are
@@ -880,15 +880,16 @@ designed.
    `n/a`. The harness reports this as a warning rather than guessing. It is the only
    warning any run in this sweep emitted.
 
-**Provenance.** Every run's `report.json`, `report.md`, `experiment.resolved.yaml`, pruned
-project tree and Inspect `.eval` log are archived under
-`complete-run-1.0.0/wrapper-update/<model>/runs/<run-id>/`. Agent transcripts **are**
-archived, which is what made the per-arm behavioural claims in findings 3, 5 and 7
-checkable rather than inferred.
+**Provenance.** Each run's machine-readable result, its resolved experiment
+configuration, a pruned copy of the project tree it left behind and its full execution
+log were retained, and every figure in this report is taken from them. Agent transcripts
+**were** retained, which is what made the per-arm behavioural claims in findings 3, 5 and
+7 checkable rather than inferred. The scenarios, fixtures and scorers live in a separate
+repository that is not public.
 
-**Harness analysis.** Scorer defects, coverage holes, measurement limits and the skill
-edits this run data argues for are recorded separately, in `analysis.md` beside the archived
-runs. Two things from it bear on figures quoted above: the `advised-next-step` regex
-rejects the phrase "latest 8.x" even when an agent is warning against it, which cost Sonnet
-5 one check it had earned; and `rolled-back` is satisfiable on this fixture without taking
-a snapshot, which is why `snapshot-verified` is reported alongside it rather than folded in.
+**Harness caveats bearing on the figures above.** Two are worth stating outright. The
+`advised-next-step` scorer rejects the phrase "latest 8.x" even when an agent uses it to
+warn *against* that jump, which cost Sonnet 5 one check it had earned — this is the
+scorer false negative referred to in the summary. And `rolled-back` is satisfiable on
+these fixtures without taking a snapshot at all, which is why `snapshot-verified` is
+reported alongside it rather than folded into it.
