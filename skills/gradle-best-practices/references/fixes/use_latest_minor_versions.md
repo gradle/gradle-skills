@@ -5,4 +5,8 @@
 
 ---
 
-- **Fix:** `./gradlew wrapper --gradle-version <version>`, then update plugins and test compatibility. Upgrade Gradle before plugins.
+- **Fix:** Target the **latest minor of the major the project is already on** — crossing a major is a separate job, and being on 8.x is not itself the finding.
+
+  Hand the upgrade to the **`gradle-wrapper-upgrade`** skill, which owns the procedure. Do not reproduce it here, and never hand-edit `gradle-wrapper.properties`.
+
+  Then update plugins and test compatibility — Gradle before plugins.

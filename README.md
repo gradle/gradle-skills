@@ -89,6 +89,33 @@ This covers around 80 agents. [`skills.sh`](https://skills.sh/) has the list, an
 
 The repository root is also an [Agent Plugins 1.0.0](https://github.com/agentplugins/agent-plugins-spec/blob/main/spec/1.0.0.md) package: `plugin.json` is the manifest, `skills/` holds the skills. Clients that implement the standard can install it directly. Each defines its own procedure, so check your agent's docs or the [list of compatible clients](https://agent-plugins.org/compatible-clients).
 
+## What the Skills Touch
+
+Neither skill declares `allowed-tools`, so both run under whatever permission model your agent already applies — they neither restrict nor pre-approve anything on your behalf. What they actually do:
+
+### `gradle-best-practices`
+
+| | |
+|---|---|
+| **Reads** | Settings files, build scripts, `gradle.properties`, wrapper config, the version catalog, and Java/Kotlin/Groovy sources under `buildSrc/` and `build-logic/` — plus its own bundled catalog under `references/`. |
+| **Writes** | Nothing in audit mode. In apply mode it edits the files above. On request it also writes an HTML report to `build/reports/best-practices-audit.html`. |
+| **Runs** | Nothing, unless a fix needs verifying. |
+| **Network** | None. The catalog ships with the skill and is read from disk. |
+
+### `gradle-wrapper-upgrade`
+
+| | |
+|---|---|
+| **Reads** | `gradle/wrapper/gradle-wrapper.properties` and the wrapper scripts. |
+| **Writes** | It does not hand-edit the wrapper files — that is the skill's central rule. All four change because Gradle's own `wrapper` task rewrites them. |
+| **Runs** | `./gradlew` (the `wrapper` and `tasks` tasks), `curl` against `services.gradle.org`, and `git` — `status` to check the tree, and `checkout --` on the four wrapper paths to roll back a blocked upgrade. |
+| **Network** | Yes, unavoidably: it fetches the published SHA-256, and the second `wrapper` run downloads the full distribution (100 MB+). |
+| **Outside the project** | Where the tree is dirty or not in git, it copies the four wrapper files to a `mktemp -d` directory, and deletes it once the upgrade verifies. |
+
+Neither skill reaches for a web-search or page-fetch tool. Across the benchmark runs in [`evals/`](evals), all 70 treatment arms made zero `WebFetch`/`WebSearch` calls — the best-practices skill reads its bundled catalog instead, and the wrapper skill goes to a known URL over `curl`.
+
+If you would rather enforce that than trust it, both skills work with web fetch and search denied, and the wrapper skill works with file-write tools denied as well. `gradle-best-practices` needs write access only in apply mode; denying it leaves audit mode working, minus the optional HTML report.
+
 ## Repository Structure
 
 ```text

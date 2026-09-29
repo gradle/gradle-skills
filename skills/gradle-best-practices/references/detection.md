@@ -138,8 +138,8 @@ finished with, because its own directory may be the symptom.
 | `distributionUrl` ending `-all.zip` | `prefer_bin_distribution` | performance |
 | `distributionUrl` naming a release older than the current one | `use_latest_minor_versions` | general |
 | **no** `distributionSha256Sum` in `gradle-wrapper.properties` | `validate_gradle_checksum` | security |
-| `distributionUrl` not on `https://services.gradle.org/` | `validate_wrapper_checksum` | security |
-| `exec(`, `ProcessBuilder`, `Runtime.getRuntime().exec` | `run_gradle_on_external_projects` | security |
+| a committed `gradle/wrapper/gradle-wrapper.jar` — presence is all that is checkable; genuineness is not decidable offline | `validate_wrapper_checksum` | security |
+| `exec(`, `ProcessBuilder`, `Runtime.getRuntime().exec`, or a `distributionUrl` on a host other than `services.gradle.org` | `run_gradle_on_external_projects` | security |
 | `: DefaultTask()`, `extends DefaultTask`, `: Plugin<Project>` with **no** `GradleRunner` anywhere under `src/` | `test_custom_types_with_testkit` | testing |
 
 A row is a pointer, not a verdict. Read the entry before you report: several
@@ -147,11 +147,12 @@ rows carry a `When:` precondition that rules the entry out, two rows fire on the
 same token for different practices, and one practice can carry two rows
 reachable from opposite directions — so that missing one still leaves the other.
 
-**The index is not the catalog.** Three of the 48 entries have no row —
-`modularize_builds`, `builds_should_be_reproducible` and
-`build-published-artifacts-securely` — because none has a literal token to grep
-for; they are judged across the whole tree, or against CI configuration, from
-their `heur` recipes. A clean pass over this table is not a clean audit, and
+**The index is not the catalog.** Three of the 48 entries have no row, and for
+three different reasons: `modularize_builds` is judged across the whole tree
+rather than at any one token; `builds_should_be_reproducible` turns partly on a
+block being *absent*; and `build-published-artifacts-securely` is advisory and
+is not evaluated at all — it is reported as standing advice whenever the build
+publishes. A clean pass over this table is not a clean audit, and
 Step 2's category reading is still what decides which entries apply.
 
 Two anchors are hyphenated (`single-gav-string`,

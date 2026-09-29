@@ -35,7 +35,7 @@ The direct link for any best practice is `https://docs.gradle.org/current/usergu
 
 ## Never block on a question
 
-If you are running unattended — a scripted, CI, or single-turn session where no reply will come — treat every "ask the user" or "get confirmation" step in this skill as: choose the recommended option, record the decision and its rationale in the report, and continue. Never end the session waiting for input. For structural fixes, write the plan into the report instead of asking, then execute it.
+If no reply can reach you — an automated or single-turn run that ends before anyone could answer — treat every "ask the user" or "get confirmation" step in this skill as: choose the recommended option, record the decision and its rationale in the report, and continue. Never end the session waiting for input. For structural fixes, write the plan into the report instead of asking, then execute it.
 
 ## Step 1: Discover the project's Gradle files
 
