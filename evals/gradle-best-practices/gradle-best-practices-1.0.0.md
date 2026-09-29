@@ -108,7 +108,8 @@ the two meta-scorers:
   precompiled script plugins.
 - **`tasks-documented`** (`tasks`) — harvests script-defined task names, then runs
   `./gradlew tasks --all` and demands every harvested name Gradle lists carry a
-  description. **Cannot see Java-style registration** — see known gap 1.
+  description. **Cannot see Java-style registration**, which cost one arm a check it had
+  earned; see `analysis.md`.
 - **`plugin-order-agnostic`** / **`convention-order-agnostic`** (`plugin-authoring`) —
   behavioural probes that apply the plugin before and after the `java` plugin and
   demand the same result.
@@ -359,7 +360,7 @@ Twelve, across five models. Two models regress nowhere.
 
 | Model | Scenario | Check | Assessment |
 | :--- | :--- | :--- | :--- |
-| Opus 5.5 | `tasks` | `tasks-documented` | **Scorer artifact** — see known gap 1 |
+| Opus 5.5 | `tasks` | `tasks-documented` | **Scorer artifact** — the harvester cannot read Java task registration |
 | Qwen3.6-35B | `idioms` | `project-builds` | Real — treatment broke the build |
 | Qwen3.6-35B | `idioms` | `plugins-block-only` | Real |
 | Qwen3.6-35B | `idioms` | `no-after-evaluate` | Real |
@@ -462,7 +463,7 @@ unique task outputs; no config-time resolution; configuration cache enabled.
 
 **Signal:** 56 → 86 of 105. Gemini and DeepSeek reach 15/15. `tasks-documented` gains
 in six of seven models and is the single most-gained check in the sweep — and Opus's
-lone regression on it is the scorer artifact in known gap 1, not a defect: Opus
+lone regression on it is a scorer artifact, not a defect: Opus
 documented all three tasks in a Java convention plugin the harvester cannot read.
 Corrected, Opus reads 13 → 14. `cacheable-annotation` fails in both Sonnet and both
 Opus arms, the only check that resists the two strongest Anthropic models.
@@ -549,6 +550,16 @@ treatment failure and Gemini's regression are that line.
 ---
 
 ## Cost & Efficiency
+
+**Key — every cell in this section reads `no-skills / with-skills`:**
+
+| Position in cell | Arm | Meaning |
+| :--- | :--- | :--- |
+| **Left** of the `/` | `no-skills` | Baseline — no skill provided |
+| **Right** of the `/` | `with-skills` | Treatment — `gradle-best-practices@1.0.0` (`0b1f547`) |
+
+So `🏆 23 / 36` means the baseline arm spent 23 and the treatment arm spent 36, and the
+baseline was the cheaper of the two. Baseline is always first, in every table below.
 
 > **Token accounting note:** the Inspect harness uses prompt caching where the
 > provider supports it. "Cached input" is served from the prompt cache; "cache write"
@@ -644,7 +655,7 @@ Totals across the 35 delta arms appear in finding 6. The short version:
 
 ---
 
-## Methodology and known gaps
+## Methodology
 
 **Trials.** n = 1 per arm. 42 runs, 84 arms: 5 delta scenarios × 7 models × 2 arms,
 plus 7 A/A runs × 2 identical arms. Runs were strictly sequential within a model.
@@ -697,43 +708,9 @@ pruned project tree are archived under
 `test-runs/bp-skill-testing-complete-2026-09-24/<model>/runs/<run-id>/`. Agent
 transcripts are not archived.
 
-### Known gaps
-
-1. **`tasks-documented.sh` still cannot see Java-style task registration.** Two
-   independent causes, both live: its `find` filter covers only `*.gradle`,
-   `*.gradle.kts` and `*.kt` — never `*.java` — and its harvest regex anchors on
-   `tasks.register(`, which `project.getTasks().register(` does not match. A Java
-   convention plugin therefore harvests zero names and fails by the zero-names rule
-   despite documenting every task. This produced the one false negative in
-   `tasks`/Opus 5.5/treatment, where the arm documented all three tasks with
-   `setGroup` and `setDescription` in
-   `build-logic/src/main/java/…/StarObservationsPlugin.java`. **The scorer currently
-   rewards leaving tasks in a build script and punishes extracting them into a
-   convention plugin** — the opposite of what the skill under test recommends.
-   Tracked on `tt/fix-tasks-documented-scorer`.
-2. **The zero-harvest branch of `tasks-documented.sh` asserts a conclusion it cannot
-   support.** It reports "the fixture's custom tasks were removed rather than
-   documented", but a harvester that cannot parse the build's language produces
-   byte-identical output to an agent that deleted the tasks. Correct and destructive
-   refactors score the same.
-3. **`violations-count` is a one-sided floor.** Opus clears every floor in both arms,
-   so its 1.2× to 1.4× detection gains register as nothing. A graded or delta-based
-   recall measure would capture the effect in finding 2 directly.
-4. **`gradle_calls` is unreliable.** The counter recognises a bare `./gradlew` and
-   misses prefixed forms. The field is excluded from every claim in this report except
-   the failed-invocation count in the cost summary, which is a ratio between arms
-   measured the same way.
-5. **The A/A control covers one fixture out of five**, and one of the seven controls is
-   void. `tasks`, `idioms`, `plugin-authoring` and `false-positives` have no noise
-   measurement at all, and Gemini has none anywhere.
-6. **The detection-count noise band is wide.** Haiku's A/A produced 8 versus 1 lines
-   and GPT's 4 versus 11. Small detection gains are not interpretable; see finding 8.
-7. **`skill-used` proves invocation, not compliance.** An arm that opens the skill and
-   ignores it passes the scorer. It is not a compliance measure.
-8. **n = 1.** Every number here is directional. Nothing in this report should be quoted
-   as a magnitude.
-
-Three further findings point at catalog edits rather than harness work — the
-`notCompatibleWithConfigurationCache` regression, the invented `gradle init`
-version-catalog finding, and the small-model scoping problem. They are written up in
-`bt-agentic-gradle-evaluator/docs/notes/bp-skill-catalog-gaps-2026-09-24.md`.
+**Harness analysis.** Scorer defects, coverage holes, measurement limits and the catalog
+edits this run data argues for are recorded separately, in `analysis.md` beside the archived
+runs. Three things from it bear on figures quoted above: `tasks-documented.sh` cannot parse
+Java-style task registration, which cost Opus 5.5 one check it had earned; `violations-count`
+is a one-sided floor, so Opus's detection gains register as zero delta; and the A/A control
+covers one fixture out of five, with Gemini's control void.
