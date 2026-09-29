@@ -2,17 +2,19 @@
 
 ## Summary
 
-`gradle-wrapper-upgrade@1.0.0` (revision `d8dcf73`) was measured against seven models
-from five vendors across three agent CLIs, on five wrapper-upgrade scenarios, two arms
-each, plus a seven-model A/A control. The treatment arm passed **187 of 203** checks
-against **91 of 203** for the unaided baseline — **99 gains, 3 regressions**.
+`gradle-wrapper-upgrade@1.0.0` (revision `d8dcf73`) was measured on seven models from
+five vendors across three agent CLIs, on five wrapper-upgrade scenarios. Each scenario
+ran twice per model — once with the skill, once without. With the skill, agents passed
+**187 of 203** checks against **91 of 203** unaided — **99 gains, 3 regressions**. A
+sixth scenario ran the unaided arm twice on every model, to measure how far two identical
+runs drift on their own.
 
 Every model improves. Six of the seven land 26 or better out of 29, and **four reach a
 perfect 29 of 29** — Opus 5.5, GPT-5.6-luna, Gemini 3.8 Flash and DeepSeek-v4-pro. Sonnet 5
 reaches 28, and its one miss is a scorer false negative rather than a model error, so five
-of seven are perfect on the merits. Excluding the local 35B leaf, **the six hosted models
-go 79 of 174 → 170 of 174 with zero regressions.** At the arm level, **29 of 35 treatment
-arms clear their fixture outright against 7 of 35 baselines**.
+of seven are perfect on the merits. Excluding Qwen3.6-35B, the one local model, **the six
+hosted models go 79 of 174 → 170 of 174 with zero regressions.** **29 of 35 skilled arms
+clear their fixture outright, against 7 of 35 unaided.**
 
 Three results deserve to be read before the tables:
 
@@ -31,8 +33,8 @@ supplies a catalog explores.**
 unprompted, and no model rolls a failed upgrade back unprompted. Both habits arrive intact
 with the skill on every model tested, on every CLI.
 
-**The noise floor is narrow.** The A/A control ran two identical `no-skills` arms on all
-seven models: **1 of 35 scorer pairs disagreed**, and six of seven models reproduced
+**The noise floor is narrow.** The repeat-run control ran two identical unaided arms on
+all seven models: **1 of 35 scorer pairs disagreed**, and six of seven models reproduced
 themselves exactly. Every aggregate delta in this report is an order of magnitude outside
 that band.
 
@@ -57,11 +59,20 @@ Each scenario runs two arms against the same Gradle project and the same prompt:
 
 All 35 treatment arms received the same skill revision.
 
-Four of the five prompts are one line, textually identical: *"Upgrade this project's
-Gradle wrapper to Gradle 9.0.0."* — `upgrade`, `sha-already-pinned`, `upgrade-blocked`,
-`upgrade-blocked-git`, and the `aa` control. `advice-only` changes one word:
-*"How do I upgrade this project's Gradle wrapper to Gradle 9.0.0?"* — and the correct
-behaviour inverts with it.
+Terms used throughout this report:
+
+| Term | Meaning |
+| :--- | :--- |
+| **arm** | One agent run: one model, one scenario, one skill setting |
+| **baseline arm** | The `no-skills` half of a pair |
+| **treatment arm** | The `with-skills` half of the same pair |
+| **repeat-run control** (`aa`) | A pair of `no-skills` arms run against the same fixture and prompt, to show how much two identical runs differ on their own |
+
+Four of the five scenarios — `upgrade`, `sha-already-pinned`, `upgrade-blocked` and
+`upgrade-blocked-git` — share a one-line prompt with the repeat-run control:
+*"Upgrade this project's Gradle wrapper to Gradle 9.0.0."* `advice-only` changes one
+word: *"How do I upgrade this project's Gradle wrapper to Gradle 9.0.0?"* — and the
+correct behaviour inverts with it.
 
 Nothing in any prompt asks for a checksum, for the `wrapper` task to be run twice, or for
 a rollback. Every check that moves is measuring an unprompted habit.
@@ -91,7 +102,7 @@ harness's skill-loading mechanism.
 | `upgrade-blocked` | `sample-kiln-registry` | 8 | When the upgrade *cannot* succeed: snapshot, roll back, report, advise |
 | `upgrade-blocked-git` | `sample-kiln-registry` | 9 | The same with the project in git — does it roll back *with git*? |
 | `advice-only` | `sample-stale-wrapper` | 2 | Asked *how*, does it answer instead of acting? |
-| `aa` | `sample-stale-wrapper` | 5 | A/A control: two identical `no-skills` arms, same fixture and prompt as `upgrade` |
+| `aa` | `sample-stale-wrapper` | 5 | Repeat-run control: two identical unaided arms, same fixture and prompt as `upgrade` |
 
 Check counts exclude `skill-used`, which is scored only on the treatment arm and therefore
 cannot contribute a delta. `aa` runs no treatment arm and contributes no checks to the
@@ -232,9 +243,9 @@ arm would leave a project indistinguishable from a deliberate rollback.
 | Qwen3.6-35B | 12 / 29 | **17 / 29** | **+5** | 8 | 3 |
 | **All** | **91 / 203** | **187 / 203** | **+96** | **99** | **3** |
 
-**Five models regress nowhere, and six regress nowhere.** Every regression in the sweep
-belongs to Qwen3.6-35B (finding 5). Discount that leaf and the six hosted models read
-**79 of 174 → 170 of 174 with zero regressions**.
+**Six models regress nowhere.** Every regression in the sweep belongs to Qwen3.6-35B
+(finding 5). Discount it and the six hosted models read **79 of 174 → 170 of 174 with
+zero regressions**.
 
 The gains do not run inverse to unaided competence the way a knowledge-injection skill's
 do. Opus 5.5 gains the least (+13) but still reaches 29 of 29, and its baseline 16 of 29
@@ -243,8 +254,8 @@ weakest at pinning a checksum or rolling back a failed upgrade unaided, because 
 a knowledge problem. **This is a procedure the models do not have, not facts they do not
 know.** That is why the effect is uniform rather than graded.
 
-**Twelve of the sixteen residual treatment failures are Qwen's.** The other four are
-Haiku's `snapshot-verified` and two `advised-next-step` misses, plus Sonnet's
+**Twelve of the sixteen residual treatment failures are Qwen's.** Three more are Haiku's
+— `snapshot-verified` and two `advised-next-step` misses — and the last is Sonnet's
 `advised-next-step` scorer artifact.
 
 ### 2. Four checks go 0/7 → 7/7
@@ -298,9 +309,9 @@ Step 3 that `upgrade-blocked` alone can never exercise.
 So the effect here is two-sided: the skill supplies a rollback the models don't have, and
 it suppresses a build migration they reach for unasked.
 
-The `-git` scenario is worth its own leaf for exactly that reason: the harness stages
-projects without a `.git`, so half of Step 3 and half of `references/rollback.md` had never
-been graded before this sweep. They grade clean.
+The `-git` scenario earns its place for exactly that reason: the harness stages projects
+without a `.git`, so half of Step 3 and half of `references/rollback.md` had never been
+graded before this sweep. They grade clean.
 
 `advised-next-step` is the hardest of the five to earn — it needs a
 `services.gradle.org/versions/all` query, final-release filtering, and a
@@ -345,8 +356,8 @@ the skill saves.**
 
 ### 5. All three regressions are one model, and they mark the floor of the skill's reach
 
-Six of seven models regress nowhere. Every regression in the sweep belongs to the local
-35B leaf:
+Six of seven models regress nowhere. Every regression in the sweep belongs to
+Qwen3.6-35B, the one local model:
 
 | Scenario | Check | What happened |
 | :--- | :--- | :--- |
@@ -354,9 +365,9 @@ Six of seven models regress nowhere. Every regression in the sweep belongs to th
 | `advice-only` | `explained-how` | …and never wrote out the command |
 | `upgrade-blocked-git` | `no-collateral-damage` | Edited **`buildSrc`** to make 9.0.0 compile, and left 9.0.0 pinned |
 
-Both are comprehension failures rather than budget failures — Qwen's worst arm used 11% of
-its turn limit — and both are failures of the *boundaries* the skill draws rather than of
-the procedure it teaches. On `advice-only` it read SKILL.md's two modes and resolved them
+Both arms failed on comprehension, not budget — Qwen's worst arm used 11% of its turn
+limit — and both missed the *boundaries* the skill draws rather than the procedure it
+teaches. On `advice-only` it read SKILL.md's two modes and resolved them
 toward action. On `upgrade-blocked-git` it ran the `wrapper` task twice with the right flags
 (`wrapper-task-pinned` PASSes), hit the `buildSrc` compile error, and then repaired the
 build instead of rolling back — swapping `project.exec(spec -> …)` for an `ExecAction`-typed
@@ -414,8 +425,8 @@ behind the `advised-next-step` passes.
 
 ### 8. The noise floor is narrow, so the deltas mean what they say
 
-The `aa` control ran two identical `no-skills` arms on all seven models, grading all five
-of `upgrade`'s non-`skill-used` criteria.
+The repeat-run control ran two identical unaided arms on all seven models, grading all
+five of `upgrade`'s non-`skill-used` criteria.
 
 | Model | Scorers disagreeing | Which |
 | :--- | :---: | :--- |
@@ -438,7 +449,7 @@ arm regenerated all three files, the other left them stale — so that criterion
 carries a ±1 band, while `wrapper-properties`, which agreed on all seven models, does not.
 
 Turn and token variance between identical arms is much wider than scorer variance (Qwen's
-A/A ran 36 turns versus 5). **No single-arm cost cell is a measurement**; the aggregate
+two control arms ran 36 turns and 5). **No single-arm cost cell is a measurement**; the aggregate
 ratios in finding 4 sum 175 arm-scenario pairs and are the figures to read.
 
 ### 9. n = 1 per arm
@@ -493,8 +504,8 @@ Three, all one model. Six models regress nowhere.
 | Qwen3.6-35B | `advice-only` | `explained-how` | Real — same arm, explained nothing |
 | Qwen3.6-35B | `upgrade-blocked-git` | `no-collateral-damage` | Real — edited `buildSrc` rather than rolling back |
 
-**Three regressions against 99 gains**, and all three on one local 35B leaf. Every hosted
-model in the sweep gained without losing a single check.
+**Three regressions against 99 gains**, and all three on the one local model. Every
+hosted model in the sweep gained without losing a single check.
 
 ### Skill pickup
 
@@ -533,9 +544,9 @@ Grids read `baseline → treatment`. ✅ = PASS, ❌ = FAIL.
 
 **Signal:** 24 → 35 of 35 — a clean sweep, and the only scenario in either eval where the
 treatment grid is solid green. `wrapper-properties` fails in **all seven baselines** and
-passes in **all seven treatments**: the sweep's single cleanest result, and the one the A/A
-control agreed on across all seven models. `wrapper-files` moves 3 → 7 with a ±1 band, it
-being the one criterion the control flipped. `no-collateral-damage` and
+passes in **all seven treatments**: the sweep's single cleanest result, and the one the
+repeat-run control agreed on across all seven models. `wrapper-files` moves 3 → 7 with a
+±1 band, being the one criterion the control flipped. `no-collateral-damage` and
 `non-version-properties-preserved` pass in all fourteen arms: **nobody, skilled or not,
 does more than they were asked on this fixture.** Precision was never the risk here;
 completeness was.
@@ -634,7 +645,7 @@ difference is `git_init: true`.
 | `wrapper-task-pinned` | ❌→✅ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→✅ |
 | `reported-blocked` | ❌→✅ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→❌ |
 | `quoted-error` | ✅→✅ | ✅→✅ | ✅→✅ | ❌→✅ | ✅→✅ | ✅→✅ | ❌→✅ |
-| `advised-next-step` | ❌→✅ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→❌ |
+| `advised-next-step` | ❌→❌ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→❌ |
 | `git-used` | ❌→✅ | ❌→✅ | ✅→✅ | ❌→✅ | ❌→✅ | ✅→✅ | ❌→❌ |
 
 **Signal:** 14 → 55 of 63 in its first outing, and **five models reach 9 of 9** — the
@@ -657,10 +668,10 @@ The baseline split is the same as `upgrade-blocked`'s and equally lopsided: all 
 `buildSrc` to migrate the build rather than roll it back.** Adding git changes nothing
 about that instinct; it only gives the skilled arm a cheaper way to undo it.
 
-`advised-next-step` passes in six of seven here against four of seven on
-`upgrade-blocked` — the same models, same fixture, same prompt. **That is inside the
-unmeasured noise of a scenario with no A/A control** and should not be read as git making
-agents better at advice.
+`advised-next-step` passes in five of seven here against four of seven on
+`upgrade-blocked` — the same models, same fixture, same prompt. **A one-model difference
+is inside the unmeasured noise of a scenario with no repeat-run control** and should not
+be read as git making agents better at advice.
 
 Qwen is the whole of the residual failure: 7 of the 8 missed checks, including the
 `buildSrc` edit described in finding 5.
@@ -829,7 +840,7 @@ in finding 5: it stopped answering and started working.
 ## Methodology
 
 **Trials.** n = 1 per arm. 42 runs, 84 arms: 5 delta scenarios × 7 models × 2 arms, plus
-7 A/A runs × 2 identical arms. Runs were strictly sequential within a model, 2026-09-28
+7 repeat-run controls × 2 identical arms. Runs were strictly sequential within a model, 2026-09-28
 into 2026-09-29.
 
 **Toolchain.** JDK 17, `resources: small`, network **on**. No `gradle_dist` is pinned,
@@ -851,7 +862,7 @@ mirror is unmeasured, and the skill's own scope note disclaims both.
 | …on `advice-only` | 40 | 3,000,000 | 60m |
 
 Gemini and Qwen carry ×2 turns and tokens, and ×2 / ×4 wall clock — applied uniformly to
-every scenario's own baseline, so neither leaf gets headroom a sibling lacks. **Both arms
+every scenario's own baseline, so neither gets headroom the others lack. **Both arms
 of any single run always share limits**, so every within-model baseline-versus-treatment
 delta in this report is sound. Cross-model cost comparisons are not, and none is made.
 No arm was bounded; the heaviest reached 54% of its turn limit.
