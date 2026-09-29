@@ -8,7 +8,7 @@ They follow the [Agent Skills](https://agentskills.io/home) format, so they work
 
 ## Available Skills
 
-### gradle-best-practices [![v1.0.0](https://img.shields.io/badge/v1.0.0-02303A?logo=gradle&logoColor=white)](skills/gradle-best-practices)
+### gradle-best-practices [![v1.0.1](https://img.shields.io/badge/v1.0.1-02303A?logo=gradle&logoColor=white)](skills/gradle-best-practices)
 
 Audits a build against the [official Gradle best practices](https://docs.gradle.org/current/userguide/best_practices.html) and reports what it finds, ordered by impact. Ask it to, and it applies the fixes.
 
@@ -22,7 +22,7 @@ Try:
 - "Audit this Gradle project"
 - "Apply Gradle best practices"
 
-### gradle-wrapper-upgrade [![v1.0.0](https://img.shields.io/badge/v1.0.0-02303A?logo=gradle&logoColor=white)](skills/gradle-wrapper-upgrade)
+### gradle-wrapper-upgrade [![v1.0.1](https://img.shields.io/badge/v1.0.1-02303A?logo=gradle&logoColor=white)](skills/gradle-wrapper-upgrade)
 
 Upgrades the Gradle wrapper, to the latest release or to a version you name. It pins the distribution's checksum, regenerates `gradlew`, `gradlew.bat`, and the wrapper jar, and then checks that the build still configures on the new version. If it doesn't, the upgrade is rolled back and you get a smaller version step to try instead, with the release notes for it.
 
