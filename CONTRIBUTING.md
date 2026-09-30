@@ -78,9 +78,24 @@ npx markdownlint-cli2 "**/*.md"
 python3 .github/scripts/check-consistency.py
 ```
 
-The consistency check verifies that the three plugin manifests agree, that each skill's `SKILL.md` and `metadata.json` state the same version, and that `README.md` badges and relative links are correct.
+The consistency check verifies that the three plugin manifests agree, that each skill's `SKILL.md` and `metadata.json` state the same version, that no skill version is ahead of the plugin version, and that `README.md` badges and relative links are correct.
+
+## Versions
 
 Leave version numbers alone unless a maintainer asks otherwise; they are set when a release is cut.
+
+Each skill and the plugin that bundles them have separate versions, with different jobs:
+
+- A **skill version** records what changed in that skill, and is the version its evaluation under `evals/` refers to. It is stated in the skill's `SKILL.md` (`metadata.version`), its `metadata.json`, and its README badge.
+- The **plugin version** is what installed copies are updated by. Clients compare it to decide whether an update is available: Claude Code does, and the Agent Plugins specification permits any client to. It is stated in `plugin.json` and `.claude-plugin/plugin.json`, and nowhere else — Claude Code ignores a version in the marketplace entry in favor of `.claude-plugin/plugin.json`.
+
+A skill change that ships without a plugin version bump never reaches plugin users. So when a release changes any skill:
+
+1. Bump the version of each changed skill, following [Semantic Versioning](https://semver.org/).
+2. Bump the plugin version by at least the largest of those bumps: a minor bump to any skill means at least a minor bump to the plugin. Adding a skill is a minor bump; removing one is a major bump.
+3. Record the release in [`CHANGELOG.md`](CHANGELOG.md), including the version of every skill it contains.
+
+Unchanged skills keep their versions, so a skill version can lag behind the plugin version, but can never be ahead of it.
 
 ## Commits
 

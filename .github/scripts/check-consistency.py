@@ -14,9 +14,12 @@ Checks performed:
 3. Each skill's SKILL.md frontmatter agrees with its metadata.json.
 4. Each skill's version badge in README.md matches that skill's version.
 5. Every relative link in README.md points at a file that exists.
+6. No skill version is ahead of the plugin version.
 
 Skill versions are deliberately NOT required to equal the plugin version: a
-plugin release can bundle unchanged skills.
+plugin release can bundle unchanged skills. But a skill change reaches plugin
+users only through a plugin version bump at least as large, so a skill version
+ahead of the plugin version means that bump was missed.
 
 Stdlib only, so CI needs no dependency install step.
 
@@ -42,6 +45,7 @@ MANIFEST_FIELDS = {
 MANIFEST_REQUIRED = ("$schema", "name")
 NAME_PATTERN = re.compile(r"(?!.*(?:--|\.\.))[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?")
 AUTHOR_FIELDS = {"name", "email", "url"}
+VERSION_PATTERN = re.compile(r"(\d+)\.(\d+)\.(\d+)")
 
 # Fields the three manifests must state identically.
 SHARED_FIELDS = ("name", "description", "author", "homepage", "license", "keywords")
@@ -223,6 +227,24 @@ def check_readme(skill_versions: dict[str, str]) -> None:
             fail(f"README.md: link target '{target}' does not exist")
 
 
+def check_skills_not_ahead(plugin_version, skill_versions: dict[str, str]) -> None:
+    """Check 6: every skill version is at or below the plugin version."""
+    plugin = VERSION_PATTERN.fullmatch(plugin_version or "")
+    if plugin is None:
+        fail(f"plugin.json: version {plugin_version!r} is not MAJOR.MINOR.PATCH")
+        return
+
+    for skill, version in skill_versions.items():
+        match = VERSION_PATTERN.fullmatch(version)
+        if match is None:
+            fail(f"skills/{skill}: version {version!r} is not MAJOR.MINOR.PATCH")
+        elif tuple(map(int, match.groups())) > tuple(map(int, plugin.groups())):
+            fail(
+                f"skills/{skill}: version {version} is ahead of plugin version "
+                f"{plugin_version}; bump the plugin version too"
+            )
+
+
 def main() -> int:
     manifest = load_json("plugin.json")
     claude_manifest = load_json(".claude-plugin/plugin.json")
@@ -230,7 +252,10 @@ def main() -> int:
 
     check_manifest_schema(manifest)
     check_manifests_agree(manifest, claude_manifest, marketplace)
-    check_readme(check_skills())
+    skill_versions = check_skills()
+    check_readme(skill_versions)
+    if manifest is not None:
+        check_skills_not_ahead(manifest.get("version"), skill_versions)
 
     if failures:
         print(f"Consistency check failed with {len(failures)} problem(s):\n", file=sys.stderr)
