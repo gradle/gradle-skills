@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/gradle/gradle-skills/security/policy
+    about: Do not report security vulnerabilities in public issues.
+  - name: Ask for help with Gradle
+    url: https://gradle.org/help/
+    about: For questions about Gradle itself rather than these skills, reach the Gradle community.

@@ -1,0 +1,35 @@
+name: New skill proposal
+description: Propose a skill for a Gradle task that isn't covered yet
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Read [what makes a good skill](https://github.com/gradle/gradle-skills/blob/main/CONTRIBUTING.md#what-makes-a-good-skill) first.
+        If the task overlaps with an existing skill, propose extending that skill instead.
+  - type: textarea
+    id: task
+    attributes:
+      label: Task
+      description: What task does the skill cover, and what does an agent get wrong on that task without it?
+    validations:
+      required: true
+  - type: textarea
+    id: gap
+    attributes:
+      label: Why a new skill
+      description: Why is it not part of an existing skill?
+    validations:
+      required: true
+  - type: textarea
+    id: success
+    attributes:
+      label: Success
+      description: What would a successful run look like, and how would you tell it apart from a failed one?
+    validations:
+      required: true
+  - type: input
+    id: gradle-versions
+    attributes:
+      label: Gradle versions (optional)
+      description: Which Gradle versions should the skill support?
