@@ -32,6 +32,24 @@ jobs:
           find . -name '*.json' -not -path './.git/*' -print0 \
             | xargs -0 -I{} sh -c 'echo "Checking {}"; jq empty "{}"'
 
+  final-newline:
+    name: Check Final Newlines
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check that every text file ends with a newline
+        run: |
+          status=0
+          while IFS= read -r -d '' file; do
+            if [ -s "$file" ] && grep -Iq . "$file" && [ -n "$(tail -c1 "$file")" ]; then
+              echo "::error file=$file::missing final newline"
+              status=1
+            fi
+          done < <(git ls-files -z)
+          exit $status
+
   consistency:
     name: Check Metadata Consistency
     runs-on: ubuntu-latest
