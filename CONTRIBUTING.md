@@ -70,7 +70,7 @@ Instead, test the skill by hand and describe what you did in the pull request:
 2. Run it against at least one real Gradle project where the skill applies, and one where it should decline or stop.
 3. Run the same prompt without the skill, and compare.
 
-Note the agent, the model, the Gradle version, and the prompts you used.
+Note the project, the agent, the harness, the Gradle version, and the prompts you used.
 
 ## Checks
 
@@ -105,10 +105,7 @@ Each skill and the plugin that bundles them have separate versions, with differe
 - A **skill version** records what changed in that skill, and is the version its evaluation under `evals/` refers to. It is stated in the skill's `SKILL.md` (`metadata.version`), its `metadata.json`, and its README badge.
 - The **plugin version** is what installed copies are updated by. Clients compare it to decide whether an update is available: Claude Code does, and the Agent Plugins specification permits any client to. It is stated in `plugin.json` and `.claude-plugin/plugin.json`, and nowhere else — Claude Code ignores a version in the marketplace entry in favor of `.claude-plugin/plugin.json`.
 
-A skill change that ships without a plugin version bump never reaches plugin users. So when a release changes any skill:
-
-1. Bump the version of each changed skill, following [Semantic Versioning](https://semver.org/).
-2. Bump the plugin version by at least the largest of those bumps: a minor bump to any skill means at least a minor bump to the plugin. Adding a skill is a minor bump; removing one is a major bump.
+When a release changes any skill, bump the version of that skill, following [Semantic Versioning](https://semver.org/).
 
 Unchanged skills keep their versions, so a skill version can lag behind the plugin version, but can never be ahead of it.
 
