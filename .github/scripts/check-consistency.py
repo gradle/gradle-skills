@@ -11,10 +11,10 @@ Checks performed:
 2. plugin.json, .claude-plugin/plugin.json, and the .claude-plugin/marketplace.json
    entry agree on every field they share. The marketplace entry must not set
    version: Claude Code would ignore it in favor of .claude-plugin/plugin.json.
-3. Each skill's SKILL.md frontmatter agrees with its metadata.json.
+3. Each skill's SKILL.md declares name, description, license, and
+   metadata.author, and a metadata.version agreeing with its metadata.json.
 4. Each skill's version badge in README.md matches that skill's version.
-5. Every relative link in README.md, CONTRIBUTING.md, and SECURITY.md points
-   at a file that exists.
+5. Every relative link in the root Markdown docs points at a file that exists.
 6. No skill version is ahead of the plugin version.
 
 Skill versions are deliberately NOT required to equal the plugin version: a
@@ -187,8 +187,9 @@ def check_skills() -> dict[str, str]:
                 f"skills/{skill}/SKILL.md: frontmatter name is "
                 f"{frontmatter.get('name')!r}, but the directory is {skill!r}"
             )
-        if not frontmatter.get("description"):
-            fail(f"skills/{skill}/SKILL.md: frontmatter is missing a description")
+        for field in ("description", "license", "metadata.author"):
+            if not frontmatter.get(field):
+                fail(f"skills/{skill}/SKILL.md: frontmatter is missing {field}")
 
         metadata = load_json(f"skills/{skill}/metadata.json")
         if metadata is None:
@@ -263,7 +264,7 @@ def main() -> int:
     check_manifests_agree(manifest, claude_manifest, marketplace)
     skill_versions = check_skills()
     check_readme(skill_versions)
-    check_links("README.md", "CONTRIBUTING.md", "SECURITY.md")
+    check_links("README.md", "CONTRIBUTING.md", "SECURITY.md", "CODE_OF_CONDUCT.md")
     if manifest is not None:
         check_skills_not_ahead(manifest.get("version"), skill_versions)
 

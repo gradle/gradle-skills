@@ -128,7 +128,7 @@ Each skill follows the [Agent Skills](https://agentskills.io/home) layout, and a
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md) to get started, and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for the community standards this project follows.
 
 ## Security
 

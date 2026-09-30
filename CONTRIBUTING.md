@@ -23,7 +23,7 @@ Follow the [security policy](https://github.com/gradle/gradle-skills/security/po
 
 ### Code of Conduct
 
-Contributors must follow the Code of Conduct outlined at [https://gradle.org/conduct/](https://gradle.org/conduct/).
+This project is governed by the [Code of Conduct](CODE_OF_CONDUCT.md), which applies to issues, pull requests, and discussions.
 
 ## What makes a good skill
 
@@ -46,16 +46,19 @@ skills/<skill-name>/
 ├── SKILL.md          # frontmatter + instructions the agent follows
 ├── metadata.json     # version, organization, date, abstract, references
 └── references/       # optional, loaded on demand
+
+evals/<skill-name>/
+└── <skill-name>-<version>.md   # published evaluation, one per released version
 ```
 
-Beyond the `name` and `description` the specification requires, `SKILL.md` frontmatter here must include `license` and `metadata.author` and `metadata.version`.
+Beyond the `name` and `description` the specification requires, `SKILL.md` frontmatter here must include `license`, `metadata.author`, and `metadata.version`. The consistency check enforces all five.
 The `description` is what the agent uses to decide whether to load the skill, so name the task and the phrases that should trigger it.
 
 Adding a skill also touches files outside its directory:
 
 - `README.md` — a `### <skill-name>` section with a version badge, a short description, and example prompts.
 - `skills.sh.json` — the skill in a grouping.
-- `plugin.json`, `.claude-plugin/plugin.json`, and `.claude-plugin/marketplace.json` — update `description` and `keywords` if the plugin's scope changes. The three files must stay identical on every field they share.
+- `plugin.json`, `.claude-plugin/plugin.json`, and `.claude-plugin/marketplace.json` — update `description` and `keywords` if the plugin's scope changes. The three files must stay identical on every field they share; `version` is not one of them, and the marketplace entry must not set it (see [Versions](#versions)).
 
 ## Testing your change
 
@@ -74,11 +77,24 @@ Note the agent, the model, the Gradle version, and the prompts you used.
 CI runs these on every pull request; run them locally first:
 
 ```bash
+# Lint Markdown
 npx markdownlint-cli2 "**/*.md"
+
+# Validate JSON syntax
+find . -name '*.json' -not -path './.git/*' -print0 | xargs -0 -I{} jq empty "{}"
+
+# Check that every text file ends with a newline
+git ls-files -z | while IFS= read -r -d '' f; do
+  if [ -s "$f" ] && grep -Iq . "$f" && [ -n "$(tail -c1 "$f")" ]; then
+    echo "missing final newline: $f"
+  fi
+done
+
+# Check manifests, skill versions, and links
 python3 .github/scripts/check-consistency.py
 ```
 
-The consistency check verifies that the three plugin manifests agree, that each skill's `SKILL.md` and `metadata.json` state the same version, that no skill version is ahead of the plugin version, and that `README.md` badges and relative links are correct.
+The consistency check verifies that `plugin.json` satisfies the Agent Plugins manifest rules, that the three plugin manifests agree, that each skill's `SKILL.md` declares the frontmatter this repository requires and states the same version as its `metadata.json`, that no skill version is ahead of the plugin version, that `README.md` has a correct version badge per skill, and that every relative link in the root Markdown docs resolves.
 
 ## Versions
 
@@ -98,7 +114,7 @@ Unchanged skills keep their versions, so a skill version can lag behind the plug
 
 ## Commits
 
-- [Write good commit messages.](https://cbea.ms/git-commit/#seven-rules)
+- [Write good commit messages](https://cbea.ms/git-commit/#seven-rules).
 - [Sign off your commits](https://git-scm.com/docs/git-commit#Documentation/git-commit.txt---signoff) to indicate that you agree to the terms of the [Developer Certificate of Origin](https://developercertificate.org/). Pull requests from outside the Gradle organization can only be accepted if all commits are signed off. To sign off commits after the fact, run `git rebase --signoff origin/main` and force-push.
 - Keep commits discrete and self-contained: one logical change per commit.
 
