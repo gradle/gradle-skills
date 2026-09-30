@@ -9,7 +9,8 @@ Checks performed:
 
 1. Root plugin.json satisfies the Agent Plugins 1.0.0 manifest rules.
 2. plugin.json, .claude-plugin/plugin.json, and the .claude-plugin/marketplace.json
-   entry agree on every field they share.
+   entry agree on every field they share. The marketplace entry must not set
+   version: Claude Code would ignore it in favor of .claude-plugin/plugin.json.
 3. Each skill's SKILL.md frontmatter agrees with its metadata.json.
 4. Each skill's version badge in README.md matches that skill's version.
 5. Every relative link in README.md points at a file that exists.
@@ -43,7 +44,7 @@ NAME_PATTERN = re.compile(r"(?!.*(?:--|\.\.))[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?")
 AUTHOR_FIELDS = {"name", "email", "url"}
 
 # Fields the three manifests must state identically.
-SHARED_FIELDS = ("name", "version", "description", "author", "homepage", "license", "keywords")
+SHARED_FIELDS = ("name", "description", "author", "homepage", "license", "keywords")
 
 failures: list[str] = []
 
@@ -146,11 +147,18 @@ def check_manifests_agree(manifest, claude_manifest, marketplace) -> None:
             if actual != expected:
                 fail(f"{label}: {field} is {actual!r}, but plugin.json says {expected!r}")
 
-    if claude_manifest.get("repository") != manifest.get("repository"):
+    if "version" in entry:
         fail(
-            f".claude-plugin/plugin.json: repository is {claude_manifest.get('repository')!r}, "
-            f"but plugin.json says {manifest.get('repository')!r}"
+            ".claude-plugin/marketplace.json plugins[]: must not set version; "
+            "Claude Code takes it from .claude-plugin/plugin.json"
         )
+
+    for field in ("version", "repository"):
+        if claude_manifest.get(field) != manifest.get(field):
+            fail(
+                f".claude-plugin/plugin.json: {field} is {claude_manifest.get(field)!r}, "
+                f"but plugin.json says {manifest.get(field)!r}"
+            )
 
 
 def check_skills() -> dict[str, str]:

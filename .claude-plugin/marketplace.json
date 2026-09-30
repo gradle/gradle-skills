@@ -10,7 +10,6 @@
     {
       "name": "gradle-skills",
       "source": "./",
-      "version": "1.0.0",
       "description": "Official Gradle skills for AI coding agents: audit a build against Gradle best practices, and upgrade the Gradle wrapper.",
       "author": {
         "name": "Gradle, Inc.",
