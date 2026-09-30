@@ -40,7 +40,7 @@ Try:
 
 ## Installation
 
-Install all of them. A skill costs nothing until the agent triggers it.
+Install the plugin to use all of the skills.
 
 ### Claude Code
 
@@ -99,6 +99,7 @@ skills/<name>/
   SKILL.md         instructions, loaded when the skill triggers
   metadata.json    version, owner, abstract, sources
   references/      loaded on demand, not on trigger
+evals/<name>/      benchmark results per skill version
 ```
 
 ## License
