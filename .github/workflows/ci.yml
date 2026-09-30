@@ -7,37 +7,63 @@ on:
 
 permissions: {}
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   markdownlint:
     name: Lint Markdown
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Run markdownlint
-        uses: DavidAnson/markdownlint-cli2-action@v19
+        uses: DavidAnson/markdownlint-cli2-action@v24
         with:
           globs: '**/*.md'
 
   json:
     name: Validate JSON
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Validate JSON syntax
         run: |
           find . -name '*.json' -not -path './.git/*' -print0 \
             | xargs -0 -I{} sh -c 'echo "Checking {}"; jq empty "{}"'
 
-  consistency:
-    name: Check Metadata Consistency
+  final-newline:
+    name: Check Final Newlines
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
+      - name: Check that every text file ends with a newline
+        run: |
+          status=0
+          while IFS= read -r -d '' file; do
+            if [ -s "$file" ] && grep -Iq . "$file" && [ -n "$(tail -c1 "$file")" ]; then
+              echo "::error file=$file::missing final newline"
+              status=1
+            fi
+          done < <(git ls-files -z)
+          exit $status
+
+  consistency:
+    name: Check Metadata Consistency
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
       - name: Check manifests, skill versions, and README links
         run: python3 .github/scripts/check-consistency.py

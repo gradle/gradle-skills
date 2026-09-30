@@ -1,0 +1,81 @@
+name: Skill problem
+description: A skill gave wrong or outdated guidance, did something it shouldn't, or didn't trigger when it should have
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Agents don't behave the same way twice, so a report can only be reproduced with the details below.
+        Do not paste secrets, credentials, or private build contents; redact them.
+  - type: input
+    id: skill
+    attributes:
+      label: Skill
+      description: The skill's name, as in the `name` field of its `SKILL.md`.
+      placeholder: gradle-wrapper-upgrade
+    validations:
+      required: true
+  - type: input
+    id: skill-version
+    attributes:
+      label: Skill version
+      description: From `metadata.version` in the installed `SKILL.md`.
+      placeholder: 1.0.0
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: Installed as
+      options:
+        - Plugin
+        - Individual skill, via skills.sh
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: agent
+    attributes:
+      label: Agent and version
+      placeholder: Claude Code 2.1.0
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Model
+    validations:
+      required: true
+  - type: input
+    id: gradle-version
+    attributes:
+      label: Gradle version of the project
+      placeholder: 8.14.3
+    validations:
+      required: true
+  - type: textarea
+    id: prompt
+    attributes:
+      label: Prompt
+      description: What you asked the agent, word for word.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What the agent did
+      description: Quote the relevant part of the transcript or report if you can.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What it should have done
+      description: If the skill's guidance is wrong, point at the file and line, and at the Gradle documentation that says otherwise.
+    validations:
+      required: true
+  - type: textarea
+    id: project
+    attributes:
+      label: Project (optional)
+      description: A link to the project, or the build files that matter.

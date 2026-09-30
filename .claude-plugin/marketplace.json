@@ -3,17 +3,16 @@
   "name": "gradle-skills",
   "description": "Official Gradle skills for AI coding agents working in Gradle projects.",
   "owner": {
-    "name": "Gradle Inc.",
+    "name": "Gradle, Inc.",
     "url": "https://github.com/gradle"
   },
   "plugins": [
     {
       "name": "gradle-skills",
       "source": "./",
-      "version": "1.0.0",
       "description": "Official Gradle skills for AI coding agents: audit a build against Gradle best practices, and upgrade the Gradle wrapper.",
       "author": {
-        "name": "Gradle Inc.",
+        "name": "Gradle, Inc.",
         "url": "https://gradle.org"
       },
       "homepage": "https://github.com/gradle/gradle-skills",
