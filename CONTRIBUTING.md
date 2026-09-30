@@ -93,7 +93,6 @@ A skill change that ships without a plugin version bump never reaches plugin use
 
 1. Bump the version of each changed skill, following [Semantic Versioning](https://semver.org/).
 2. Bump the plugin version by at least the largest of those bumps: a minor bump to any skill means at least a minor bump to the plugin. Adding a skill is a minor bump; removing one is a major bump.
-3. Record the release in [`CHANGELOG.md`](CHANGELOG.md), including the version of every skill it contains.
 
 Unchanged skills keep their versions, so a skill version can lag behind the plugin version, but can never be ahead of it.
 

@@ -13,7 +13,8 @@ Checks performed:
    version: Claude Code would ignore it in favor of .claude-plugin/plugin.json.
 3. Each skill's SKILL.md frontmatter agrees with its metadata.json.
 4. Each skill's version badge in README.md matches that skill's version.
-5. Every relative link in README.md points at a file that exists.
+5. Every relative link in README.md, CONTRIBUTING.md, and SECURITY.md points
+   at a file that exists.
 6. No skill version is ahead of the plugin version.
 
 Skill versions are deliberately NOT required to equal the plugin version: a
@@ -206,7 +207,7 @@ def check_skills() -> dict[str, str]:
 
 
 def check_readme(skill_versions: dict[str, str]) -> None:
-    """Checks 4 and 5: README version badges and relative links."""
+    """Check 4: README version badges."""
     readme = REPO / "README.md"
     if not readme.is_file():
         fail("README.md: missing")
@@ -220,11 +221,19 @@ def check_readme(skill_versions: dict[str, str]) -> None:
         elif f"v{version}" not in heading:
             fail(f"README.md: the '{skill}' badge does not show v{version}")
 
-    for target in re.findall(r"\]\(([^)\s]+)\)", text):
-        if re.match(r"^(https?:|mailto:|#)", target):
+
+def check_links(*names: str) -> None:
+    """Check 5: every relative link in these docs points at a file that exists."""
+    for name in names:
+        doc = REPO / name
+        if not doc.is_file():
+            fail(f"{name}: missing")
             continue
-        if not (REPO / target.split("#", 1)[0]).exists():
-            fail(f"README.md: link target '{target}' does not exist")
+        for target in re.findall(r"\]\(([^)\s]+)\)", doc.read_text(encoding="utf-8")):
+            if re.match(r"^(https?:|mailto:|#)", target):
+                continue
+            if not (REPO / target.split("#", 1)[0]).exists():
+                fail(f"{name}: link target '{target}' does not exist")
 
 
 def check_skills_not_ahead(plugin_version, skill_versions: dict[str, str]) -> None:
@@ -254,6 +263,7 @@ def main() -> int:
     check_manifests_agree(manifest, claude_manifest, marketplace)
     skill_versions = check_skills()
     check_readme(skill_versions)
+    check_links("README.md", "CONTRIBUTING.md", "SECURITY.md")
     if manifest is not None:
         check_skills_not_ahead(manifest.get("version"), skill_versions)
 
