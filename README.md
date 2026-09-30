@@ -126,6 +126,10 @@ The same tree is also laid out as a [Claude Code plugin marketplace](https://cod
 
 Each skill follows the [Agent Skills](https://agentskills.io/home) layout, and add a `metadata.json` recording its version, owning organization, abstract, and references.
 
+## Security
+
+Do not report security vulnerabilities in the public issue tracker; see [SECURITY.md](SECURITY.md).
+
 ## License
 
 Apache License 2.0 — see [LICENSE](LICENSE).
