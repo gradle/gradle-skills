@@ -11,5 +11,7 @@
     "MD038": false  // no-space-in-code
   },
   "globs": ["**/*.md"],
-  "ignores": ["node_modules"]
+  // The PR template is a form GitHub pastes into a textarea, not a document:
+  // MD041 (first-line-h1) does not apply, since GitHub supplies the title.
+  "ignores": ["node_modules", ".github/PULL_REQUEST_TEMPLATE.md"]
 }

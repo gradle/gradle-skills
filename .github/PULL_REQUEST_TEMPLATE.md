@@ -1,4 +1,3 @@
-<!-- markdownlint-disable-file MD041 -->
 <!-- For a new skill or a substantial change, link the issue where it was discussed. -->
 
 ## What and why
@@ -16,5 +15,5 @@
 
 ## Checklist
 
-- [ ] `npx markdownlint-cli2 "**/*.md"` and `python3 .github/scripts/check-consistency.py` pass
+- [ ] `npx --yes markdownlint-cli2@0.23.2 "**/*.md"` and `python3 .github/scripts/check-consistency.py` pass
 - [ ] Commits are [signed off](https://github.com/gradle/gradle-skills/blob/main/CONTRIBUTING.md#commits)
