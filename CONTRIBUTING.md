@@ -77,8 +77,8 @@ Note the agent, the model, the Gradle version, and the prompts you used.
 CI runs these on every pull request; run them locally first:
 
 ```bash
-# Lint Markdown
-npx markdownlint-cli2 "**/*.md"
+# Lint Markdown (same version the CI action bundles)
+npx --yes markdownlint-cli2@0.23.2 "**/*.md"
 
 # Validate JSON syntax
 find . -name '*.json' -not -path './.git/*' -print0 | xargs -0 -I{} jq empty "{}"
