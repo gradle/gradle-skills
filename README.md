@@ -124,7 +124,11 @@ The repository root is an [Agent Plugins](https://agent-plugins.org/) package: `
 
 The same tree is also laid out as a [Claude Code plugin marketplace](https://code.claude.com/docs/en/plugin-marketplaces): `.claude-plugin/` holds the marketplace catalog and Claude Code's own copy of the plugin manifest. `skills.sh.json` groups the skills by topic for `skills.sh`.
 
-Each skill follows the [Agent Skills](https://agentskills.io/home) layout, and add a `metadata.json` recording its version, owning organization, abstract, and references.
+Each skill follows the [Agent Skills](https://agentskills.io/home) layout, and adds a `metadata.json` recording its version, owning organization, abstract, and references.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Security
 
