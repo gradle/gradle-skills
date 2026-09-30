@@ -4,7 +4,7 @@ description: "Use whenever the user asks to upgrade, bump, or update the Gradle 
 license: Apache-2.0
 metadata:
   author: gradle
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Gradle Wrapper Upgrade

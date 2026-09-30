@@ -8,7 +8,7 @@ Fix: Convert the script to `.gradle.kts`, one script at a time. Structural — p
 ## Use the Latest Minor Version of Gradle · `use_latest_minor_versions` · Medium
 When: a wrapper exists.
 Detect (heur): the version in `distributionUrl` (`gradle/wrapper/gradle-wrapper.properties`). Flag only if clearly old — a superseded major, or several minors behind. Do not guess at "latest"; state the version found and that it needs checking, rather than asserting a newer number.
-Fix: Run `./gradlew wrapper --gradle-version <v>`, then update plugins. Gradle before plugins.
+Fix: Go to the latest minor of the major the project is already on — crossing a major is a separate job. Perform the upgrade with the `gradle-wrapper-upgrade` skill, which owns that procedure; never hand-edit `gradle-wrapper.properties`. Then update plugins — Gradle before plugins.
 
 ## Apply Plugins Using the `plugins` Block · `use_the_plugins_block` · Medium
 When: always.
@@ -27,7 +27,7 @@ Fix: Use the public API equivalent; if none exists, copy the logic into the proj
 
 ## Set Build Flags in `gradle.properties` · `use_the_gradle_properties_file` · Medium
 When: always.
-Detect (heur): `org.gradle.*` flags absent from the root `gradle.properties` while appearing in CI configuration, scripts or documentation as `-D` / `-P` arguments. Also flag a missing root `gradle.properties` in a build that plainly needs flags (see `performance.md`).
+Detect (heur): `org.gradle.*` flags absent from the root `gradle.properties` while appearing as `-D` / `-P` arguments in scripts or documentation inside the project. Also flag a missing root `gradle.properties` in a build that plainly needs flags (see `performance.md`).
 Fix: Move the flags into the root `gradle.properties`, one `key=value` per line.
 
 ## Name Your Root Project · `name_your_root_project` · Medium

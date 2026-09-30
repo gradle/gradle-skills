@@ -38,7 +38,7 @@ Put all four in the message that ends your turn, not scattered through earlier o
 
    > The smallest next hop is Gradle 8.6. Upgrade to the latest Gradle 8.x release and resolve the deprecations before retrying.
 
-   The first sentence is right and the second is wrong, and together they name two different versions, so the user cannot tell which to follow. **"Upgrade to the latest 8.x" is not the advice** — that is the same oversized jump that just failed, only from a different starting point. Say instead: *"Go to 8.6 next. From there 8.7, then 8.8, and so on — one release at a time, running `./gradlew --warning-mode=all build` at each step to clear what the next one removes — until you reach 9.0.0."* One route, one rung at a time.
+   The first sentence is right and the second is wrong *here*, and together they name two different versions, so the user cannot tell which to follow. "Upgrade to the latest 8.x" is Gradle's standard route toward a major and is the correct opening move — but **it is not the advice at this point**, because a hop of that size is precisely what just failed. Say instead: *"Go to 8.6 next. From there 8.7, then 8.8, and so on — one release at a time, running `./gradlew --warning-mode=all build` at each step to clear what the next one removes — until you reach 9.0.0."* One route, one rung at a time.
 
    When there is no next release — the request was already the next one or smaller, or the project is on the newest release — **say that instead**. Silence is never the right content here, and this is the item that goes missing, because it is the only one that can be dropped without leaving a visible hole.
 4. **The links.** Release notes for the version they asked for, `https://docs.gradle.org/<version>/release-notes.html` — for 9.0.0, https://docs.gradle.org/9.0.0/release-notes.html — the per-version record of what changed, and where the cause is most likely written down. For a major, add the upgrade guide (https://docs.gradle.org/current/userguide/upgrading_major_version_9.html for 9.x), which lists the removals against their replacements and is the only way to size the work.
@@ -46,6 +46,8 @@ Put all four in the message that ends your turn, not scattered through earlier o
 **Recommend the hop; do not take it.** Quietly landing the user on a version they did not ask for, right after telling them the one they did ask for failed, is a second unrequested change on top of a failed first. Offer it and wait — which makes item 3 a sentence you write rather than a command you run, and is exactly why it is the easiest to skip.
 
 ## The ladder — one release at a time
+
+**The ladder is recovery, not the default route.** Gradle's own guidance — go to the latest minor of the current major, clear deprecations, then cross — is the correct advice *before* an attempt, and nothing here contradicts it. You are reading this page because that has already been tried and failed, and a hop that has failed once is not worth repeating at the same size. That is what buys the smaller steps their cost.
 
 Resolve the next rung rather than guessing it:
 
@@ -59,7 +61,7 @@ curl -sL https://services.gradle.org/versions/all    # every release, newest fir
 
 One release at a time is the smallest step that makes progress, and a failure on one rung is a far smaller thing to diagnose than a failure across several.
 
-**Never recommend skipping to the newest release of the current major.** "Get to the latest 8.x, then try 9.0" is the same oversized jump that just failed, restarted from a different rung — 8.5 → 8.14 crosses nine releases' worth of removals in one step, and when it breaks the user is no better off than they are now. The whole point of the ladder is that each step is small enough that a failure names its own cause.
+**Do not restart with another oversized jump.** "Get to the latest 8.x, then try 9.0" is Gradle's documented route to a new major, and it is the right place to *start* — but the user has already been there, because the hop that just failed was one of that size. Restarting it from a different rung asks for the same failure: 8.5 → 8.14 crosses nine releases' worth of removals in one step, and when it breaks they are no better off than now. Once a jump that big has failed, each step has to be small enough that a failure names its own cause.
 
 **Clear deprecations on every rung, not at the end.** Each release warns about what the next ones remove, which is how the ladder stays cheap:
 

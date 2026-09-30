@@ -13,7 +13,7 @@
   ```
 
   Supplied per invocation: easily forgotten, and applied inconsistently across
-  machines and CI.
+  machines and environments.
 - **Do:**
 
   ```properties

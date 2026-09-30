@@ -23,4 +23,4 @@ Fix: Move the logic into a `@TaskAction` or a lazily-queried `Provider`, and dec
 ## Prefer the `-bin` Gradle Distribution · `prefer_bin_distribution` · Recommendation
 When: a wrapper exists.
 Detect (det): `distributionUrl` in `gradle/wrapper/gradle-wrapper.properties` ends with `-all.zip`.
-Fix: Change the `distributionUrl` suffix to `-bin.zip`; re-fetch `distributionSha256Sum` if set.
+Fix: Re-run the `wrapper` task at the project's current version with `--distribution-type=bin`, re-pinning `distributionSha256Sum` for the `-bin` artifact. Never hand-edit the URL.
