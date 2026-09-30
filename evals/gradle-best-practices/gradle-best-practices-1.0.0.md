@@ -195,15 +195,20 @@ baseline → treatment, with the fixture's floor:
 
 The skill raises detection in **26 of 28 fixture-model pairs**, flat in one (Gemini on
 `plugin-authoring`, 6 → 6), down in one (Opus on `plugin-authoring`, 12 → 10, where both
-arms clear the floor of 6 and score 8/8 regardless). Typical multiples are 1.5× to 4×;
-DeepSeek on `structure` is 6 → 28.
+arms clear the floor of 6 and score 8/8 regardless). Typical multiples are 1.5× to 4×.
+The largest of them, DeepSeek's 6 → 28 on `structure`, is also the one to read most
+carefully: two further unaided runs of DeepSeek on that fixture produced 14 and 11
+lines, so the 4.7× is measured against the lowest of three baselines. Sonnet's 8 → 26
+has the same shape — its other two unaided runs read 17 and 14.
 
 The grid captures part of this. `violations-count` moves for Sonnet (3 of 4 fixtures),
 GPT (3), DeepSeek (3) and Gemini (1). It is one-sided, so Opus's 25 → 30 on
 `structure` scores nothing — both arms clear the floor of 14.
 
-**But see finding 8 before quoting any of these numbers as an effect size.** The
-repeat-run control puts the run-to-run band on this metric at up to ±7 lines.
+**But see finding 8 before quoting any of these numbers as an effect size.** Three
+unaided runs per model on `sample-carlog` spread by as much as 9 lines, and against that
+band **20 of these 28 cells are inside the noise** — the whole `plugin-authoring` row
+among them. The direction of the effect is not in doubt; the per-cell multiples are.
 
 ### 3. `plugin-authoring` is the cleanest scenario, and it works
 
@@ -225,8 +230,9 @@ broke the build on `idioms` and on `plugin-authoring`, having left it green unai
 Its `idioms` grid goes 7/14 → 3/14, losing `plugins-block-only`, `no-after-evaluate`,
 `build-cache-enabled` and `config-cache-enabled` alongside the build itself.
 
-The cost profile says why: turns 93 → 289 (3.11×), cached input 4.6M → 21.7M (4.76×),
-and the `plugin-authoring` treatment arm hit 100% of its token cap and was bounded.
+The cost profile says why: turns 93 → ≥289 (≥3.11×), cached input 4.6M → ≥21.7M
+(≥4.76×), and the `plugin-authoring` treatment arm hit 100% of its token cap and was
+bounded, so every Qwen treatment figure is a floor.
 A 35B local model given a 48-practice catalog attempts far more than it can land.
 
 **This is a real limitation, not a scoring artifact.** The skill should carry guidance
@@ -280,12 +286,12 @@ Totals across the 35 delta arms, by model:
 | GPT-5.6-luna | 96 → 100 (1.04×) | 27,819 → 36,441 (1.31×) | 1.15M → 2.17M (1.88×) | 601 → 834 (1.39×) | 0.10 → 0.16 |
 | Gemini 3.8 Flash | 294 → 287 (0.98×) | 492,621 → 345,219 (0.70×) | 15.83M → 18.57M (1.17×) | 2,867 → 2,557 (0.89×) | 4.30 → 3.86 |
 | DeepSeek-v4-pro | 178 → 148 (0.83×) | 191,258 → 251,428 (1.31×) | 6.15M → 8.88M (1.44×) | 1,884 → 2,238 (1.19×) | 0.63 → 0.87 |
-| Qwen3.6-35B | 93 → 289 (3.11×) | 188,886 → 297,934 (1.58×) | 4.57M → 21.75M (4.76×) | ≥10,167 → ≥12,902 (1.27×) | n/a |
+| Qwen3.6-35B | 93 → ≥289 (≥3.11×) | 188,886 → ≥297,934 (≥1.58×) | 4.57M → ≥21.75M (≥4.76×) | 10,167 → ≥12,902 (≥1.27×) | n/a |
 
 Gemini's apparent saving is one outlier: its `plugin-authoring` **baseline** burned
-263,866 output tokens and 1,060s, more than four times its own treatment arm. Strip
-that scenario and Gemini's output-token ratio is 1.20×, not 0.70×. Do not read
-Gemini as evidence the skill is free.
+263,866 output tokens and 1,060s — 3.9× its own treatment arm's output tokens and 2.0×
+its wall clock. Strip that scenario and Gemini's output-token ratio is 1.21×, not 0.70×.
+Do not read Gemini as evidence the skill is free.
 
 A more useful figure than the raw multiple is **extra output tokens spent per check
 gained**: ~430 for GPT-5.6-luna, ~1,050 for Haiku 4.5, ~2,700 for DeepSeek-v4-pro,
@@ -331,17 +337,37 @@ The `aa` control runs on all seven models. Scorer disagreement between two
 tokens, wrote no `VIOLATIONS.md` and consumed zero cached input. That is a degenerate
 arm, not a measurement, and its 4/12 should be discarded.
 
-**The detection-count band is much wider than the scorer band.** Haiku's control produced
-**8 versus 1** lines and GPT's **4 versus 11** — swings of 7 lines on the same fixture,
-same prompt, same conditions. Finding 2's detection multiples remain directionally
-solid because most of them are far larger than 7, but **the smaller ones (Gemini
-`idioms` 10 → 11, Haiku `plugin-authoring` 2 → 3, Qwen `plugin-authoring` 3 → 4) are
-inside the noise and should not be counted.**
+**There is a third unaided run per model, and it belongs here.** `aa` uses `structure`'s
+fixture and `structure`'s prompt, so each model's `structure` baseline arm is a third
+draw from the same distribution as the two control arms:
 
-On the scorer grid, up to 3 of 12 checks flip between identical arms. Aggregate
-deltas of +18 and above are far outside that; **Opus's +3 is not.** Opus's control was
-clean (1/12), which helps, but a single-check-per-scenario movement on one model is
-directional at best.
+| Model | `structure` baseline | `aa`-a | `aa`-b | Spread |
+| :--- | ---: | ---: | ---: | ---: |
+| Sonnet 5 | 8 | 17 | 14 | **9** |
+| DeepSeek-v4-pro | 6 | 14 | 11 | **8** |
+| Haiku 4.5 | 3 | 8 | 1 | 7 |
+| GPT-5.6-luna | 8 | 4 | 11 | 7 |
+| Gemini 3.8 Flash | 12 | 9 | void | 3 |
+| Opus 5.5 | 25 | 24 | 25 | 1 |
+| Qwen3.6-35B | 4 | 5 | 3 | 2 |
+
+**The detection-count band is much wider than the scorer band.** The control pair alone
+swings 7 lines — Haiku's **8 versus 1**, GPT's **4 versus 11**. The third run widens it
+to **9** on Sonnet and 8 on DeepSeek, same fixture, same prompt, same conditions. Read 9
+as the floor of this band rather than its ceiling: three runs is still three.
+
+Against a band of 9, **20 of the 28 cells in finding 2's detection table sit inside the
+noise**, the entire `plugin-authoring` row among them. Eight clear it: Sonnet on
+`structure`, `tasks` and `idioms`; DeepSeek on `structure` and `tasks`; Opus and GPT on
+`tasks`; Gemini on `structure`.
+
+On the scorer grid, up to 3 of 12 checks flip between identical control arms — and that
+is a **lower bound**, because a third sample can add disagreements but never remove
+them, and the per-check `aa` grids needed to compute the three-run figure are not
+reproduced in this report. Aggregate deltas of +18 and above are far outside that band
+either way; **Opus's +3 is not.** Opus's control was clean (1/12) and its three runs
+span a single line, which helps, but a single-check-per-scenario movement on one model
+is directional at best.
 
 ### 9. n = 1 per arm
 
@@ -535,8 +561,8 @@ reproducible archives configured; `flatMap` rather than `map` for nested provide
 | `violations-count` | ❌→❌ | ❌→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ❌→❌ |
 
 **Signal:** 36 → 49 of 56 in its first outing, with five arms at 8/8.
-`flatmap-for-nested-providers` gains in five models — the largest single-check gain in
-the sweep — and `reproducible-archives` in three. The scenario is the cleanest evidence
+`flatmap-for-nested-providers` gains in five models — the largest single-check gain on
+this fixture — and `reproducible-archives` in three. The scenario is the cleanest evidence
 that the bundled catalog transfers specific, non-obvious practices rather than general
 tidiness.
 
@@ -633,7 +659,7 @@ baseline was the cheaper of the two. Baseline is always first, in every table be
 | GPT-5.6-luna | 🏆 17 / 19 | 🏆 122.2 / 169.2 | 🏆 5,927 / 7,585 | 🏆 199,931 / 380,417 | 🏆 0.019 / 0.031 |
 | Gemini 3.8 Flash | 75 / 🏆 63 | 1,060.1 / 🏆 535.8 | 263,866 / 🏆 67,951 | 3,780,164 / 🏆 3,360,416 | 1.551 / 🏆 0.763 |
 | DeepSeek-v4-pro | 🏆 20 / 48 | 🏆 329.7 / 644.8 | 🏆 36,416 / 71,584 | 🏆 612,224 / 3,444,224 | 🏆 0.100 / 0.261 |
-| Qwen3.6-35B | 32 / ≥ 107 | 8,756.0 / ≥ 7,630.6 | 136,078 / ≥ 128,221 | 🏆 2,649,556 / ≥ 9,259,438 | n/a |
+| Qwen3.6-35B | 🏆 32 / ≥ 107 | 8,756.0 / ≥ 7,630.6 | 136,078 / ≥ 128,221 | 🏆 2,649,556 / ≥ 9,259,438 | n/a |
 
 Gemini's baseline here is the sweep's single most expensive arm and the sole reason
 its aggregate reads as a saving. Treat it as an outlier, not a result.
@@ -654,8 +680,11 @@ its aggregate reads as a saving. Treat it as an outlier, not a result.
 
 Totals across the 35 delta arms appear in finding 6. The short version:
 
-- The skill costs **1.3× to 2.0× output tokens** and **1.4× to 2.6× cached input** on
-  six of seven models; Qwen is the outlier at 4.8× cached input.
+- The skill costs **1.3× to 2.0× output tokens** on six of seven models — every model
+  but Gemini, whose 0.70× is the `plugin-authoring` baseline outlier of finding 6 — and
+  **1.4× to 2.6× cached input** on five of seven. Qwen is the outlier at ≥4.8× cached
+  input; Gemini reads 1.2×. Every Qwen ratio is a floor — its `plugin-authoring`
+  treatment arm was bounded on tokens.
 - **Extra output tokens per check gained** range from ~430 (GPT-5.6-luna) to ~9,200
   (Opus 5.5), and track inversely with how much the model gained.
 - **One arm of thirty-five was bounded**, on tokens, and it is Qwen.

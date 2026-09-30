@@ -450,7 +450,8 @@ carries a ±1 band, while `wrapper-properties`, which agreed on all seven models
 
 Turn and token variance between identical arms is much wider than scorer variance (Qwen's
 two control arms ran 36 turns and 5). **No single-arm cost cell is a measurement**; the aggregate
-ratios in finding 4 sum 175 arm-scenario pairs and are the figures to read.
+ratios in finding 4 sum 35 baseline/treatment pairs across 70 arms and are the figures
+to read.
 
 ### 9. n = 1 per arm
 
@@ -570,7 +571,7 @@ working as designed rather than the skill failing. The build fails loudly until 
 matching new `--gradle-distribution-sha256-sum`, so **`wrapper-properties` passes in all
 fourteen arms — the error message teaches unaided agents the habit the skill would have
 supplied.** What the skill still buys is the second `wrapper` run: `wrapper-files` moves
-3 → 7. Three models recovered from the first-attempt failure, updated the sum, and stopped
+4 → 7. Three models recovered from the first-attempt failure, updated the sum, and stopped
 one run short.
 
 The documented wrong turn — deleting the old sum line to get past the error — **appears in
@@ -598,8 +599,9 @@ configures the build and so fails outright if 9.0.0 is still pinned.
 | `advised-next-step` | ❌→❌ | ❌→❌ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→❌ |
 
 **Signal:** 12 → 50 of 56, the largest scenario-level movement in the sweep. Four models
-reach 8 of 8. **Three checks go 0/7 → 7/7 here or in its git twin** —
-`wrapper-task-pinned` and `reported-blocked` outright, `rolled-back` at 0/7 → 6/7.
+reach 8 of 8. **Two checks go 0/7 → 7/7 here** — `wrapper-task-pinned` and
+`reported-blocked` — and `wrapper-task-pinned` repeats it on the git twin.
+`rolled-back` goes 0/7 → 6/7.
 
 The baseline behaviour is worth stating plainly, because it is not what the scenario was
 built to expect. **All seven baseline arms left `distributionUrl` pinned at 9.0.0, and
@@ -615,9 +617,9 @@ none ran the `wrapper` task with a pinned checksum.** They then split two ways:
 So the unaided default on a blocked upgrade is **migrate the build**. That is a defensible
 engineering choice in general and the wrong one here: the user asked for a wrapper
 upgrade, and four agents rewrote their
-build logic to deliver it. The skill stops that in six of seven arms — which means
-`no-collateral-damage` is not measuring tidiness on this fixture, it is measuring scope
-discipline.
+build logic to deliver it. The skill stops that in all seven arms here and six of seven
+on the git twin — which means `no-collateral-damage` is not measuring tidiness on this
+fixture, it is measuring scope discipline.
 
 `quoted-error` already passes in five of seven baselines — naming the removed API is
 something models do unaided. It is the *state report* they don't produce, which is why
