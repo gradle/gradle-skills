@@ -2,11 +2,12 @@
 
 ## Summary
 
-`gradle-best-practices@1.0.0` (revision `0b1f547`) was measured against seven models
-from five vendors across three agent CLIs, on five Gradle build-quality scenarios,
-two arms each, plus a seven-model A/A control. The treatment arm passed **292 of 357**
-best-practice checks against **191 of 357** for the unaided baseline — **113 gains,
-12 regressions**.
+`gradle-best-practices@1.0.0` (revision `0b1f547`) was measured on seven models from
+five vendors across three agent CLIs, on five Gradle build-quality scenarios. Each
+scenario ran twice per model — once with the skill, once without. With the skill, agents
+passed **292 of 357** best-practice checks against **191 of 357** unaided — **113 gains,
+12 regressions**. A sixth scenario ran the unaided arm twice on every model, to measure
+how far two identical runs drift on their own.
 
 The effect is broad rather than concentrated. All seven models improve, four of them
 by 18 checks or more: **DeepSeek-v4-pro +22** (0 regressions), **Sonnet 5 +20**
@@ -48,12 +49,23 @@ Each scenario runs two arms against the same Gradle project and the same prompt:
 
 All 35 treatment arms received the same skill revision.
 
-The four fixing prompts ask the agent to investigate the build, write a
-`VIOLATIONS.md` with one `<file>: <line>: <description>` line per issue before
-changing anything, then apply the fixes while keeping `./gradlew build` green, and
-record anything left over in `REMAINING-UNFIXED.md`. `false-positives` is audit-only
-and forbids edits. **All five fixing prompts are textually identical**, and the `aa`
-prompt matches them exactly.
+Terms used throughout this report:
+
+| Term | Meaning |
+| :--- | :--- |
+| **arm** | One agent run: one model, one scenario, one skill setting |
+| **baseline arm** | The `no-skills` half of a pair |
+| **treatment arm** | The `with-skills` half of the same pair |
+| **repeat-run control** (`aa`) | A pair of `no-skills` arms run against the same fixture and prompt, to show how much two identical runs differ on their own |
+
+The four fixing scenarios — `structure`, `tasks`, `idioms` and `plugin-authoring` —
+ask the agent to investigate the build, write a `VIOLATIONS.md` with one
+`<file>: <line>: <description>` line per issue before changing anything, then apply
+the fixes while keeping `./gradlew build` green, and record anything left over in
+`REMAINING-UNFIXED.md`. **Those four prompts and the repeat-run control's prompt are all
+textually identical** — five scenarios, one prompt — so every fixing scenario is
+prompt-comparable to every other. `false-positives` is the exception: it uses its own
+audit-only prompt, which forbids edits.
 
 ### Models tested
 
@@ -67,8 +79,7 @@ prompt matches them exactly.
 | `deepseek/deepseek-v4-pro` | DeepSeek | `opencode 1.18.30` | DeepSeek-v4-pro |
 | `ollama/qwen3.6:35b-a3b-coding-nvfp4` | Alibaba (local) | `claude-code 2.1.233` | Qwen3.6-35B |
 
-Cross-vendor and cross-CLI coverage is the most useful property of this benchmark:
-nothing here rests on a single vendor's prompt conventions or a single harness's
+Nothing here rests on a single vendor's prompt conventions or a single harness's
 skill-loading mechanism.
 
 ### Scenarios and fixtures
@@ -80,7 +91,7 @@ skill-loading mechanism.
 | `idioms` | `sample-recipe-vault` | 14 | 13 | Script idioms: `apply plugin`, `afterEvaluate`, internal APIs, properties placement, config-time work, eager file trees |
 | `plugin-authoring` | `sample-fleet-tracker` | 8 | 6 | Plugin hygiene: order-independence, no `buildSrc`, reproducible archives, `flatMap` for nested providers |
 | `false-positives` | `sample-init-library` | 2 | — | Restraint on untouched `gradle init` output — audit only, no edits |
-| `aa` | `sample-carlog` | 12 | 14 | A/A control: two identical `no-skills` arms, same fixture and prompt as `structure` |
+| `aa` | `sample-carlog` | 12 | 14 | Repeat-run control: two identical unaided arms, same fixture and prompt as `structure` |
 
 Check counts exclude `skill-used`, which is scored only on the treatment arm and
 therefore cannot contribute a delta. `aa` runs no treatment arm and contributes no
@@ -94,8 +105,8 @@ Fixture revisions: `sample-carlog` `sha256:624f1d41fe05…`, `sample-star-charte
 ### Scorers
 
 Most checks are `file-exists` greps over comment-stripped copies of the build
-sources. The ones worth calling out are the behavioural and structural probes, and
-the two meta-scorers:
+sources. The ones worth calling out are the behavioural and structural probes, plus
+the two that grade the agent's report rather than the build:
 
 - **`lazy-extension-wiring`** (`structure`) — not a regex. An init script reconfigures
   the `carLog` extension in `gradle.afterProject`, after every build script has
@@ -109,7 +120,7 @@ the two meta-scorers:
 - **`tasks-documented`** (`tasks`) — harvests script-defined task names, then runs
   `./gradlew tasks --all` and demands every harvested name Gradle lists carry a
   description. **Cannot see Java-style registration**, which cost one arm a check it had
-  earned; see `analysis.md`.
+  earned.
 - **`plugin-order-agnostic`** / **`convention-order-agnostic`** (`plugin-authoring`) —
   behavioural probes that apply the plugin before and after the `java` plugin and
   demand the same result.
@@ -158,9 +169,9 @@ skill should do. Opus 5.5 already knows most of this catalog; the skill buys it 
 checks. Haiku 4.5, which does not, gains 18 against two regressions — the cleanest
 demonstration in the sweep that the catalog supplies knowledge the model lacks.
 
-**Qwen3.6-35B is the exception and should not be read as part of that pattern.** Its
-+10 is the second-largest raw gain count in the sweep (17 gains), but it comes with
-**seven regressions — more than the other six models combined** — and two of those are
+**Qwen3.6-35B is the exception and should not be read as part of that pattern.** Its 17
+gains sit in the same range as Haiku's 20 and Sonnet's 20, but they come with **seven
+regressions — more than the other six models combined** — and two of those are
 `project-builds` flipping PASS → FAIL. It still nets an improvement, and every one of
 its 17 gains is a real check it did not pass unaided; but a net that is built from 17
 gains and 7 regressions is a different thing from Haiku's 20 and 2, and finding 4
@@ -182,23 +193,29 @@ baseline → treatment, with the fixture's floor:
 | `idioms` | 13 | 1 → **8** | 7 → **18** | 18 → **25** | 9 → **14** | 10 → **11** | 8 → **17** | 4 → **10** |
 | `plugin-authoring` | 6 | 2 → **3** | 4 → **11** | 12 → **10** | 6 → **13** | 6 → **6** | 7 → **10** | 3 → **4** |
 
-The skill raises detection in **25 of 28 fixture-model pairs**, flat in two, down in
-one (Opus on `plugin-authoring`, 12 → 10, where both arms clear the floor of 6 and
-score 8/8 regardless). Typical multiples are 1.5× to 4×; DeepSeek on `structure` is
-6 → 28.
+The skill raises detection in **26 of 28 fixture-model pairs**, flat in one (Gemini on
+`plugin-authoring`, 6 → 6), down in one (Opus on `plugin-authoring`, 12 → 10, where both
+arms clear the floor of 6 and score 8/8 regardless). Typical multiples are 1.5× to 4×.
+The largest of them, DeepSeek's 6 → 28 on `structure`, is also the one to read most
+carefully: two further unaided runs of DeepSeek on that fixture produced 14 and 11
+lines, so the 4.7× is measured against the lowest of three baselines. Sonnet's 8 → 26
+has the same shape — its other two unaided runs read 17 and 14.
 
 The grid captures part of this. `violations-count` moves for Sonnet (3 of 4 fixtures),
 GPT (3), DeepSeek (3) and Gemini (1). It is one-sided, so Opus's 25 → 30 on
 `structure` scores nothing — both arms clear the floor of 14.
 
-**But see finding 8 before quoting any of these numbers as an effect size.** The A/A
-control puts the run-to-run band on this metric at up to ±7 lines.
+**But see finding 8 before quoting any of these numbers as an effect size.** Three
+unaided runs per model on `sample-carlog` spread by as much as 9 lines, and against that
+band **20 of these 28 cells are inside the noise** — the whole `plugin-authoring` row
+among them. The direction of the effect is not in doubt; the per-cell multiples are.
 
 ### 3. `plugin-authoring` is the cleanest scenario, and it works
 
 The `sample-fleet-tracker` fixture probes plugin hygiene with two behavioural
-order-independence checks. Results: **five of seven models gain, none lose except
-Qwen**, and five arms reach 8/8. Sonnet goes 3 → 8 with five gains.
+order-independence checks. Opus and Gemini already score 8/8 unaided, so only five
+models could improve — and **all five did**, with five arms reaching 8/8. Sonnet goes
+3 → 8 with five gains. Qwen is the only model to lose checks here.
 
 The two most-gained checks are `flatmap-for-nested-providers` (+5 models) and
 `reproducible-archives` (+3) — both textbook catalog entries that models do not reach
@@ -213,8 +230,9 @@ broke the build on `idioms` and on `plugin-authoring`, having left it green unai
 Its `idioms` grid goes 7/14 → 3/14, losing `plugins-block-only`, `no-after-evaluate`,
 `build-cache-enabled` and `config-cache-enabled` alongside the build itself.
 
-The cost profile says why: turns 93 → 289 (3.11×), cached input 4.6M → 21.7M (4.76×),
-and the `plugin-authoring` treatment arm hit 100% of its token cap and was bounded.
+The cost profile says why: turns 93 → ≥289 (≥3.11×), cached input 4.6M → ≥21.7M
+(≥4.76×), and the `plugin-authoring` treatment arm hit 100% of its token cap and was
+bounded, so every Qwen treatment figure is a floor.
 A 35B local model given a 48-practice catalog attempts far more than it can land.
 
 **This is a real limitation, not a scoring artifact.** The skill should carry guidance
@@ -231,7 +249,7 @@ file **and** description. The harness rewrites the wrapper's `distributionUrl` t
 about the tree as staged, and scoring it as a false positive would make the scenario
 unwinnable by construction.
 
-Result: **five of seven models gain**, and the treatment arm passes in six of seven.
+Result: **five of seven models gain**, and the skilled arm passes in five of seven.
 
 | Model | Baseline | Treatment |
 | :--- | :--- | :--- |
@@ -268,12 +286,12 @@ Totals across the 35 delta arms, by model:
 | GPT-5.6-luna | 96 → 100 (1.04×) | 27,819 → 36,441 (1.31×) | 1.15M → 2.17M (1.88×) | 601 → 834 (1.39×) | 0.10 → 0.16 |
 | Gemini 3.8 Flash | 294 → 287 (0.98×) | 492,621 → 345,219 (0.70×) | 15.83M → 18.57M (1.17×) | 2,867 → 2,557 (0.89×) | 4.30 → 3.86 |
 | DeepSeek-v4-pro | 178 → 148 (0.83×) | 191,258 → 251,428 (1.31×) | 6.15M → 8.88M (1.44×) | 1,884 → 2,238 (1.19×) | 0.63 → 0.87 |
-| Qwen3.6-35B | 93 → 289 (3.11×) | 188,886 → 297,934 (1.58×) | 4.57M → 21.75M (4.76×) | ≥10,167 → ≥12,902 (1.27×) | n/a |
+| Qwen3.6-35B | 93 → ≥289 (≥3.11×) | 188,886 → ≥297,934 (≥1.58×) | 4.57M → ≥21.75M (≥4.76×) | 10,167 → ≥12,902 (≥1.27×) | n/a |
 
 Gemini's apparent saving is one outlier: its `plugin-authoring` **baseline** burned
-263,866 output tokens and 1,060s, more than four times its own treatment arm. Strip
-that scenario and Gemini's output-token ratio is 1.20×, not 0.70×. Do not read
-Gemini as evidence the skill is free.
+263,866 output tokens and 1,060s — 3.9× its own treatment arm's output tokens and 2.0×
+its wall clock. Strip that scenario and Gemini's output-token ratio is 1.21×, not 0.70×.
+Do not read Gemini as evidence the skill is free.
 
 A more useful figure than the raw multiple is **extra output tokens spent per check
 gained**: ~430 for GPT-5.6-luna, ~1,050 for Haiku 4.5, ~2,700 for DeepSeek-v4-pro,
@@ -315,21 +333,41 @@ The `aa` control runs on all seven models. Scorer disagreement between two
 | DeepSeek-v4-pro | 3 / 12 | `version-catalog`, `convention-plugins`, `violations-count` | 14 vs 11 |
 | Gemini 3.8 Flash | 4 / 12 | `root-project-named`, `no-eager-getbyname`, `lazy-extension-wiring`, `no-duplicate-dependencies` | 9 vs — ⚠️ |
 
-⚠️ **Gemini's A/A is void.** Its `no-skills-b` arm ran two turns, produced 554 output
+⚠️ **Gemini's control is void.** Its `no-skills-b` arm ran two turns, produced 554 output
 tokens, wrote no `VIOLATIONS.md` and consumed zero cached input. That is a degenerate
 arm, not a measurement, and its 4/12 should be discarded.
 
-**The detection-count band is much wider than the scorer band.** Haiku's A/A produced
-**8 versus 1** lines and GPT's **4 versus 11** — swings of 7 lines on the same fixture,
-same prompt, same conditions. Finding 2's detection multiples remain directionally
-solid because most of them are far larger than 7, but **the smaller ones (Gemini
-`idioms` 10 → 11, Haiku `plugin-authoring` 2 → 3, Qwen `plugin-authoring` 3 → 4) are
-inside the noise and should not be counted.**
+**There is a third unaided run per model, and it belongs here.** `aa` uses `structure`'s
+fixture and `structure`'s prompt, so each model's `structure` baseline arm is a third
+draw from the same distribution as the two control arms:
 
-On the scorer grid, up to 3 of 12 checks flip between identical arms. Aggregate
-deltas of +18 and above are far outside that; **Opus's +3 is not.** Opus's A/A was
-clean (1/12), which helps, but a single-check-per-scenario movement on one model is
-directional at best.
+| Model | `structure` baseline | `aa`-a | `aa`-b | Spread |
+| :--- | ---: | ---: | ---: | ---: |
+| Sonnet 5 | 8 | 17 | 14 | **9** |
+| DeepSeek-v4-pro | 6 | 14 | 11 | **8** |
+| Haiku 4.5 | 3 | 8 | 1 | 7 |
+| GPT-5.6-luna | 8 | 4 | 11 | 7 |
+| Gemini 3.8 Flash | 12 | 9 | void | 3 |
+| Opus 5.5 | 25 | 24 | 25 | 1 |
+| Qwen3.6-35B | 4 | 5 | 3 | 2 |
+
+**The detection-count band is much wider than the scorer band.** The control pair alone
+swings 7 lines — Haiku's **8 versus 1**, GPT's **4 versus 11**. The third run widens it
+to **9** on Sonnet and 8 on DeepSeek, same fixture, same prompt, same conditions. Read 9
+as the floor of this band rather than its ceiling: three runs is still three.
+
+Against a band of 9, **20 of the 28 cells in finding 2's detection table sit inside the
+noise**, the entire `plugin-authoring` row among them. Eight clear it: Sonnet on
+`structure`, `tasks` and `idioms`; DeepSeek on `structure` and `tasks`; Opus and GPT on
+`tasks`; Gemini on `structure`.
+
+On the scorer grid, up to 3 of 12 checks flip between identical control arms — and that
+is a **lower bound**, because a third sample can add disagreements but never remove
+them, and the per-check `aa` grids needed to compute the three-run figure are not
+reproduced in this report. Aggregate deltas of +18 and above are far outside that band
+either way; **Opus's +3 is not.** Opus's control was clean (1/12) and its three runs
+span a single line, which helps, but a single-check-per-scenario movement on one model
+is directional at best.
 
 ### 9. n = 1 per arm
 
@@ -368,12 +406,12 @@ Twelve, across five models. Two models regress nowhere.
 | Qwen3.6-35B | `idioms` | `config-cache-enabled` | Real |
 | Qwen3.6-35B | `plugin-authoring` | `project-builds` | Real — treatment broke the build |
 | Qwen3.6-35B | `plugin-authoring` | `no-forced-java-plugin` | Real |
-| Haiku 4.5 | `structure` | `no-duplicate-dependencies` | **Inside the A/A band** — Haiku's own control flipped this exact scorer |
+| Haiku 4.5 | `structure` | `no-duplicate-dependencies` | **Inside the control band** — Haiku's own control flipped this exact scorer |
 | Haiku 4.5 | `tasks` | `no-cc-optout` | Real — added a configuration-cache opt-out |
 | GPT-5.6-luna | `tasks` | `no-cc-optout` | Real — same failure mode |
 | Gemini 3.8 Flash | `false-positives` | `only-defensible-findings` | Real, but replaces a vacuous pass — see finding 5 |
 
-Discounting the one scorer artifact and the one A/A-band flip, **10 real
+Discounting the one scorer artifact and the one control-band flip, **10 real
 regressions, 7 of them one model.**
 
 `no-cc-optout` failing in two independent treatment arms and no baseline arm is the
@@ -483,7 +521,7 @@ configuration cache enabled; no eager `fileTree`.
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | `project-builds` | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→❌ |
 | `plugins-block-only` | ❌→❌ | ❌→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→❌ |
-| `no-after-evaluate` | ❌→❌ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅���❌ |
+| `no-after-evaluate` | ❌→❌ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→❌ |
 | `no-internal-apis` | ❌→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ❌→❌ |
 | `build-cache-enabled` | ❌→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→❌ |
 | `utf8-in-jvmargs` | ❌→❌ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→❌ |
@@ -522,12 +560,11 @@ reproducible archives configured; `flatMap` rather than `map` for nested provide
 | `flatmap-for-nested-providers` | ❌→✅ | ❌→✅ | ✅→✅ | ❌→✅ | ✅→✅ | ❌→✅ | ❌→✅ |
 | `violations-count` | ❌→❌ | ❌→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ❌→❌ |
 
-**Signal:** 36 → 49 of 56 in its first outing. Five arms reach 8/8. Opus and Gemini
-already score 8/8 unaided, so only five models could improve at all, and all five
-did. `flatmap-for-nested-providers` gains in five
-models — the largest single-check gain in the sweep — and `reproducible-archives` in
-three. The scenario is the cleanest evidence that the bundled catalog transfers
-specific, non-obvious practices rather than general tidiness.
+**Signal:** 36 → 49 of 56 in its first outing, with five arms at 8/8.
+`flatmap-for-nested-providers` gains in five models — the largest single-check gain on
+this fixture — and `reproducible-archives` in three. The scenario is the cleanest evidence
+that the bundled catalog transfers specific, non-obvious practices rather than general
+tidiness.
 
 ### false-positives
 
@@ -622,7 +659,7 @@ baseline was the cheaper of the two. Baseline is always first, in every table be
 | GPT-5.6-luna | 🏆 17 / 19 | 🏆 122.2 / 169.2 | 🏆 5,927 / 7,585 | 🏆 199,931 / 380,417 | 🏆 0.019 / 0.031 |
 | Gemini 3.8 Flash | 75 / 🏆 63 | 1,060.1 / 🏆 535.8 | 263,866 / 🏆 67,951 | 3,780,164 / 🏆 3,360,416 | 1.551 / 🏆 0.763 |
 | DeepSeek-v4-pro | 🏆 20 / 48 | 🏆 329.7 / 644.8 | 🏆 36,416 / 71,584 | 🏆 612,224 / 3,444,224 | 🏆 0.100 / 0.261 |
-| Qwen3.6-35B | 32 / ≥ 107 | 8,756.0 / ≥ 7,630.6 | 136,078 / ≥ 128,221 | 🏆 2,649,556 / ≥ 9,259,438 | n/a |
+| Qwen3.6-35B | 🏆 32 / ≥ 107 | 8,756.0 / ≥ 7,630.6 | 136,078 / ≥ 128,221 | 🏆 2,649,556 / ≥ 9,259,438 | n/a |
 
 Gemini's baseline here is the sweep's single most expensive arm and the sole reason
 its aggregate reads as a saving. Treat it as an outlier, not a result.
@@ -643,8 +680,11 @@ its aggregate reads as a saving. Treat it as an outlier, not a result.
 
 Totals across the 35 delta arms appear in finding 6. The short version:
 
-- The skill costs **1.3× to 2.0× output tokens** and **1.4× to 2.6× cached input** on
-  six of seven models; Qwen is the outlier at 4.8× cached input.
+- The skill costs **1.3× to 2.0× output tokens** on six of seven models — every model
+  but Gemini, whose 0.70× is the `plugin-authoring` baseline outlier of finding 6 — and
+  **1.4× to 2.6× cached input** on five of seven. Qwen is the outlier at ≥4.8× cached
+  input; Gemini reads 1.2×. Every Qwen ratio is a floor — its `plugin-authoring`
+  treatment arm was bounded on tokens.
 - **Extra output tokens per check gained** range from ~430 (GPT-5.6-luna) to ~9,200
   (Opus 5.5), and track inversely with how much the model gained.
 - **One arm of thirty-five was bounded**, on tokens, and it is Qwen.
@@ -658,7 +698,7 @@ Totals across the 35 delta arms appear in finding 6. The short version:
 ## Methodology
 
 **Trials.** n = 1 per arm. 42 runs, 84 arms: 5 delta scenarios × 7 models × 2 arms,
-plus 7 A/A runs × 2 identical arms. Runs were strictly sequential within a model.
+plus 7 repeat-run controls × 2 identical arms. Runs were strictly sequential within a model.
 
 **Toolchain.** JDK 21, Gradle 9.5.0, `resources: small`, network on. CLIs and versions
 per model are in [Models tested](#models-tested). Every arm ran against a pinned
@@ -689,28 +729,31 @@ treatment, at 100% of tokens.
 bundled catalog was captured from the Gradle 9.9.0-nightly documentation on
 2026-09-23 and covers 48 practices.
 
-**Prompt uniformity.** All five fixing prompts — including `aa` — are textually
-identical, so every fixing scenario is prompt-comparable to every other.
-`false-positives` uses its own audit-only prompt, as designed.
+**Prompt uniformity.** The four fixing prompts and the repeat-run control's prompt are
+textually identical — five scenarios, one prompt — so every fixing scenario is
+prompt-comparable to every other. `false-positives` uses its own audit-only prompt,
+as designed.
 
 **Non-uniformity, disclosed.**
 
 1. **Per-arm limits vary by model**, as tabulated above.
-2. **Gemini's A/A control is void.** Its `no-skills-b` arm ran two turns and produced
+2. **Gemini's repeat-run control is void.** Its `no-skills-b` arm ran two turns and produced
    no report. Gemini has no usable noise measurement in this sweep.
 3. **Three CLIs report no cache-write telemetry** (`gemini-cli`, `opencode`, the local
    Ollama path). Those cells are omitted rather than recorded as zero.
 4. **Qwen3.6-35B has no configured price**, so its cost rows read `n/a`. The harness
    reports this as a warning rather than guessing.
 
-**Provenance.** Every run's `report.json`, `report.md`, `experiment.resolved.yaml` and
-pruned project tree are archived under
-`test-runs/bp-skill-testing-complete-2026-09-24/<model>/runs/<run-id>/`. Agent
-transcripts are not archived.
+**Provenance.** The sweep ran on 2026-09-24. Each run's machine-readable result, its
+resolved experiment configuration and a pruned copy of the project tree it left behind
+were retained, and every figure in this report is taken from them. Agent transcripts were
+not retained, so the behavioural claims here rest on scorer output and final project state
+rather than on step-by-step traces. The scenarios, fixtures and scorers live in a separate
+repository that is not public.
 
-**Harness analysis.** Scorer defects, coverage holes, measurement limits and the catalog
-edits this run data argues for are recorded separately, in `analysis.md` beside the archived
-runs. Three things from it bear on figures quoted above: `tasks-documented.sh` cannot parse
-Java-style task registration, which cost Opus 5.5 one check it had earned; `violations-count`
-is a one-sided floor, so Opus's detection gains register as zero delta; and the A/A control
-covers one fixture out of five, with Gemini's control void.
+**Harness caveats bearing on the figures above.** Three are worth stating outright.
+The `tasks-documented` scorer cannot parse Java-style task registration, which cost
+Opus 5.5 one check it had earned. `violations-count` is a one-sided floor, so Opus's
+detection gains register as zero delta. And the repeat-run control covers one fixture out of
+five, with Gemini's control void — the noise floor is therefore narrower evidence than
+the aggregate deltas it is used to qualify.
