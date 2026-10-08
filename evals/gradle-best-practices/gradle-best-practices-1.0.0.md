@@ -21,35 +21,37 @@ Runs made 2026-09-24 to 2026-09-25.
 
 **Best results.**
 
-`deepseek-v4-pro` (`opencode`) scores highest with the skill: 51 of 51 checks, up from 29, with 22 gains and no losses. Only 3 of 12 checks differed between its two identical runs, so a few of those gains may be noise but not the bulk. It is also one of the cheaper runs: 0.872 USD and 2,238.0 s over the five scenarios with the skill, 1.37× and 1.19× its runs without.
+With the skill, the highest totals of 51 checks are `deepseek-v4-pro` on `opencode` (51), `claude-sonnet-5` on `claude-code` (50) and `claude-opus-5-5` on `claude-code` (48). Each is one run per side, so a one- or two-check gap between them is within what identical runs showed for these models (3, 3 and 1 of 12 checks differed).
 
-`claude-sonnet-5` (`claude-code`) is next at 50 of 51, up from 30, with 20 gains and no losses against 3 run-to-run differences. That comes at the highest cost in the sweep: 6.308 USD and 2,857.8 s with the skill, 2.07× and 1.79× its runs without.
+- `deepseek-v4-pro` went from 29 to 51 (22 gains, 0 losses) for 2,238.0 s and $0.872 with the skill, 1.19× the time and 1.37× the cost without it.
 
-`claude-opus-5-5` (`claude-code`) starts highest without the skill at 45 of 51 and ends at 48, with 4 gains and 1 loss against 1 run-to-run difference, so its change is close to the noise floor. Its one loss, `tasks-documented`, is a run that registered its tasks in Java sources the scorer that ran did not read (see Notes). Cost with the skill is 3.161 USD, 2.08× without.
+- `claude-sonnet-5` went from 30 to 50 (20 gains, 0 losses) for 2,857.8 s and $6.308, 1.79× the time and 2.07× the cost, the highest cost of any model with the skill.
 
-`gpt-5-6-luna` (`opencode`) goes from 27 to 47 of 51 with 21 gains and 1 loss, and 0 checks differed between its identical runs. It is the cheapest hosted model in the sweep at 0.159 USD with the skill (1.66× without) in 834.2 s.
+- `claude-opus-5-5` went from 45 to 48 (4 gains, 1 loss) for 1,060.7 s and $3.161, 1.66× the time and 2.08× the cost. Its 1 loss is the `tasks-documented` run that registered tasks in Java, which the scorer that ran did not read.
 
-The effect reads as broad rather than model-specific: in `structure`, `no-intraproject-dependson` went from FAIL to PASS for 6 of 7 models, and in `tasks`, `tasks-documented` did the same for 6 of 7. Every hosted model except `gemini-3-8-flash` spent more with the skill, 1.19× to 1.79× the wall clock and 1.37× to 2.08× the cost.
+`gpt-5-6-luna` on `opencode` reached 47 from 27 (21 gains, 1 loss) at $0.159 with the skill, the lowest cost of any priced model, in 834.2 s. Identical runs differed on 0 of 12 checks for this model, so the 20-check net reads as more than run-to-run variation.
 
-**Frontier vs entry-level.**
+`gemini-3-8-flash` on `gemini-cli` reached 46 from 38 (9 gains, 1 loss) and is the only model whose time and cost fell with the skill: 2,557.4 s and $3.865, 0.89× and 0.90× its run without it. Its identical runs differed on 4 of 12 checks, the most of any model, so a few of the 9 gains may be noise.
 
-The report records no tiers; this reading takes `claude-opus-5-5`, `claude-sonnet-5`, `deepseek-v4-pro` and `gpt-5-6-luna` as frontier models and `claude-haiku-4-5-20251001` and `gemini-3-8-flash` as entry-level. Without the skill the frontier group spans 27 to 45 of 51 and with it 47 to 51. The entry-level pair moves from 11 and 38 to 29 and 46.
+The 20-plus gains for `claude-sonnet-5`, `deepseek-v4-pro`, `gpt-5-6-luna` and `claude-haiku-4-5-20251001` (11 to 29) sit well above those models' run-to-run figures of 3, 3, 0 and 1 checks. `claude-opus-5-5` started at 45 and had 6 checks left to gain, so its smaller change seems to reflect how little room remained.
 
-- `claude-haiku-4-5-20251001` (`claude-code`): 11 to 29 of 51, 20 gains and 2 losses against 1 run-to-run difference. Its gain in checks matches `claude-sonnet-5`'s 20, but it still fails 22 checks with the skill, among them `version-catalog`, `convention-plugins` and every `violations-count`. Its gap to the best frontier score shrinks from 34 (11 vs 45) to 22 (29 vs 51).
-
-- `gemini-3-8-flash` (`gemini-cli`): 38 to 46 of 51, 9 gains and 1 loss, but 4 of 12 checks differed between its identical runs, the most of any model, so its gains are the hardest to separate from noise. With the skill it sits 1 to 5 checks below the frontier group. It is also the only model whose cost and time fell with the skill (0.90× and 0.89×), mostly in `plugin-authoring` (1,060.1 to 535.8 s).
-
-So the skill seems to narrow the gap for the entry-level model that was already close (`gemini-3-8-flash`) and to lift the one that was far behind (`claude-haiku-4-5-20251001`) without bringing it near the frontier range. A reader on an entry-level model should expect a large gain in checks but not frontier-level results.
+Cost with the skill ranges from $0.159 (`gpt-5-6-luna`) to $6.308 (`claude-sonnet-5`) for totals within 4 checks of each other, so for a reader weighing price the ratio matters more than the check totals here. Every priced model except `gemini-3-8-flash` spent 1.37× to 2.08× more with the skill.
 
 **Local models.**
 
-`qwen3-6-35b-a3b-coding-nvfp4` (`claude-code`, local via Ollama) goes from 11 to 21 of 51 with 17 gains and 7 losses, against 2 run-to-run differences. It gains in `structure` (1 to 5), `tasks` (0 to 7) and `false-positives` (1 to 2), and loses in `idioms` (7 to 3) and `plugin-authoring`, where `project-builds` fails with the skill in both scenarios after passing without it.
+`qwen3-6-35b-a3b-coding-nvfp4`, run locally through Ollama on `claude-code`, went from 11 to 21 of 51 (17 gains, 7 losses). Identical runs differed on 2 of 12 checks for it, so the net of 10 is above that, but the 7 losses are 7 of the 12 recorded across all models.
 
-Its `plugin-authoring` run with the skill stopped at the 10,000,000-token limit after 107 turns and 7,770 s, so its 4 of 8 there, and its totals, are from an unfinished run. The `idioms` losses (5 checks) are the largest single-scenario loss in the sweep and are well above its 2-check run-to-run variation.
+- `structure` went from 1 to 5 of 12, `tasks` from 0 to 7 of 15, `plugin-authoring` from 2 to 4 of 8 and `false-positives` from 1 to 2 of 2.
 
-Time is the main cost: 10,167.3 s without the skill (about 2.8 h, of which `plugin-authoring` alone is 8,756.0 s) and at least 12,902.2 s with it (about 3.6 h, a lower bound). In `structure`, `tasks` and `idioms` the with-skill runs took 3.6× to 4.8× as long: 332.1 to 1,598.6 s, 332.7 to 1,441.8 s and 515.7 to 1,880.6 s. No cost is recorded, as no price is configured for the model.
+- `idioms` went from 7 to 3 of 14: 5 losses, including `project-builds`, so the build the run with the skill left behind no longer succeeded, and `plugins-block-only`, `no-after-evaluate`, `build-cache-enabled` and `config-cache-enabled`.
 
-A reader running a local model of this size should expect a net gain in checks but also broken builds in some scenarios, runs that take hours per scenario, and a token limit that this sweep's 10,000,000 budget did not always cover.
+- `plugin-authoring` lost `project-builds` and `no-forced-java-plugin` while gaining `plugin-order-agnostic`, `no-buildsrc`, `reproducible-archives` and `flatmap-for-nested-providers`.
+
+Its `plugin-authoring` run with the skill stopped at the token limit, 10,039,551 of 10,000,000 tokens after 107 of 200 turns and 7,770 s of a 10,800 s limit, so that arm's figures and the model's totals are lower bounds. The run without the skill in the same scenario took 8,756.0 s and did not stop at a limit.
+
+Time is the main cost: 10,167.3 s without the skill and at least 12,902.2 s with it (about 2.8 and 3.6 hours), against 2,857.8 s for `claude-sonnet-5` with the skill. In `structure`, `tasks` and `idioms` the run with the skill took 1,441.8 to 1,880.6 s, 3.6× to 4.8× the run without it. No price is configured, so no cost is recorded.
+
+Run-to-run, the two identical `structure` runs passed 3 and 3 of 12 checks but took 1,417.7 s and 579.8 s, so wall clock for this model varies more than twofold with nothing changed, and its single-run time ratios should be read loosely.
 
 ---
 

@@ -21,42 +21,37 @@ Runs made 2026-09-28 to 2026-09-29.
 
 **Best results.**
 
-Four models pass every check with the skill: `claude-opus-5-5`, `deepseek-v4-pro`, `gemini-3-8-flash` and `gpt-5-6-luna`, each at 29 of 29. `claude-sonnet-5` reaches 28 of 29 and `claude-haiku-4-5-20251001` 26 of 29.
+Four models pass all 29 checks with the skill, each with 0 losses: `claude-opus-5-5` (16 → 29, 13 gains), `deepseek-v4-pro` (13 → 29, 16 gains), `gemini-3-8-flash` (15 → 29, 14 gains) and `gpt-5-6-luna` (13 → 29, 16 gains). Gains of 13 to 16 checks sit well above the run-to-run control, which is 0 of 5 checks for three of them and 1 of 5 for `deepseek-v4-pro`.
 
-The six hosted models gain 13 to 16 checks each with no losses, against 0 or 1 of 5 checks differing between their two identical runs. Differences of that size sit well outside the run-to-run control.
+What those four took with the skill, summed over the five scenarios, with the ratio to the runs without it:
 
-What the full score costs, summed over the five scenarios with the skill, and the ratio to the same model's runs without it:
-
-- `gpt-5-6-luna` (opencode): 314.3 s and $0.051, 1.19× the time and 1.52× the cost.
+- `claude-opus-5-5` (claude-code): 225.1 s and $0.617, 1.02× the time and 1.14× the cost.
 - `deepseek-v4-pro` (opencode): 257.7 s and $0.069, 0.79× and 0.99×.
-- `claude-opus-5-5` (claude-code): 225.1 s and $0.617, 1.02× and 1.14×.
 - `gemini-3-8-flash` (gemini-cli): 376.8 s and $0.592, 0.48× and 0.68×.
+- `gpt-5-6-luna` (opencode): 314.3 s and $0.051, 1.19× and 1.52×.
 
-Where time falls with the skill, the drop reads as concentrated in the two blocked scenarios. `gemini-3-8-flash` spends 432.0 s and 227.1 s without the skill on `upgrade-blocked` and `upgrade-blocked-git`, and 94.6 s and 95.7 s with it; `deepseek-v4-pro` goes from 149.8 s to 57.5 s on `upgrade-blocked`.
+The cheapest 29 of 29 is `gpt-5-6-luna` at $0.051, then `deepseek-v4-pro` at $0.069, both on opencode. The cost ratio varies by model: the skill raised `gpt-5-6-luna`'s cost from $0.033 and `claude-opus-5-5`'s from $0.541, and lowered `gemini-3-8-flash`'s from $0.871, so the skill seems to be a saving mainly where the run without it was long.
 
-**Frontier vs entry-level.**
+`claude-sonnet-5` (claude-code) reaches 28 of 29 with 16 gains and 0 losses, at 307.4 s and $0.782 (0.75× and 0.93×). Its one miss, `advised-next-step` in `upgrade-blocked`, reads as a pattern exclusion rather than missing advice: the note records a message naming 8.6 and the upgrade guide that also contains the phrase "latest 8.x".
 
-Taking `claude-opus-5-5`, `claude-sonnet-5`, `gpt-5-6-luna` and `deepseek-v4-pro` as frontier models and `claude-haiku-4-5-20251001` and `gemini-3-8-flash` as entry-level is an assumption from their names; the tables record nothing about tiers.
+`claude-haiku-4-5-20251001` (claude-code) goes from 10 to 26 of 29, 16 gains and 0 losses, in the least time of any model with the skill and at about the same cost as without: 165.1 s and $0.222 (0.65× and 0.98×). Its three misses with the skill are `snapshot-verified` in `upgrade-blocked` and `advised-next-step` in both blocked scenarios.
 
-Without the skill the frontier models pass 12 to 16 of 29 and the entry-level ones 10 and 15. With it the frontier models pass 28 or 29 and the entry-level ones 26 and 29. The spread across all six narrows from 10–16 to 26–29, so the skill seems to close most of the gap rather than widen it.
-
-`claude-haiku-4-5-20251001` is the one hosted model short of 29. Its three remaining failures, `snapshot-verified` and `advised-next-step` in `upgrade-blocked` and `advised-next-step` in `upgrade-blocked-git`, failed in both arms, so they are checks the skill did not move for it rather than losses.
-
-`claude-sonnet-5`'s one miss is `advised-next-step` in `upgrade-blocked`. The Notes record that its message names 8.6 and the upgrade guide but also contains "latest 8.x", which the pattern excludes, so the miss reads as a boundary of the pattern rather than a missing next step.
-
-A reader on any of the six hosted models can expect the blocked-upgrade behaviour to appear with the skill: `wrapper-task-pinned` in both blocked scenarios and `reported-blocked` in `upgrade-blocked` failed without the skill and passed with it for all 7 models, and `rolled-back` and `restored-to-head` did the same for the six hosted ones.
+The gains concentrate in the two blocked scenarios. Without the skill every model fails `rolled-back` (0 of 7 in each), `wrapper-task-pinned` and `restored-to-head`; with it the six hosted models pass all three. The plain `upgrade` and `sha-already-pinned` tasks were already at 3 to 5 of 5 without the skill, where the common gain is `wrapper-properties` in `upgrade` (0 of 7 to 7 of 7).
 
 **Local models.**
 
-`qwen3-6-35b-a3b-coding-nvfp4` (claude-code via Ollama) goes from 12 to 17 of 29 with the skill: 8 gains and 3 losses, against 0 of 5 checks differing between its two identical runs. No arm of it stopped at a turn, token or wall-clock limit.
+`qwen3-6-35b-a3b-coding-nvfp4` (claude-code via Ollama, no price configured) is the one local model. It passes 12 of 29 without the skill and 17 with it: 8 gains and 3 losses, against a run-to-run control of 0 of 5 checks. The skill loaded in 5 of 5 runs and no arm stopped at a limit.
 
-Its gains are `wrapper-properties` in `upgrade`, `project-builds` in `sha-already-pinned`, `wrapper-task-pinned` and `quoted-error` in both blocked scenarios, and `project-builds` and `reported-blocked` in `upgrade-blocked`.
+On the two plain upgrade scenarios it reaches 5 of 5 with the skill in both, up from 4 of 5, gaining `wrapper-properties` in `upgrade` and `project-builds` in `sha-already-pinned`. Per the note, that `project-builds` failure without the skill is a `NoSuchFileException` under a `/tmp/gradle-9.0.0` directory the arm itself removed, with the other four checks in that arm passing.
 
-Its three losses are both `advice-only` checks, where the Notes record a final tree holding a 9.0.0 wrapper, and `no-collateral-damage` in `upgrade-blocked-git`, where two `buildSrc` sources were modified. With the skill it seems to act on the upgrade rather than describe it, and to edit the plugins rather than roll back.
+The three losses are all in checks the six hosted models pass with the skill:
 
-The rollback checks did not move for it: `rolled-back` fails in both arms of both blocked scenarios, and `restored-to-head`, `reported-blocked` and `git-used` fail in both arms of `upgrade-blocked-git`, which stays at 2 of 9 with the skill.
+- `advice-only`: with the skill the final tree has a 9.0.0 wrapper (`did-not-upgrade` fails) and no message matched the command pattern (`explained-how` fails); without the skill both passed. That arm took 92.6 s with the skill against 39.1 s without.
+- `upgrade-blocked-git` / `no-collateral-damage`: per the note, the arm wrote both `buildSrc` plugin sources after the `wrapper` task failed.
 
-It takes 780.3 s without the skill and 518.8 s with it (0.66×); the 518.8 s is the longest with-skill total in the sweep. Its two identical runs took 511.1 s and 69.2 s, so its time ratio carries more noise than any other model's. No cost is recorded for it.
+On the blocked scenarios the skill seems to change what this model says and runs more than what it leaves behind. With the skill it passes `wrapper-task-pinned` and `quoted-error` in both, and `reported-blocked` in `upgrade-blocked`, yet fails `rolled-back` in both, `restored-to-head`, `git-used` and `project-builds` in the git variant, ending `upgrade-blocked-git` at 2 of 9.
+
+It is the slowest model with the skill: 518.8 s against 780.3 s without (0.66×), with output tokens at 0.78×. Its two identical runs of the `upgrade` task took 511.1 s and 69.2 s, so single-run timings for this model vary by a factor of about 7 and the 0.66× should be read loosely.
 
 ---
 
