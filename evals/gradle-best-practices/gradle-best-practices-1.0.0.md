@@ -21,37 +21,33 @@ Runs made 2026-09-24 to 2026-09-25.
 
 **Best results.**
 
-With the skill, the highest totals of 51 checks are `deepseek-v4-pro` on `opencode` (51), `claude-sonnet-5` on `claude-code` (50) and `claude-opus-5-5` on `claude-code` (48). Each is one run per side, so a one- or two-check gap between them is within what identical runs showed for these models (3, 3 and 1 of 12 checks differed).
+`deepseek-v4-pro` on `opencode` shows the clearest result: with the skill it passes every check in every scenario, from a little over half of them without, and loses nothing. The gain is far beyond the few checks that differed between its two identical runs. Cost and time rise by only about a third, the smallest increase among the models that got more expensive.
 
-- `deepseek-v4-pro` went from 29 to 51 (22 gains, 0 losses) for 2,238.0 s and $0.872 with the skill, 1.19× the time and 1.37× the cost without it.
+`claude-sonnet-5` on `claude-code` passes everything with the skill except `cacheable-annotation` in `tasks`, from about three fifths of the checks without, again with no losses. Its two identical runs differed in a few checks, so the gain is well outside that. The price is about twice the cost, tokens and time of the run without the skill.
 
-- `claude-sonnet-5` went from 30 to 50 (20 gains, 0 losses) for 2,857.8 s and $6.308, 1.79× the time and 2.07× the cost, the highest cost of any model with the skill.
+`gpt-5-6-luna` on `opencode` gains in all four fixing scenarios and loses only `no-cc-optout` in `tasks`. Its two identical runs did not differ at all, so even that single loss cannot be put down to noise. Its total cost stays an order of magnitude below the other priced models, about two thirds higher with the skill than without.
 
-- `claude-opus-5-5` went from 45 to 48 (4 gains, 1 loss) for 1,060.7 s and $3.161, 1.66× the time and 2.08× the cost. Its 1 loss is the `tasks-documented` run that registered tasks in Java, which the scorer that ran did not read.
+`claude-opus-5-5` on `claude-code` already passes nearly everything without the skill, so there is little room: a few gains, and one loss on `tasks-documented` that the notes trace to the scorer not reading Java sources. The net change is only a little beyond what its identical runs differed by. It pays about double in cost for it.
 
-`gpt-5-6-luna` on `opencode` reached 47 from 27 (21 gains, 1 loss) at $0.159 with the skill, the lowest cost of any priced model, in 834.2 s. Identical runs differed on 0 of 12 checks for this model, so the 20-check net reads as more than run-to-run variation.
+`claude-haiku-4-5-20251001` on `claude-code` goes from about a fifth of the checks to a little over half, for about double the cost. It keeps failing several of the build-layout checks in `structure`, such as `version-catalog` and `convention-plugins`. One of its two losses, `no-duplicate-dependencies`, is the same check that differed between its identical runs, so it reads as run-to-run variation.
 
-`gemini-3-8-flash` on `gemini-cli` reached 46 from 38 (9 gains, 1 loss) and is the only model whose time and cost fell with the skill: 2,557.4 s and $3.865, 0.89× and 0.90× its run without it. Its identical runs differed on 4 of 12 checks, the most of any model, so a few of the 9 gains may be noise.
+`gemini-3-8-flash` on `gemini-cli` is the only model whose runs with the skill cost less and finish sooner than without, while gaining modestly. Its control is the least stable: a third of its checks differed between identical runs, and the second of those ended after two turns without writing VIOLATIONS.md, so its gains and its one loss carry the widest uncertainty here.
 
-The 20-plus gains for `claude-sonnet-5`, `deepseek-v4-pro`, `gpt-5-6-luna` and `claude-haiku-4-5-20251001` (11 to 29) sit well above those models' run-to-run figures of 3, 3, 0 and 1 checks. `claude-opus-5-5` started at 45 and had 6 checks left to gain, so its smaller change seems to reflect how little room remained.
+A handful of checks that no model passed without the skill pass for most of them with it: `no-intraproject-dependson` in `structure`, and `utf8-in-jvmargs` and `no-empty-project` in `idioms`. `tasks-documented` in `tasks` behaves the same way apart from the `claude-opus-5-5` loss above. These read as practices the skill points out and models do not look for on their own.
 
-Cost with the skill ranges from $0.159 (`gpt-5-6-luna`) to $6.308 (`claude-sonnet-5`) for totals within 4 checks of each other, so for a reader weighing price the ratio matters more than the check totals here. Every priced model except `gemini-3-8-flash` spent 1.37× to 2.08× more with the skill.
+The skill also seems to curb spurious reports on a clean project. In `false-positives`, only `gemini-3-8-flash` passed `only-defensible-findings` without the skill, and every model except `claude-opus-5-5` and `gemini-3-8-flash` passes it with the skill.
+
+`cacheable-annotation` in `tasks` is where the skill helps least: `claude-opus-5-5` and `claude-sonnet-5` fail it in both runs, while `claude-haiku-4-5-20251001`, `gpt-5-6-luna` and `qwen3-6-35b-a3b-coding-nvfp4` gain it. `convention-plugins` in `structure` also stays failed with the skill for more than half the models.
 
 **Local models.**
 
-`qwen3-6-35b-a3b-coding-nvfp4`, run locally through Ollama on `claude-code`, went from 11 to 21 of 51 (17 gains, 7 losses). Identical runs differed on 2 of 12 checks for it, so the net of 10 is above that, but the 7 losses are 7 of the 12 recorded across all models.
+`qwen3-6-35b-a3b-coding-nvfp4`, run locally through Ollama on `claude-code`, is the one local model. With the skill it roughly doubles the checks it passes, but it also has the most losses of any model, several times what its two identical runs differed by, so the skill both helps and hurts it.
 
-- `structure` went from 1 to 5 of 12, `tasks` from 0 to 7 of 15, `plugin-authoring` from 2 to 4 of 8 and `false-positives` from 1 to 2 of 2.
+Its gains fall in `structure` and `tasks`, where it passed almost nothing without the skill and passes about half the checks with it. The losses sit in `idioms` and `plugin-authoring`, where `project-builds` fails with the skill: the build no longer succeeds, and most of the checks it had passed in `idioms` fail in that same run.
 
-- `idioms` went from 7 to 3 of 14: 5 losses, including `project-builds`, so the build the run with the skill left behind no longer succeeded, and `plugins-block-only`, `no-after-evaluate`, `build-cache-enabled` and `config-cache-enabled`.
+Its `plugin-authoring` run with the skill stopped at the token limit of 10,000,000 tokens after about half its allowed turns, so its totals with the skill are lower bounds. No cost is recorded because no price is configured for the model.
 
-- `plugin-authoring` lost `project-builds` and `no-forced-java-plugin` while gaining `plugin-order-agnostic`, `no-buildsrc`, `reproducible-archives` and `flatmap-for-nested-providers`.
-
-Its `plugin-authoring` run with the skill stopped at the token limit, 10,039,551 of 10,000,000 tokens after 107 of 200 turns and 7,770 s of a 10,800 s limit, so that arm's figures and the model's totals are lower bounds. The run without the skill in the same scenario took 8,756.0 s and did not stop at a limit.
-
-Time is the main cost: 10,167.3 s without the skill and at least 12,902.2 s with it (about 2.8 and 3.6 hours), against 2,857.8 s for `claude-sonnet-5` with the skill. In `structure`, `tasks` and `idioms` the run with the skill took 1,441.8 to 1,880.6 s, 3.6× to 4.8× the run without it. No price is configured, so no cost is recorded.
-
-Run-to-run, the two identical `structure` runs passed 3 and 3 of 12 checks but took 1,417.7 s and 579.8 s, so wall clock for this model varies more than twofold with nothing changed, and its single-run time ratios should be read loosely.
+It is the slowest model by a wide margin, several times the next slowest. Its `plugin-authoring` run without the skill alone took over two hours, and with the skill the `structure`, `tasks` and `idioms` runs each took about three to five times as long as without. A reader with a similar local setup should expect much longer runs with the skill and should confirm the build still succeeds afterwards.
 
 ---
 
