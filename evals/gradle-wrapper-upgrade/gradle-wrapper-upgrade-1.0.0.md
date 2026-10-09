@@ -10,11 +10,11 @@ Runs made 2026-09-28 to 2026-09-29.
 
 ## Findings
 
-**Helps a lot, closing the whole gap.** Claude Opus 5.5, DeepSeek V4 Pro, Gemini 3.8 Flash and GPT-5.6 Luna pass every check with the skill. Cost is about the same for DeepSeek V4 Pro, a little higher for Claude Opus 5.5, lower for Gemini 3.8 Flash and about half again for GPT-5.6 Luna.
+**Helps a lot, at about the same or lower cost.** For Claude Haiku 4.5, Claude Sonnet 5, DeepSeek V4 Pro and Gemini 3.8 Flash, the skill closes most or all of the gap; cost is about the same, and lower for Gemini 3.8 Flash.
 
-**Helps a lot, closing most of the gap.** Claude Sonnet 5 and Claude Haiku 4.5 gain many checks with the skill and lose none, at about the same cost and in less time.
+**Helps a lot, at higher cost.** For Claude Opus 5.5 and GPT-5.6 Luna, the skill closes the whole gap; runs cost a little more for Claude Opus 5.5 and about half again as much for GPT-5.6 Luna.
 
-**Helps a little.** Qwen3.6 35B-A3B Coding (NVFP4) closes a small part of the gap and also loses some checks with the skill. It runs locally, so no cost is recorded; it takes less time with the skill.
+**Helps a little.** For Qwen3.6 35B-A3B Coding (NVFP4), the skill closes under a third of the gap and also loses some checks; the model is served locally, with no price, and runs with the skill take less time.
 
 ---
 
@@ -269,7 +269,7 @@ Wall clock is the agent's active time in seconds. Cost is the harness's price fo
 
 The figure in parentheses is with ÷ without.
 
-### upgrade
+### Cost and time: upgrade
 
 | Model (without / with skill) | Wall clock (s) | Output tokens | Cost (USD) |
 | :--- | ---: | ---: | ---: |
@@ -281,7 +281,7 @@ The figure in parentheses is with ÷ without.
 | `gpt-5-6-luna` | 54.0 / 75.3 | 1,152 / 2,309 | 0.006 / 0.013 |
 | `qwen3-6-35b-a3b-coding-nvfp4` | 221.6 / 73.4 | 7,026 / 1,852 | local / local |
 
-### sha-already-pinned
+### Cost and time: sha-already-pinned
 
 | Model (without / with skill) | Wall clock (s) | Output tokens | Cost (USD) |
 | :--- | ---: | ---: | ---: |
@@ -293,7 +293,7 @@ The figure in parentheses is with ÷ without.
 | `gpt-5-6-luna` | 66.5 / 77.2 | 1,951 / 2,573 | 0.010 / 0.012 |
 | `qwen3-6-35b-a3b-coding-nvfp4` | 161.9 / 66.6 | 3,807 / 1,544 | local / local |
 
-### advice-only
+### Cost and time: advice-only
 
 | Model (without / with skill) | Wall clock (s) | Output tokens | Cost (USD) |
 | :--- | ---: | ---: | ---: |
@@ -305,7 +305,7 @@ The figure in parentheses is with ÷ without.
 | `gpt-5-6-luna` | 31.0 / 20.9 | 741 / 375 | 0.004 / 0.003 |
 | `qwen3-6-35b-a3b-coding-nvfp4` | 39.1 / 92.6 | 589 / 2,756 | local / local |
 
-### upgrade-blocked
+### Cost and time: upgrade-blocked
 
 | Model (without / with skill) | Wall clock (s) | Output tokens | Cost (USD) |
 | :--- | ---: | ---: | ---: |
@@ -317,7 +317,7 @@ The figure in parentheses is with ÷ without.
 | `gpt-5-6-luna` | 51.7 / 78.2 | 1,632 / 2,395 | 0.008 / 0.014 |
 | `qwen3-6-35b-a3b-coding-nvfp4` | 116.8 / 136.9 | 3,397 / 5,120 | local / local |
 
-### upgrade-blocked-git
+### Cost and time: upgrade-blocked-git
 
 | Model (without / with skill) | Wall clock (s) | Output tokens | Cost (USD) |
 | :--- | ---: | ---: | ---: |
@@ -361,4 +361,3 @@ Each model ran the same task as the `upgrade` scenario twice, without the skill 
 - `non-version-properties-preserved` recorded PASS in every arm of `upgrade` and `sha-already-pinned`. The scorer records FAIL when any of the six entries is missing or has a different value; an edit that changes only the `distributionUrl` and `distributionSha256Sum` lines leaves all six in place and records PASS.
 - `project-builds` recorded PASS in every arm of `upgrade`. The same scorer recorded FAIL in `sha-already-pinned` for `qwen3-6-35b-a3b-coding-nvfp4` without the skill, so it produces both verdicts.
 - `wrapper-properties` recorded PASS in every arm of `sha-already-pinned`. The same scorer recorded FAIL in every arm of `upgrade` without the skill, so it produces both verdicts.
-

@@ -10,13 +10,13 @@ Runs made 2026-09-24 to 2026-09-25.
 
 ## Findings
 
-**Helps a lot.** Claude Sonnet 5, DeepSeek V4 Pro and GPT-5.6 Luna: the skill closes most or all of the gap. It costs about twice as much for Claude Sonnet 5 and between a third and two-thirds more for the other two; GPT-5.6 Luna also lost a check.
+**Helps a lot.** Claude Sonnet 5, DeepSeek V4 Pro and GPT-5.6 Luna: the skill closes most or all of the gap, at about a third more cost for DeepSeek V4 Pro, two-thirds more for GPT-5.6 Luna and twice as much for Claude Sonnet 5; GPT-5.6 Luna also lost a check.
 
-**Helps somewhat.** Claude Haiku 4.5: the skill closes a little under half of the gap, at about twice the cost; it also lost a couple of checks.
+**Helps somewhat.** Claude Haiku 4.5: the skill closes a little under half of the gap, at about twice the cost and with more time; it also lost checks.
 
-**Within run-to-run variation.** Claude Opus 5.5 and Gemini 3.8 Flash passed the most checks without the skill, and their change with it is within run-to-run variation. Claude Opus 5.5 costs about twice as much, Gemini 3.8 Flash slightly less; each lost a check.
+**Within run-to-run variation.** Claude Opus 5.5 and Gemini 3.8 Flash rate Medium, but the change is within run-to-run variation. Claude Opus 5.5 had little to fix and costs about twice as much; Gemini 3.8 Flash costs slightly less. Both also lost a check.
 
-**Helps a little.** Qwen3.6 35B-A3B Coding (NVFP4): the skill closes a small part of the gap but also loses several checks. It is served locally with no price, takes longer with the skill, and hit a token limit only with it.
+**Helps a little.** Qwen3.6 35B-A3B Coding (NVFP4): the skill closes a small part of the gap. It is served locally with no price but takes longer with the skill; it also lost checks and hit a limit only with the skill.
 
 ---
 
@@ -333,7 +333,7 @@ Wall clock is the agent's active time in seconds. Cost is the harness's price fo
 
 The figure in parentheses is with ÷ without.
 
-### structure
+### Cost and time: structure
 
 | Model (without / with skill) | Wall clock (s) | Output tokens | Cost (USD) |
 | :--- | ---: | ---: | ---: |
@@ -345,7 +345,7 @@ The figure in parentheses is with ÷ without.
 | `gpt-5-6-luna` | 155.9 / 190.4 | 7,131 / 9,688 | 0.025 / 0.043 |
 | `qwen3-6-35b-a3b-coding-nvfp4` | 332.1 / 1,598.6 | 13,158 / 52,772 | local / local |
 
-### tasks
+### Cost and time: tasks
 
 | Model (without / with skill) | Wall clock (s) | Output tokens | Cost (USD) |
 | :--- | ---: | ---: | ---: |
@@ -357,7 +357,7 @@ The figure in parentheses is with ÷ without.
 | `gpt-5-6-luna` | 135.1 / 199.1 | 6,020 / 8,619 | 0.023 / 0.036 |
 | `qwen3-6-35b-a3b-coding-nvfp4` | 332.7 / 1,441.8 | 12,181 / 50,217 | local / local |
 
-### idioms
+### Cost and time: idioms
 
 | Model (without / with skill) | Wall clock (s) | Output tokens | Cost (USD) |
 | :--- | ---: | ---: | ---: |
@@ -369,7 +369,7 @@ The figure in parentheses is with ÷ without.
 | `gpt-5-6-luna` | 120.3 / 173.5 | 5,731 / 7,504 | 0.018 / 0.035 |
 | `qwen3-6-35b-a3b-coding-nvfp4` | 515.7 / 1,880.6 | 20,349 / 54,644 | local / local |
 
-### plugin-authoring
+### Cost and time: plugin-authoring
 
 | Model (without / with skill) | Wall clock (s) | Output tokens | Cost (USD) |
 | :--- | ---: | ---: | ---: |
@@ -381,7 +381,7 @@ The figure in parentheses is with ÷ without.
 | `gpt-5-6-luna` | 122.2 / 169.2 | 5,927 / 7,585 | 0.019 / 0.031 |
 | `qwen3-6-35b-a3b-coding-nvfp4` | 8,756.0 / ≥ 7,630.6 | 136,078 / ≥ 128,221 | local / local |
 
-### false-positives
+### Cost and time: false-positives
 
 | Model (without / with skill) | Wall clock (s) | Output tokens | Cost (USD) |
 | :--- | ---: | ---: | ---: |
@@ -423,4 +423,3 @@ Each model ran the same task as the `structure` scenario twice, without the skil
 - `aa` / `deepseek-v4-pro` / `no-skills-a` stopped at the token limit: 5,098,199 tokens used of a 5,000,000 limit, after 71 of 100 allowed turns and 751 s of a 1,800 s wall-clock limit.
 - `aa` / `gemini-3-8-flash` / `no-skills-b` ended after 2 turns and 63.9 s with no limit reached: the transcript shows five file reads followed by an empty assistant reply. The arm called only file-read tools and wrote no VIOLATIONS.md.
 - `single-gav-strings` passed in every `idioms` arm. The unmodified fixture's `services/exporter/build.gradle` declares `implementation group: 'com.google.code.gson', name: 'gson', version: '2.11.0'`, which the scorer matches; in every arm's final state that line uses a single coordinate string or a catalog accessor.
-
