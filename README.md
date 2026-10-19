@@ -22,13 +22,13 @@ Try:
 - "Audit this Gradle project"
 - "Apply Gradle best practices"
 
-### gradle-wrapper-upgrade [![v1.0.1](https://img.shields.io/badge/v1.0.1-02303A?logo=gradle&logoColor=white)](skills/gradle-wrapper-upgrade)
+### gradle-wrapper-upgrade [![v1.1.0](https://img.shields.io/badge/v1.1.0-02303A?logo=gradle&logoColor=white)](skills/gradle-wrapper-upgrade)
 
 Upgrades the Gradle wrapper, to the latest release or to a version you name. It pins the distribution's checksum, regenerates `gradlew`, `gradlew.bat`, and the wrapper jar, and then checks that the build still configures on the new version. If it doesn't, the upgrade is rolled back and you get a smaller version step to try instead, with the release notes for it.
 
 Ask *how* to upgrade and you get the commands, not a changed working tree.
 
-It upgrades a wrapper that already exists. It won't add one to a project that has none, and it won't edit your build scripts.
+It upgrades a wrapper that already exists. It won't add one to a build that has none, and it won't edit your build scripts.
 
 [Benchmark results](evals/gradle-wrapper-upgrade/gradle-wrapper-upgrade-1.0.0.md) across several models and agents.
 
@@ -106,11 +106,11 @@ Neither skill declares `allowed-tools`, so both run under whatever permission mo
 
 | | |
 |---|---|
-| **Reads** | `gradle/wrapper/gradle-wrapper.properties` and the wrapper scripts. |
-| **Writes** | It does not hand-edit the wrapper files — that is the skill's central rule. All four change because Gradle's own `wrapper` task rewrites them. |
-| **Runs** | `./gradlew` (the `wrapper` and `tasks` tasks), `curl` against `services.gradle.org`, and `git` — `status` to check the tree, and `checkout --` on the four wrapper paths to roll back a blocked upgrade. |
+| **Reads** | The four wrapper files — `gradle-wrapper.properties`, `gradle-wrapper.jar`, `gradlew` and `gradlew.bat` — which it copies to a snapshot before upgrading. |
+| **Writes** | It does not hand-edit the wrapper files — that is the skill's central rule. Gradle's own `wrapper` task rewrites all four. A rollback copies them back from the snapshot and deletes any the upgrade created. |
+| **Runs** | `./gradlew` (the `wrapper` and `tasks` tasks), `curl` against `services.gradle.org`, and `mktemp`, `mkdir`, `cp`, `find`, `diff`, `rm -f` and `rmdir` to snapshot, check and restore the four wrapper files — never `rm -rf`. It needs a POSIX shell (macOS, Linux, WSL or Git Bash), and never runs `git`; commit state is yours. |
 | **Network** | Yes, unavoidably: it fetches the published SHA-256, and the second `wrapper` run downloads the full distribution (100 MB+). |
-| **Outside the project** | Where the tree is dirty or not in git, it copies the four wrapper files to a `mktemp -d` directory, and deletes it once the upgrade verifies. |
+| **Outside the build** | Before every upgrade it copies the wrapper files to a private `gradle-wrapper-snapshot.*` directory under `$TMPDIR` or `/tmp`, and tells you where. It deletes the snapshot once the upgrade verifies or a rollback is confirmed; if a run is interrupted or a rollback cannot be confirmed, the snapshot stays for you. |
 
 Neither skill reaches for a web-search or page-fetch tool. Across the benchmark runs in [`evals/`](evals), all 70 treatment arms made zero `WebFetch`/`WebSearch` calls — the best-practices skill reads its bundled catalog instead, and the wrapper skill goes to a known URL over `curl`.
 
