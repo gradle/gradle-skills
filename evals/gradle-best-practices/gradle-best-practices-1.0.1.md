@@ -95,6 +95,10 @@ Notes at the end of the report record 4 verified statements about the data and t
 
 Every run used JDK 21, with network access on.
 
+**Two of these models are not the ones the v1.0.0 sweep ran.** That sweep used `claude-haiku-4-5-20251001` and `claude-sonnet-5`; this one uses `claude-haiku-5-5` and `claude-sonnet-5-5`. A newer model moves the without-skill baseline as well as the with-skill result, so for those two rows a difference between the two sweeps cannot be attributed to the skill version. `claude-opus-5-5`, `deepseek-v4-pro`, `gpt-5-6-luna` and `qwen3-6-35b-a3b-coding-nvfp4` are the same model in both, and this report's scenarios, fixtures and 51 checks are unchanged from v1.0.0, so those four rows can be read across versions.
+
+Every figure in this report compares the two arms of one sweep — with the skill against without it, on the same model. None of them is a comparison against v1.0.0.
+
 ### Scenarios
 
 - **`structure`** — 12 checks, prompt P1. A two-project Groovy build (root and `:reporting`) around a car-maintenance library. It plants structure and laziness violations: no `rootProject.name`, source in the root project, repositories in each build script, no version catalog, configuration duplicated across scripts, a redundant dependency, `Provider.get()` at configuration time, `dependsOn` between tasks with actions, a task looked up by name, and no wrapper checksum. The prompt asks the agent to list the violations in VIOLATIONS.md, fix them, and keep `./gradlew build` passing.

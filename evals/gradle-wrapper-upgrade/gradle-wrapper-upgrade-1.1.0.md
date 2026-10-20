@@ -92,6 +92,12 @@ Notes at the end of the report record 6 verified statements about the data and t
 
 Every run used JDK 17, with network access on.
 
+**Two of these models are not the ones the v1.0.0 sweep ran.** That sweep used `claude-haiku-4-5-20251001` and `claude-sonnet-5`; this one uses `claude-haiku-5-5` and `claude-sonnet-5-5`. A newer model moves the without-skill baseline as well as the with-skill result, so for those two rows a difference between the two sweeps cannot be attributed to the skill version.
+
+The remaining four models are the same in both sweeps, but the measured surface is not: v1.0.0 scored 29 checks over five scenarios, and this sweep scores 20 over four. `upgrade-blocked-git` is gone, because v1.1.0 removed git from the skill and the scenario no longer describes anything it does. Counts are therefore not comparable across the two reports in either direction, and a share of checks passed is the only figure that carries over.
+
+Every figure in this report compares the two arms of one sweep — with the skill against without it, on the same model. None of them is a comparison against v1.0.0.
+
 ### Scenarios
 
 - **`upgrade`** — 5 checks, prompt P1. `sample-stale-wrapper`, a one-module `java-library` build on a Gradle 8.5 wrapper with no `distributionSha256Sum`. The prompt asks for the wrapper to be upgraded to Gradle 9.0.0.
