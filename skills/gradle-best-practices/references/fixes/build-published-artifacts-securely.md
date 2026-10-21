@@ -5,12 +5,14 @@
 
 ---
 
-- **Fix:** Publish from a fresh, isolated, ephemeral CI machine — one that starts from a clean slate with no lingering artifacts, caches, or external state. Disable the build cache and any incremental reuse on the publishing path, and do not publish from a developer workstation or a reused CI workspace.
+- **Fix:** Publish from a fresh, isolated, ephemeral machine — one that starts from a clean slate with no lingering artifacts, caches, or external state. Disable the build cache and any incremental reuse on the publishing path, and do not publish from a developer workstation or a reused workspace.
 
-This practice has no `Don't`/`Do` code pair in the documentation, because the change is to the publishing pipeline rather than to the build scripts. What to report instead:
+**This practice is advisory. It is not evaluated against the project.** The change it asks for is to the publishing pipeline rather than to the build scripts, and this skill reads only Gradle files — so it can tell that the build publishes, and nothing more. Say that plainly rather than implying either a violation or a pass, and do not go hunting for pipeline configuration to judge. It also has no `Don't`/`Do` code pair in the documentation, for the same reason.
+
+What the advice covers, as three things worth checking by hand:
 
 - **Incremental or local builds on the publish path** — they consume outputs from earlier builds, so a compromised earlier build propagates into the release.
 - **A remote build cache left enabled while publishing** — it can serve stale or malicious entries, and makes the artifact's integrity depend on machine state rather than on source.
-- **A reused workspace or long-lived runner** — the same objection, one level up.
+- **A reused workspace or long-lived machine** — the same objection, one level up.
 
-Report these as recommendations about the project's CI configuration, naming the job or workflow file. If the project ships no visible CI configuration, say that the practice could not be evaluated rather than asserting a violation.
+Phrase all three as properties the publishing environment must have. Nothing here assumes any particular CI product, and the report should not name one.

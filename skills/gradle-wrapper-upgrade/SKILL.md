@@ -1,10 +1,10 @@
 ---
 name: gradle-wrapper-upgrade
-description: "Use whenever the user asks to upgrade, bump, or update the Gradle wrapper, `gradlew`, `distributionUrl`, `gradle-wrapper.properties`, or the project's Gradle version, on Gradle 7.0–9.x — or asks *how* that is done. Covers both modes: 'upgrade the wrapper' means perform it; a 'how do I upgrade' question is answered with the copy-pasteable commands rather than by running them. Not for adding a wrapper to a project that has none."
+description: "Use whenever the user asks to upgrade, bump, or update the Gradle wrapper, `gradlew`, `distributionUrl`, `gradle-wrapper.properties`, or the build's Gradle version, on Gradle 7.0–9.x — or asks *how* that is done. Covers both modes: 'upgrade the wrapper' means perform it; a 'how do I upgrade' question is answered with the copy-pasteable commands rather than by running them. Not for adding a wrapper to a build that has none."
 license: Apache-2.0
 metadata:
   author: gradle
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Gradle Wrapper Upgrade
@@ -18,17 +18,21 @@ Decide this first; everything below is conditional on it.
 
 If genuinely ambiguous, give the commands.
 
-The steps below are the same material either way: in act mode you run them, in answer mode you hand them over.
+The steps below are the same material either way: in act mode you run them, in answer mode you hand them over — all but the snapshot. Leave out Step 3's copy and Step 5's `diff` and delete when answering: they exist so an agent can undo its own work, and a person has their own version control. Drop the `cd "<build-root>" &&` prefix too: a person runs them from the build root.
 
-Upgrading means running the built-in `wrapper` task, never hand-editing files: `gradlew`, `gradlew.bat`, and `gradle-wrapper.jar` are generated, and the next `wrapper` run reverts any edit without warning. **Scope:** a wrapper that already exists — adding one to a project with none is a different job (`gradle :wrapper` from a system Gradle install).
+Upgrading means running the built-in `wrapper` task, never hand-editing files: `gradlew`, `gradlew.bat`, and `gradle-wrapper.jar` are generated, and the next `wrapper` run reverts any edit without warning. **Scope:** a wrapper that already exists — adding one to a build with none is a different job (`gradle :wrapper` from a system Gradle install).
 
-Two references ship beside this file, for branches most upgrades never hit: **`references/snapshot.md`** (Step 3 — securing the wrapper where git cannot) and **`references/rollback.md`** (Step 6 — undoing an upgrade the build cannot take). **Open either only when the step says to.**
+Two references ship beside this file: **`references/snapshot.md`** (Step 3 — securing the wrapper before every upgrade) and **`references/rollback.md`** (Step 6 — undoing an upgrade the build cannot take, a branch most upgrades never hit). **Open either only when the step says to.**
 
 ## Step 1 — Orient
 
-Confirm `gradlew` is in the project root and read `distributionUrl` from `gradle/wrapper/gradle-wrapper.properties`. It carries both things you need: the **current version** (`gradle-8.14-bin.zip` → 8.14) and the **distribution type** (`-bin` or `-all`).
+Find the build root — the directory holding `gradle/wrapper/gradle-wrapper.properties`, normally beside `gradlew` — and read `distributionUrl` from that file. It carries both things you need: the **current version** (`gradle-8.14-bin.zip` → 8.14) and the **distribution type** (`-bin` or `-all`).
 
-Commands below are `./gradlew` (Unix/macOS/WSL/Git Bash); Windows cmd → `gradlew.bat`, PowerShell → `.\gradlew`. Options are identical.
+**Note the build root's absolute path** (`pwd` there). It is `"<build-root>"` in every command below — every `./gradlew` run, and every snapshot, verify, restore and delete — so each acts on this build from whatever directory your shell is in. A repository can hold more than one build, each with a wrapper of its own.
+
+**Act mode needs a POSIX shell** — macOS, Linux, or WSL or Git Bash on Windows. The snapshot, verification and rollback are POSIX commands. In native cmd or PowerShell, do not upgrade and do not translate them into `Copy-Item` or `Remove-Item`: give the commands as in answer mode and say they need WSL or Git Bash.
+
+Commands below are `./gradlew`; a user running them by hand in Windows cmd uses `gradlew.bat`, in PowerShell `.\gradlew`. Options are identical.
 
 ## Step 2 — Pin the target version and its checksum
 
@@ -38,7 +42,7 @@ Use the version the user named. **If they named none, upgrade to the latest rele
 curl -s https://services.gradle.org/versions/current     # → version + checksumUrl
 ```
 
-Resolve before you pin — no checksum can be looked up for `--gradle-version=latest`. Pinning the sum is standard on every upgrade, not an add-on; it is what verifies the download.
+**Target equals the current version → still run the steps.** A bot or a hand edit may have bumped `distributionUrl` without the task, leaving stale scripts and jar (see the end of this page); two runs regenerate them. Resolve before you pin — no checksum can be looked up for `--gradle-version=latest`. Pinning the sum is standard on every upgrade, not an add-on; it is what verifies the download.
 
 **The sum is the distribution URL with `.sha256` appended**, and that one line is the whole lookup:
 
@@ -57,70 +61,74 @@ Once `distributionSha256Sum` is set, any later `wrapper` run that *changes* `--g
 First, establish that the build works *before* you touch it:
 
 ```
-./gradlew --console=plain tasks
+cd "<build-root>" && ./gradlew --console=plain tasks
 ```
 
 Keep the exit code. This is the canary, and Steps 5 and 6 re-run it: **a red canary after an upgrade means nothing if it was red beforehand.**
 
 **`tasks`, not `build`.** `tasks` applies every plugin and registers every task — the exact surface a new major breaks — while compiling and running nothing, so it is fast and fails only for reasons the upgrade caused. `build` goes red on a flaky test or an unreachable repository, and rolling back on that would revert upgrades that were fine.
 
-If the build sets `org.gradle.configuration-on-demand=true`, use `tasks --all` instead — plain `tasks` configures the root project and little else, so it would pass while a subproject is broken. **Whichever form you pick, use that identical command every later time**; `tasks` before against `tasks --all` after is not a comparison.
+If the build sets `org.gradle.configuration-on-demand=true`, use `tasks --all` instead — plain `tasks` configures the build's root and little else, so it would pass while another part of the build is broken. **Whichever form you pick, use that identical command every later time**; `tasks` before against `tasks --all` after is not a comparison.
 
 **If the canary fails here, stop and do not upgrade.** `:wrapper` configures the build too, so Step 4 will fail for the same reason — there is no supported way to upgrade a build that will not configure. Report what broke; getting it green on its current version comes first.
 
-Then make sure you can get the four wrapper files back:
-
-```
-git status --short gradlew gradlew.bat gradle/wrapper
-```
-
-**Silent output is all you need.** Git is the snapshot: `git checkout -- gradlew gradlew.bat gradle/wrapper` restores all four at any point, so there is nothing to copy and nothing to clean up afterwards.
-
-**Anything else — output, or not a git repository — read `references/snapshot.md` and take a copy before going on.** Do not skip it. Without a snapshot there is no rollback, and Step 6 assumes one exists.
+Then **read `references/snapshot.md` and copy the wrapper files out of the build** — every upgrade, in git or not. Do not skip it. Without a snapshot there is no rollback, and Step 6 assumes one exists.
 
 ## Step 4 — Run the `wrapper` task twice
 
 ```
-./gradlew --console=plain :wrapper --gradle-version=8.14.4 --gradle-distribution-sha256-sum=<sha256>
-./gradlew --console=plain :wrapper --gradle-version=8.14.4 --gradle-distribution-sha256-sum=<sha256>
+cd "<build-root>" && ./gradlew --console=plain :wrapper --gradle-version=8.14.4 --gradle-distribution-sha256-sum=<sha256>
+cd "<build-root>" && ./gradlew --console=plain :wrapper --gradle-version=8.14.4 --gradle-distribution-sha256-sum=<sha256>
 ```
 
-Same command, twice: the first regenerates the scripts and jar from the *old* Gradle's templates, the second from the new version's. Both are required — see below. The leading `:` targets the root project, the only one the task belongs to.
+Same command, twice: the first regenerates the scripts and jar from the *old* Gradle's templates, the second from the new version's. Both are required — see below. The leading `:` runs the task at the build root, the only place it exists.
 
-**An upgrade never changes the distribution type.** `-all.zip` in Step 1 → add `--distribution-type=all` to both runs; the task defaults to `bin` and will otherwise switch the project silently. Changing type is the user's decision, not a side effect of an upgrade.
+**An upgrade never changes the distribution type.** `-all.zip` in Step 1 → add `--distribution-type=all` to both runs; the task defaults to `bin` and will otherwise switch the build silently. Changing type is the user's decision, not a side effect of an upgrade.
 
 Running as an agent:
 
 - **Trust the exit code; never grep for `BUILD SUCCESSFUL`.** A failed checksum must not read as a successful upgrade. A nonzero exit from either run sends you to Step 6, not to a third attempt.
-- **The second run downloads the full distribution (100 MB+).** A long silence is normal, not a hang — abandoning it leaves the half-done state described below, and is the one rollback with no error message to quote.
+- **Expect a long download.** The second run fetches the full distribution (100 MB+) and can take minutes. Give it a timeout of 10 minutes or more, or run it in the background and wait for it to exit. A long silence is normal, not a hang — abandoning it leaves the half-done state described below, with no error message to quote.
 - **`--console=plain`** keeps the output parseable: no progress bar, no colors.
 
 ## Step 5 — Verify the files, then run the canary
 
+With the literal snapshot and build-root paths, in double quotes — never `$SNAP`:
+
 ```
-git status --short gradle/wrapper gradlew gradlew.bat
+diff -q "<snapshot>/gradle/wrapper/gradle-wrapper.properties" "<build-root>/gradle/wrapper/gradle-wrapper.properties"
 ```
 
-On a real version change, all four files show as modified: `gradle-wrapper.properties`, `gradle-wrapper.jar`, `gradlew`, `gradlew.bat`. **Only the properties moved → the second run didn't happen.** Working from a snapshot instead of git? Compare against it as `references/snapshot.md` describes. Then `./gradlew --version` should report the target version. That check can't stand alone either way: the version it prints comes from `distributionUrl`, so it looks correct even while the scripts and jar are stale.
+It must print `differ`. **Silent is expected only when the target was already the current version** — the two runs then regenerated the scripts and jar, which is the repair a half-done upgrade needs; carry on to the canary. Silent otherwise means the `wrapper` runs changed some other build — they ran outside the build root. Stop and tell the user which directory they ran in; do not roll back, because this build is unchanged. `No such file` means a path is wrong, not that the file differs. Then `cd "<build-root>" && ./gradlew --version` should report the target version.
+
+Only the properties are certain to change. The scripts and jar change only when Gradle changes their templates — the jar is byte-identical across many releases — so an unchanged one is not a missed run. Neither check above proves them current, and neither has to: both `wrapper` runs exiting 0 is that proof.
 
 Those check that the upgrade *landed*. They say nothing about whether the build still works, so re-run the canary — **the same command as Step 3**:
 
 ```
-./gradlew --console=plain tasks
+cd "<build-root>" && ./gradlew --console=plain tasks
 ```
 
-**Nonzero exit → Step 6.** Green here, against the green baseline from Step 3, is the upgrade verified: delete the snapshot and report.
+**Nonzero exit → Step 6.** Green here, against the green baseline from Step 3, is the upgrade verified: delete the snapshot, and report.
+
+```
+rm -f "<snapshot>/gradlew" "<snapshot>/gradlew.bat" "<snapshot>/gradle/wrapper/gradle-wrapper.properties" "<snapshot>/gradle/wrapper/gradle-wrapper.jar" \
+  && rmdir "<snapshot>/gradle/wrapper" "<snapshot>/gradle" "<snapshot>"
+```
+
+Files by name, then empty directories — never `rm -rf`. `rmdir` refusing a non-empty directory means the path is not your snapshot: stop and tell the user.
 
 ## Step 6 — If the build no longer configures, roll back and stop
 
-Two ways to get here, and the second is the one that matters:
+Three ways to get here, and the second is the one that matters:
 
-- **The `wrapper` task itself failed.** Run 2 *is* the new version, so a build it cannot configure takes the second invocation down with it. Obvious, and it leaves the properties pointing at a version the project cannot run.
-- **The `wrapper` task succeeded and the canary failed.** The upgrade landed cleanly, all four files are correct, and the build is now unusable. This is the dangerous one, because every file-level check in Step 5 passes and the agent that stops there reports a successful upgrade over a broken project.
+- **The `wrapper` task itself failed.** Run 2 *is* the new version, so a build it cannot configure takes the second invocation down with it. Obvious, and it leaves the properties pointing at a version the build cannot run.
+- **The `wrapper` task succeeded and the canary failed.** The upgrade landed cleanly, the wrapper files are correct, and the build is now unusable. This is the dangerous one, because every file-level check in Step 5 passes and the agent that stops there reports a successful upgrade over a broken build.
+- **Run 2 did not finish** — abandoned mid-download. There is no error to quote, and nothing was learned about whether the build can run the target.
 
-Either way the cause is the same: a new major removes APIs, raises the minimum JVM, and ships a new Groovy, and a build script, a plugin, or a `buildSrc` that relies on what went away no longer configures. That is a blocked upgrade, not a partial one.
+For the first two the cause is the same: a new major removes APIs, raises the minimum JVM, and ships a new Groovy, and a build script, a plugin, or a `buildSrc` that relies on what went away no longer configures. That is a blocked upgrade, not a partial one.
 
-**Read `references/rollback.md` now and follow it** — restoring the four files without scattering them, verifying the restore, and the four things the closing report must say. Do not improvise it from this page.
+**Read `references/rollback.md` now and follow it** — restoring the wrapper files from the snapshot, verifying the restore, and the four things the closing report must say. Do not improvise it from this page.
 
 Nothing else here applies once you are on this branch. Do not retry the upgrade, and do not edit build scripts to force it through.
 
