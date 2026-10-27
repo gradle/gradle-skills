@@ -44,11 +44,86 @@ construct that resembles it is not it: `if (plugins.hasPlugin("x"))` reads like
 `pluginManager.withPlugin("x")` and is the opposite — an eager test that
 silently skips. Read past "is it guarded?" to "is it guarded by *that*?"
 
+## Acknowledged exceptions
+
+Authors sometimes leave a violation in place on purpose, because something
+outside their control blocks the fix, and say so in a comment. That finding is
+an *acknowledged exception*. This applies to every entry in the catalog. Work
+through the four steps below before writing the report.
+
+### 1. Find the candidate comments
+
+Two passes:
+
+- **At each finding.** Read every comment at the finding's location (step 3),
+  not just the matched line. Comments are `//`, `/* … */` and `/** … */` in
+  `.kts`, `.gradle`, `.kt`, `.java` and `.groovy` files; `#` or `!` in
+  `.properties`; `#` in `.toml`. Read a multi-line comment whole.
+- **One sweep for blocker wording.** A finding about something missing, a
+  project's layout, or a relationship between files has no matched line to
+  look above. So, once, search the comments in every file from Step 1 for
+  wording that signals a blocker: `can't`, `cannot`, `must`, `required`,
+  `no public API`, `not supported`, `incompatible`, `workaround`, `blocked`,
+  `until`, `once … is fixed`, `on purpose`, `deliberate`, `intentional`, and
+  issue links (`gradle/gradle#`, `/issues/`). These words find candidates; they
+  do not decide them. Match each hit to the finding it is about.
+
+### 2. Decide whether it acknowledges
+
+A comment acknowledges a finding only when it names **both**:
+
+- the practice, or the construct that violates it — the comment sitting on the
+  construct names it implicitly; and
+- a **blocker the author cannot remove**: a missing public API, an incompatible
+  plugin or tool, a Gradle bug or open issue, or an external constraint (CI,
+  IDE, a code generator, a mirror, consumers on an older Gradle).
+
+Take the stated blocker at face value; do not try to verify it.
+
+| Comment | Acknowledges? | Why |
+|:--|:--|:--|
+| `// No public API exists, use internal` | yes | missing public API |
+| `# Configuration cache off: the release plugin is incompatible` | yes | incompatible plugin |
+| `// Remove once gradle/gradle#12345 is fixed` | yes | blocked on an open issue |
+| `// Duplicated on purpose: lib is published standalone and can't use convention plugins` | yes | external constraint |
+| `// TODO: move to the plugins block` | no | asks for a change nothing blocks |
+| `// FIXME: stop using internal API` | no | same |
+| `// Uses the internal registry` | no | describes; names no blocker |
+| `// We prefer Groovy` | no | a preference, not a blocker |
+| `// Don't touch` | no | no reason given |
+
+**When unsure, it is a finding.** Report it under Issues and quote the comment
+in the **Issue:** line, saying it may be meant as an exception. Never drop a
+finding on a guess.
+
+### 3. Where the comment must sit
+
+A comment covers a finding only at the finding's location, and what that is
+depends on what the violation is:
+
+| The violation is… | The comment goes… |
+|:--|:--|
+| a line or block — `afterEvaluate { }`, an internal type, `-all.zip` | on that line, directly above it, or heading the declaration or block that holds it (function, class) |
+| something missing from a file — no `org.gradle.caching`, no `rootProject.name` | anywhere in that file, naming the missing thing |
+| the file itself — a `build.gradle`, a subproject's `gradle.properties` | in that file's header |
+| a project's layout — `buildSrc/`, source in the root, no version catalog | in that project's build script or settings file, naming the layout |
+| something missing whose file does not exist — no root `gradle.properties` | in the root settings file, naming the missing thing |
+| a relationship between files — duplicated configuration, a dependency reaching a project twice, two tasks sharing an output | on any one participant, naming the relationship |
+
+A header comment covers only findings about that file, never every line in it.
+An import is covered when every use of it in the file is.
+
+### 4. Record it
+
+List it under **Acknowledged** in the report, quoting the comment, and not
+under Issues. In Step 6, leave it alone.
+
 ## Running the checks
 
 Run every applicable check. Batch the searching by pattern rather than by entry
 — one pass per pattern across the discovered files is cheaper than re-reading
-every file once per entry.
+every file once per entry. Take a few lines of context above each match, so
+the comments that can acknowledge it arrive with it.
 
 ### Entries decided by comparing files
 
