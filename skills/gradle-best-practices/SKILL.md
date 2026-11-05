@@ -84,13 +84,18 @@ tokens to entries. It replaces re-deriving any check yourself.
 
 ## Step 4: Check the project
 
+**Check for acknowledged exceptions before reporting.** Authors sometimes leave a violation in place on purpose and say in a comment what blocks the fix. Follow *Acknowledged exceptions* in `references/detection.md`:
+1. Read the comments at each finding's location.
+2. Sweep every discovered file's comments once for blocker wording (`can't`, `no public API`, `incompatible`, `until`, issue links, …). This catches comments about something missing, which have no matched line to look above.
+3. Move a finding to **Acknowledged** only when its comment names both the construct and a blocker the author cannot remove. A `TODO`, a description or a preference is not enough. When unsure, keep it a finding and quote the comment.
+
 Record each finding with: best practice title, anchor URL, file(s) and line(s) where the violation appears, a one-sentence description, and the severity band. The category entry's `Fix:` line is the report's **Fix:** line — a run that reports findings without opening a single file under `references/fixes/` is working as intended.
 
 Violations are not mutually exclusive: one line can violate several practices at once, and matching a line to one practice does not exhaust it. Example: `dependsOn 'listMaintainedCars'` between two tasks with actions violates both *Don't hardcode task names* (the string) and *Avoid dependsOn* (the coupling) — fixing the string form to `dependsOn someTaskProvider` resolves the first and leaves the second. Record one finding per violated practice, even when findings share a line.
 
 ## Step 5: Present the report
 
-If no issues were found, emit a single line: **No issues found.** Then stop.
+If no issues were found, emit a single line: **No issues found.** — followed by the **Acknowledged** section below if it has entries. Then stop.
 
 Otherwise:
 
@@ -117,11 +122,17 @@ Best practices not applicable: N
 - **Issue:** What's wrong, concretely.
 - **Fix:** What to change.
 - **Reference:** https://docs.gradle.org/current/userguide/best_practices_<category>.html#<anchor>
+
+## Acknowledged
+
+- **[Best Practice Title]** (`anchor`) — file.kt:42 — "[the author's comment, quoted]"
 ```
+
+**Acknowledged** lists matches the project's authors have marked, in a comment, as unable to follow the practice (see *Acknowledged exceptions* in `references/detection.md`). They are not issues: leave them out of the Summary counts, and omit the section when it is empty.
 
 ### Optional: HTML report
 
-If the user asks for an HTML report (sortable by priority/location with clickable links), offer to write one to `build/reports/best-practices-audit.html` instead of (or in addition to) the markdown report.
+If the user asks for an HTML report (sortable by priority/location with clickable links), offer to write one to `build/reports/best-practices-audit.html` instead of (or in addition to) the markdown report. Include the Acknowledged list in it, separate from the issues.
 
 ## Step 6: Apply fixes
 
@@ -141,3 +152,4 @@ When applying fixes:
 - **Before recording any finding as unfixable, re-read the entry's `Fix:` line to the end.** Several carry more than one route, chosen by a condition — `avoid_depends_on` branches on whether an artifact flows between the tasks; `avoid_provider_get_outside_task_action` branches on the receiving parameter's type. "This can't be fixed without changing behavior" almost always means the first route was tried, found inapplicable, and the rest of the line went unread. An entry is genuinely unfixable only when every route it names has been tried and the reason each failed is recorded.
 - After fixing a line, re-check it against the remaining findings and the full catalog: a fix for one facet often leaves a co-located violation intact, or introduces a new one.
 - If the user declines a fix, leave it as-is and move on.
+- Leave acknowledged exceptions alone, and never write an acknowledgment comment yourself — only the project's authors can grant one.
