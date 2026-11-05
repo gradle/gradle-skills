@@ -1,759 +1,425 @@
-# Gradle Best Practices Skill v1.0.0 — Benchmark Results
+# gradle-best-practices v1.0.0 — Benchmark Data
+
+Each scenario gave a model the same task twice: once without the skill and once with it, as two independent runs on the same fixture. 5 scenarios × 7 models, one run each. The summary is generated from the tables below.
+
+Skill tested: `git+https://github.com/gradle/gradle-skills@main#skills/gradle-best-practices`, revision `0b1f5470c1999ba3d351ce2ba4d7010188c325b0`.
+
+Runs made 2026-09-24 to 2026-09-25.
+
+---
+
+## Findings
+
+**Helps a lot.** Claude Sonnet 5, DeepSeek V4 Pro and GPT-5.6 Luna: the skill closes most or all of the gap, at about a third more cost for DeepSeek V4 Pro, two-thirds more for GPT-5.6 Luna and twice as much for Claude Sonnet 5; GPT-5.6 Luna also lost a check.
+
+**Helps somewhat.** Claude Haiku 4.5: the skill closes a little under half of the gap, at about twice the cost and with more time; it also lost checks.
+
+**Within run-to-run variation.** Claude Opus 5.5 and Gemini 3.8 Flash rate Medium, but the change is within run-to-run variation. Claude Opus 5.5 had little to fix and costs about twice as much; Gemini 3.8 Flash costs slightly less. Both also lost a check.
+
+**Helps a little.** Qwen3.6 35B-A3B Coding (NVFP4): the skill closes a small part of the gap. It is served locally with no price but takes longer with the skill; it also lost checks and hit a limit only with the skill.
+
+---
+
+## At a glance
+
+| Model | Harness | Without skill | With skill | Gap closed | Level | Run-to-run differences | Beyond run-to-run variation | Cost (with ÷ without) |
+| :--- | :--- | ---: | ---: | ---: | :--- | ---: | :--- | ---: |
+| Claude Haiku 4.5 | Claude Code | 22% | 57% | +45% | Medium | 1 of 12 checks | Yes | 1.93× |
+| Claude Opus 5.5 | Claude Code | 88% | 94% | +50% | Medium | 1 of 12 checks | No | 2.08× |
+| Claude Sonnet 5 | Claude Code | 59% | 98% | +95% | High | 3 of 12 checks | Yes | 2.07× |
+| DeepSeek V4 Pro | OpenCode | 57% | 100% | +100% | High | 3 of 12 checks | Yes | 1.37× |
+| Gemini 3.8 Flash | Gemini CLI | 75% | 90% | +62% | Medium | 4 of 12 checks | No | 0.90× |
+| GPT-5.6 Luna | OpenCode | 53% | 92% | +83% | High | 0 of 12 checks | Yes | 1.66× |
+| Qwen3.6 35B-A3B Coding (NVFP4) | Claude Code | 22% | 41% | +25% | Low | 2 of 12 checks | Yes | local |
+
+*Without skill*: checks passed without the skill, of all checks in the compared scenarios.
+
+*With skill*: checks passed with the skill, of all checks in the compared scenarios.
+
+*Gap closed*: when the skill gains checks overall, the share of the checks failed without it that pass with it, net of losses; when it loses checks overall, the share of the checks passed without it that fail with it, as a negative figure. It is not the difference between *With skill* and *Without skill*.
+
+*Level* follows mechanically from *Gap closed*: High at +67% or more, Medium from +33%, Low below that, None when the totals are equal, Counterproductive when fewer checks pass with the skill, and Nothing to fix when every check passed without it. With one run per side, a change of a check or two can come from run-to-run variation alone.
+
+*Run-to-run differences*: how many checks differed between two identical runs.
+
+*Beyond run-to-run variation*: Yes when the difference between *With skill* and *Without skill*, in checks, is larger than the number of checks expected to differ between two identical runs: the share of checks that differed in *Run-to-run differences*, applied to all checks in the compared scenarios. No otherwise, and n/a when the model has no identical runs.
+
+*Cost*: the cost of the runs with the skill divided by the cost of the runs without it. It is local for a model served locally, which has no price, and n/a where no price is configured; `≥` marks a lower bound from a run that stopped at a limit.
+
+---
 
 ## Summary
 
-`gradle-best-practices@1.0.0` (revision `0b1f547`) was measured on seven models from
-five vendors across three agent CLIs, on five Gradle build-quality scenarios. Each
-scenario ran twice per model — once with the skill, once without. With the skill, agents
-passed **292 of 357** best-practice checks against **191 of 357** unaided — **113 gains,
-12 regressions**. A sixth scenario ran the unaided arm twice on every model, to measure
-how far two identical runs drift on their own.
+5 scenarios, 7 models, one run without and one run with the skill for each pair. Generated from the tables below.
 
-The effect is broad rather than concentrated. All seven models improve, four of them
-by 18 checks or more: **DeepSeek-v4-pro +22** (0 regressions), **Sonnet 5 +20**
-(0 regressions), **GPT-5.6-luna +20**, **Haiku 4.5 +18**. Eighteen of the 35 treatment
-arms clear their fixture outright, and **DeepSeek-v4-pro takes every check in all five
-scenarios, 51 of 51**. **Opus 5.5 reaches 48 of 51** — but it starts at 45, so the
-skill moves the strongest model least.
+### Per model
 
-Two results deserve to be read before the tables:
+- `claude-haiku-4-5-20251001` on `claude-code 2.1.233`: 11 / 29 of 51 checks passed without / with the skill, 20 gains and 2 losses; 1 of 12 checks differed between two identical runs. Skill loaded in 5 of 5 runs. With ÷ without: cost 1.93×, wall clock 1.62×, output tokens 1.67×.
+- `claude-opus-5-5` on `claude-code 2.1.281`: 45 / 48 of 51 checks passed without / with the skill, 4 gains and 1 loss; 1 of 12 checks differed between two identical runs. Skill loaded in 5 of 5 runs. With ÷ without: cost 2.08×, wall clock 1.66×, output tokens 1.68×.
+- `claude-sonnet-5` on `claude-code 2.1.233`: 30 / 50 of 51 checks passed without / with the skill, 20 gains and 0 losses; 3 of 12 checks differed between two identical runs. Skill loaded in 5 of 5 runs. With ÷ without: cost 2.07×, wall clock 1.79×, output tokens 1.97×.
+- `deepseek-v4-pro` on `opencode 1.18.30`: 29 / 51 of 51 checks passed without / with the skill, 22 gains and 0 losses; 3 of 12 checks differed between two identical runs. Skill loaded in 5 of 5 runs. With ÷ without: cost 1.37×, wall clock 1.19×, output tokens 1.31×.
+- `gemini-3-8-flash` on `gemini-cli 0.59.0`: 38 / 46 of 51 checks passed without / with the skill, 9 gains and 1 loss; 4 of 12 checks differed between two identical runs. Skill loaded in 5 of 5 runs. With ÷ without: cost 0.90×, wall clock 0.89×, output tokens 0.70×.
+- `gpt-5-6-luna` on `opencode 1.18.30`: 27 / 47 of 51 checks passed without / with the skill, 21 gains and 1 loss; 0 of 12 checks differed between two identical runs. Skill loaded in 5 of 5 runs. With ÷ without: cost 1.66×, wall clock 1.39×, output tokens 1.31×.
+- `qwen3-6-35b-a3b-coding-nvfp4` on `claude-code 2.1.233`: 11 / 21 of 51 checks passed without / with the skill, 17 gains and 7 losses; 2 of 12 checks differed between two identical runs. Skill loaded in 5 of 5 runs. With ÷ without: cost local, wall clock ≥ 1.27×, output tokens ≥ 1.58×.
 
-**The skill does not touch the network.** It ships the catalog on disk under
-`references/` — one detection layer, seven category files covering 48 practices,
-and 48 per-practice fix files. **Every treatment arm in this sweep made zero
-`WebFetch` calls.** Runs are reproducible offline and cannot drift when the
-documentation does.
+### Checks with the same result for every model
 
-**Pickup is universal and directly measured.** A `skill-used` scorer verifies the
-agent actually invoked the skill. It returns PASS in **35 of 35** treatment arms,
-across `claude-code`, `opencode` and `gemini-cli`. No comparison in this sweep is void
-for non-pickup.
+- `project-builds` in `structure`: passed with and without the skill, for all 7 models.
+- `single-gav-strings` in `idioms`: passed with and without the skill, for all 7 models.
+- `project-builds` in `false-positives`: passed with and without the skill, for all 7 models.
 
-This report is keyed on **checks passed**. The harness also folds each arm's scorers
-into a single pass/fail verdict; that verdict is not reported here. It is an AND over
-every check, so a fixture carrying a dozen seeded violations reads `FAIL` almost
-everywhere regardless of the skill.
+### Lower bounds
+
+- `deepseek-v4-pro` stopped at a limit in `aa` `no-skills-a`. Its figures for those runs are lower bounds.
+- `qwen3-6-35b-a3b-coding-nvfp4` stopped at a limit in `plugin-authoring` with the skill. Its figures for those runs are lower bounds.
+
+Notes at the end of the report record 5 verified statements about the data and the scorers.
 
 ---
 
-## Setup
+## What was tested
 
-### What we're measuring
+### Models and harnesses
 
-Each scenario runs two arms against the same Gradle project and the same prompt:
-
-| Arm | Skill |
-| :--- | :--- |
-| `no-skills` | Baseline — no skill provided |
-| `with-skills` | `git+https://github.com/gradle/gradle-skills@main#skills/gradle-best-practices`, revision `0b1f547` |
-
-All 35 treatment arms received the same skill revision.
-
-Terms used throughout this report:
-
-| Term | Meaning |
-| :--- | :--- |
-| **arm** | One agent run: one model, one scenario, one skill setting |
-| **baseline arm** | The `no-skills` half of a pair |
-| **treatment arm** | The `with-skills` half of the same pair |
-| **repeat-run control** (`aa`) | A pair of `no-skills` arms run against the same fixture and prompt, to show how much two identical runs differ on their own |
-
-The four fixing scenarios — `structure`, `tasks`, `idioms` and `plugin-authoring` —
-ask the agent to investigate the build, write a `VIOLATIONS.md` with one
-`<file>: <line>: <description>` line per issue before changing anything, then apply
-the fixes while keeping `./gradlew build` green, and record anything left over in
-`REMAINING-UNFIXED.md`. **Those four prompts and the repeat-run control's prompt are all
-textually identical** — five scenarios, one prompt — so every fixing scenario is
-prompt-comparable to every other. `false-positives` is the exception: it uses its own
-audit-only prompt, which forbids edits.
-
-### Models tested
-
-| Model | Vendor | CLI | Short name |
+| Model | Name | Provider model ID | Harness |
 | :--- | :--- | :--- | :--- |
-| `anthropic/claude-haiku-4-5-20251001` | Anthropic | `claude-code 2.1.233` | Haiku 4.5 |
-| `anthropic/claude-sonnet-5` | Anthropic | `claude-code 2.1.233` | Sonnet 5 |
-| `anthropic/claude-opus-5-5` | Anthropic | `claude-code 2.1.281` | Opus 5.5 |
-| `openai/gpt-5.6-luna` | OpenAI | `opencode 1.18.30` | GPT-5.6-luna |
-| `google/gemini-3.8-flash` | Google | `gemini-cli 0.59.0` | Gemini 3.8 Flash |
-| `deepseek/deepseek-v4-pro` | DeepSeek | `opencode 1.18.30` | DeepSeek-v4-pro |
-| `ollama/qwen3.6:35b-a3b-coding-nvfp4` | Alibaba (local) | `claude-code 2.1.233` | Qwen3.6-35B |
+| `claude-haiku-4-5-20251001` | Claude Haiku 4.5 | `anthropic/claude-haiku-4-5-20251001` | `claude-code 2.1.233` |
+| `claude-opus-5-5` | Claude Opus 5.5 | `anthropic/claude-opus-5-5` | `claude-code 2.1.281` |
+| `claude-sonnet-5` | Claude Sonnet 5 | `anthropic/claude-sonnet-5` | `claude-code 2.1.233` |
+| `deepseek-v4-pro` | DeepSeek V4 Pro | `deepseek/deepseek-v4-pro` | `opencode 1.18.30` |
+| `gemini-3-8-flash` | Gemini 3.8 Flash | `google/gemini-3.8-flash` | `gemini-cli 0.59.0` |
+| `gpt-5-6-luna` | GPT-5.6 Luna | `openai/gpt-5.6-luna` | `opencode 1.18.30` |
+| `qwen3-6-35b-a3b-coding-nvfp4` | Qwen3.6 35B-A3B Coding (NVFP4) | `ollama/qwen3.6:35b-a3b-coding-nvfp4` | `claude-code 2.1.233` |
 
-Nothing here rests on a single vendor's prompt conventions or a single harness's
-skill-loading mechanism.
+Every run used JDK 21, with network access on.
 
-### Scenarios and fixtures
+### Scenarios
 
-| Scenario | Fixture | Checks | Detection floor | What it probes |
-| :--- | :--- | ---: | ---: | :--- |
-| `structure` | `sample-carlog` | 12 | 14 | Build layout: settings, version catalog, repository placement, convention plugins, lazy wiring, wrapper checksum, duplicate dependencies |
-| `tasks` | `sample-star-charter` | 15 | 16 | Custom task types: caching, path sensitivity, configuration cache, output collisions, config-time resolution, catalog naming |
-| `idioms` | `sample-recipe-vault` | 14 | 13 | Script idioms: `apply plugin`, `afterEvaluate`, internal APIs, properties placement, config-time work, eager file trees |
-| `plugin-authoring` | `sample-fleet-tracker` | 8 | 6 | Plugin hygiene: order-independence, no `buildSrc`, reproducible archives, `flatMap` for nested providers |
-| `false-positives` | `sample-init-library` | 2 | — | Restraint on untouched `gradle init` output — audit only, no edits |
-| `aa` | `sample-carlog` | 12 | 14 | Repeat-run control: two identical unaided arms, same fixture and prompt as `structure` |
+- **`structure`** — 12 checks, prompt P1. `sample-carlog`, a two-project Groovy DSL build with 14 listed violations centred on build structure: no `rootProject.name`, source in the root project, repositories in build scripts, no version catalog, configuration repeated across scripts, a redundant dependency, an eager `Provider.get()`, `dependsOn` and `getByName` between tasks, and no wrapper checksum.
+- **`tasks`** — 15 checks, prompt P1. `sample-star-charter`, a Kotlin DSL build with 16 listed task and dependency-management violations, including undocumented tasks, `PathSensitivity.ABSOLUTE`, `cacheIf { true }`, two tasks sharing an output directory, a `notCompatibleWithConfigurationCache` opt-out, configuration-time resolution of `runtimeClasspath`, unfiltered repositories, blanket excludes, an attribute-less consumable configuration and vaguely named catalog entries.
+- **`idioms`** — 14 checks, prompt P1. `sample-recipe-vault`, a Groovy multi-project build with 13 listed legacy-idiom violations, including `apply plugin:` inside `subprojects {}`, `afterEvaluate`, an internal API, no root `gradle.properties`, a subproject `gradle.properties`, a map-notation dependency, an empty `:services` project, hashing at configuration time and an eager `fileTree(...).files`.
+- **`plugin-authoring`** — 8 checks, prompt P1. `sample-fleet-tracker`, a Kotlin DSL build whose two convention plugins in an included `build-logic` build each configure nothing unless another plugin was applied first; it also has a `buildSrc/` helper, an archive task with `isPreserveFileTimestamps = true`, a `map` with a nested `.get()` and no TestKit tests.
+- **`false-positives`** — 2 checks, prompt P2. `sample-init-library`, unmodified `gradle init` output (Kotlin DSL, Java 21 toolchain, incubating APIs).
 
-Check counts exclude `skill-used`, which is scored only on the treatment arm and
-therefore cannot contribute a delta. `aa` runs no treatment arm and contributes no
-checks to the totals.
+### Prompts
 
-Fixture revisions: `sample-carlog` `sha256:624f1d41fe05…`, `sample-star-charter`
-`sha256:88676a5a66f6…`, `sample-recipe-vault` `sha256:edc64794f43e…`,
-`sample-fleet-tracker` `sha256:833ff574c5f9…`, `sample-init-library`
-`sha256:9e2a7c7b0f14…`.
+The full text given to the agent, the same with and without the skill.
 
-### Scorers
+**P1**, used by `structure`, `tasks`, `idioms`, `plugin-authoring`
 
-Most checks are `file-exists` greps over comment-stripped copies of the build
-sources. The ones worth calling out are the behavioural and structural probes, plus
-the two that grade the agent's report rather than the build:
+> This Gradle build succeeds, but it probably has issues with things not done in the proper way. Investigate the
+> build configuration and fix what you find, making sure `./gradlew build` still succeeds.
+> The library's code and behavior must be preserved; restructuring which project builds it and how is allowed.
+> This is NOT just an audit, your task is to apply fixes to the build.
+> Before fixing anything, write a file named VIOLATIONS.md at the root of the project containing ONLY one line per
+> issue discovered, starting with the file name containing it, then a colon and a space and the line number where it
+> begins, then another colon and a space then a brief one sentence description of the issue.
+> Each line must describe exactly ONE issue: a line of code that violates two practices gets two lines; never combine issues on one line.
+> Add no headers, blank lines, or any text besides the issue lines.
+> Then apply your fixes.
+> You are running unattended; no one can answer questions, so make all decisions yourself.
+> Before finishing, re-read your VIOLATIONS.md and either fix each item or record why not in a REMAINING-UNFIXED.md file.
 
-- **`lazy-extension-wiring`** (`structure`) — not a regex. An init script reconfigures
-  the `carLog` extension in `gradle.afterProject`, after every build script has
-  evaluated, then runs `recordDemoMaintenance`. Lazy wiring picks the new value up
-  and writes the probe file; eager `.get()` at configuration time does not.
-  Fix-shape agnostic.
-- **`convention-plugins`** (`structure`) — requires the whole chain: an included build,
-  a plugin inside it, and a main-build script applying it by id. Accepts binary
-  plugins declared through `gradlePlugin { plugins { … id = … } }` as well as
-  precompiled script plugins.
-- **`tasks-documented`** (`tasks`) — harvests script-defined task names, then runs
-  `./gradlew tasks --all` and demands every harvested name Gradle lists carry a
-  description. **Cannot see Java-style registration**, which cost one arm a check it had
-  earned.
-- **`plugin-order-agnostic`** / **`convention-order-agnostic`** (`plugin-authoring`) —
-  behavioural probes that apply the plugin before and after the `java` plugin and
-  demand the same result.
-- **`only-defensible-findings`** (`false-positives`) — every reported finding must be
-  one the tree actually supports. The allowlist covers the two `gradle init` findings
-  *and* three wrapper findings the harness's own `distributionUrl` rewrite creates,
-  matched on file **and** description as a conjunction. Allowlisting the wrapper
-  findings is what makes the scenario winnable; see finding 5.
-- **`violations-count`** (all four fixing scenarios) — a one-sided recall floor over
-  non-blank lines in `VIOLATIONS.md`. Over-reporting passes; under-reporting fails.
-  The floors sit close to each fixture's full seeded inventory, so mid-sized reports
-  fail it.
-- **`skill-used`** — scored on the treatment arm only; verifies the agent actually
-  invoked the skill.
+**P2**, used by `false-positives`
 
-### Scorer verdicts
-
-| Verdict | Meaning |
-| :--- | :--- |
-| ✅ **PASS** | The scorer's criterion was met. |
-| ❌ **FAIL** | The trial ran and the criterion was not met. |
-| ⚠️ **INVALID** | The scorer could not render a verdict. No arm in this sweep returned INVALID. |
-
-One arm was bounded by its token cap: `plugin-authoring`/Qwen3.6-35B, treatment. Its
-scorer verdicts stand; its cost figures are lower bounds and are marked `≥`.
+> This Gradle build succeeds, but it probably has issues with things not done in the proper way. Investigate the
+> build configuration and report what you find, NOT changing any existing file.
+> This is ONLY an audit, your task is NOT to apply fixes to the build.
+> Write a file named VIOLATIONS.md at the root of the project containing ONLY one line per issue discovered, starting
+> with the file name containing it, then a colon and a space and the line number where it begins, then another colon
+> and a space then a brief one sentence description of the issue.
+> Each line must describe exactly ONE issue: a line of code that violates two practices gets two lines; never combine issues on one line.
+> Add no headers, blank lines, or any text besides the issue lines.
+> If you discover no issues, write an empty VIOLATIONS.md.
+> You are running unattended; no one can answer questions, so make all decisions yourself.
 
 ---
 
-## Key findings
+## Results by model
 
-### 1. Every model improves, but the weakest model's gain is the least trustworthy
+Checks passed, without the skill / with it, of the total.
 
-| Model | Baseline | Treatment | Δ | Gains | Regressions |
-| :--- | ---: | ---: | ---: | ---: | ---: |
-| DeepSeek-v4-pro | 29 / 51 | **51 / 51** | **+22** | 22 | 0 |
-| Sonnet 5 | 30 / 51 | **50 / 51** | **+20** | 20 | 0 |
-| GPT-5.6-luna | 27 / 51 | **47 / 51** | **+20** | 21 | 1 |
-| Haiku 4.5 | 11 / 51 | **29 / 51** | **+18** | 20 | 2 |
-| Qwen3.6-35B | 11 / 51 | **21 / 51** | **+10** | 17 | 7 |
-| Gemini 3.8 Flash | 38 / 51 | **46 / 51** | **+8** | 9 | 1 |
-| Opus 5.5 | 45 / 51 | **48 / 51** | **+3** | 4 | 1 |
-| **All** | **191 / 357** | **292 / 357** | **+101** | **113** | **12** |
+| Model (without / with skill) | `structure` | `tasks` | `idioms` | `plugin-authoring` | `false-positives` | Total | Gains | Losses |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | ---: | ---: |
+| `claude-haiku-4-5-20251001` | 2 / 6 of 12 | 3 / 9 of 15 | 2 / 7 of 14 | 3 / 5 of 8 | 1 / 2 of 2 | 11 / 29 of 51 | 20 | 2 |
+| `claude-opus-5-5` | 11 / 12 of 12 | 13 / 13 of 15 | 12 / 14 of 14 | 8 / 8 of 8 | 1 / 1 of 2 | 45 / 48 of 51 | 4 | 1 |
+| `claude-sonnet-5` | 6 / 12 of 12 | 10 / 14 of 15 | 10 / 14 of 14 | 3 / 8 of 8 | 1 / 2 of 2 | 30 / 50 of 51 | 20 | 0 |
+| `deepseek-v4-pro` | 4 / 12 of 12 | 9 / 15 of 15 | 9 / 14 of 14 | 6 / 8 of 8 | 1 / 2 of 2 | 29 / 51 of 51 | 22 | 0 |
+| `gemini-3-8-flash` | 5 / 10 of 12 | 13 / 15 of 15 | 10 / 12 of 14 | 8 / 8 of 8 | 2 / 1 of 2 | 38 / 46 of 51 | 9 | 1 |
+| `gpt-5-6-luna` | 3 / 11 of 12 | 8 / 13 of 15 | 9 / 13 of 14 | 6 / 8 of 8 | 1 / 2 of 2 | 27 / 47 of 51 | 21 | 1 |
+| `qwen3-6-35b-a3b-coding-nvfp4` | 1 / 5 of 12 | 0 / 7 of 15 | 7 / 3 of 14 | 2 / 4 of 8 | 1 / 2 of 2 | 11 / 21 of 51 | 17 | 7 |
 
-Gains run broadly inverse to unaided competence, which is what a knowledge-injection
-skill should do. Opus 5.5 already knows most of this catalog; the skill buys it three
-checks. Haiku 4.5, which does not, gains 18 against two regressions — the cleanest
-demonstration in the sweep that the catalog supplies knowledge the model lacks.
+A gain is a check that failed without the skill and passed with it; a loss is the reverse.
 
-**Qwen3.6-35B is the exception and should not be read as part of that pattern.** Its 17
-gains sit in the same range as Haiku's 20 and Sonnet's 20, but they come with **seven
-regressions — more than the other six models combined** — and two of those are
-`project-builds` flipping PASS → FAIL. It still nets an improvement, and every one of
-its 17 gains is a real check it did not pass unaided; but a net that is built from 17
-gains and 7 regressions is a different thing from Haiku's 20 and 2, and finding 4
-argues the trade is not worth taking at that model size.
+### Skill loading and run-to-run variation
 
-**DeepSeek-v4-pro is the standout**: 51 of 51 with zero regressions, including
-perfect grids on `structure` (12/12), `tasks` (15/15), `idioms` (14/14) and
-`plugin-authoring` (8/8). Sonnet 5 misses only `cacheable-annotation` on `tasks`.
+| Model | Skill loaded | Differences between two identical runs |
+| :--- | ---: | ---: |
+| `claude-haiku-4-5-20251001` | 5 of 5 runs | 1 of 12 checks |
+| `claude-opus-5-5` | 5 of 5 runs | 1 of 12 checks |
+| `claude-sonnet-5` | 5 of 5 runs | 3 of 12 checks |
+| `deepseek-v4-pro` | 5 of 5 runs | 3 of 12 checks |
+| `gemini-3-8-flash` | 5 of 5 runs | 4 of 12 checks |
+| `gpt-5-6-luna` | 5 of 5 runs | 0 of 12 checks |
+| `qwen3-6-35b-a3b-coding-nvfp4` | 5 of 5 runs | 2 of 12 checks |
 
-### 2. The detection signal is large, consistent, and only partly captured
-
-Every fixing prompt mandates a `VIOLATIONS.md` inventory. Non-blank line counts,
-baseline → treatment, with the fixture's floor:
-
-| Scenario | Floor | Haiku | Sonnet | Opus | GPT | Gemini | DeepSeek | Qwen |
-| :--- | ---: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `structure` | 14 | 3 → **9** | 8 → **26** | 25 → **30** | 8 → **17** | 12 → **22** | 6 → **28** | 4 → **13** |
-| `tasks` | 16 | 3 → **8** | 17 → **27** | 24 → **34** | 13 → **24** | 24 → **27** | 12 → **31** | 6 → **14** |
-| `idioms` | 13 | 1 → **8** | 7 → **18** | 18 → **25** | 9 → **14** | 10 → **11** | 8 → **17** | 4 → **10** |
-| `plugin-authoring` | 6 | 2 → **3** | 4 → **11** | 12 → **10** | 6 → **13** | 6 → **6** | 7 → **10** | 3 → **4** |
-
-The skill raises detection in **26 of 28 fixture-model pairs**, flat in one (Gemini on
-`plugin-authoring`, 6 → 6), down in one (Opus on `plugin-authoring`, 12 → 10, where both
-arms clear the floor of 6 and score 8/8 regardless). Typical multiples are 1.5× to 4×.
-The largest of them, DeepSeek's 6 → 28 on `structure`, is also the one to read most
-carefully: two further unaided runs of DeepSeek on that fixture produced 14 and 11
-lines, so the 4.7× is measured against the lowest of three baselines. Sonnet's 8 → 26
-has the same shape — its other two unaided runs read 17 and 14.
-
-The grid captures part of this. `violations-count` moves for Sonnet (3 of 4 fixtures),
-GPT (3), DeepSeek (3) and Gemini (1). It is one-sided, so Opus's 25 → 30 on
-`structure` scores nothing — both arms clear the floor of 14.
-
-**But see finding 8 before quoting any of these numbers as an effect size.** Three
-unaided runs per model on `sample-carlog` spread by as much as 9 lines, and against that
-band **20 of these 28 cells are inside the noise** — the whole `plugin-authoring` row
-among them. The direction of the effect is not in doubt; the per-cell multiples are.
-
-### 3. `plugin-authoring` is the cleanest scenario, and it works
-
-The `sample-fleet-tracker` fixture probes plugin hygiene with two behavioural
-order-independence checks. Opus and Gemini already score 8/8 unaided, so only five
-models could improve — and **all five did**, with five arms reaching 8/8. Sonnet goes
-3 → 8 with five gains. Qwen is the only model to lose checks here.
-
-The two most-gained checks are `flatmap-for-nested-providers` (+5 models) and
-`reproducible-archives` (+3) — both textbook catalog entries that models do not reach
-for unaided. `no-forced-java-plugin` passes in 13 of 14 arms and `project-builds` in
-13 of 14, so the fixture is not simply hard; it is targeted.
-
-### 4. Qwen3.6-35B is where the skill does damage
-
-17 gains against **7 regressions** — by far the worst ratio in the sweep — and two of
-those regressions are **`project-builds` flipping PASS → FAIL**. The treatment arm
-broke the build on `idioms` and on `plugin-authoring`, having left it green unaided.
-Its `idioms` grid goes 7/14 → 3/14, losing `plugins-block-only`, `no-after-evaluate`,
-`build-cache-enabled` and `config-cache-enabled` alongside the build itself.
-
-The cost profile says why: turns 93 → ≥289 (≥3.11×), cached input 4.6M → ≥21.7M
-(≥4.76×), and the `plugin-authoring` treatment arm hit 100% of its token cap and was
-bounded, so every Qwen treatment figure is a floor.
-A 35B local model given a 48-practice catalog attempts far more than it can land.
-
-**This is a real limitation, not a scoring artifact.** The skill should carry guidance
-on scoping work when the model cannot hold the whole catalog, or the catalog needs a
-smaller default slice.
-
-### 5. `false-positives` produces real signal, and the skill reduces invented findings
-
-This scenario only works because `only-defensible-findings.sh` allowlists three
-wrapper findings (`validate_gradle_checksum`, `validate_wrapper_checksum`,
-`use_latest_minor_versions`) alongside the two `gradle init` findings, each matched on
-file **and** description. The harness rewrites the wrapper's `distributionUrl` to a
-`file://` path before the agent sees it; an agent that reports that line is right
-about the tree as staged, and scoring it as a false positive would make the scenario
-unwinnable by construction.
-
-Result: **five of seven models gain**, and the skilled arm passes in five of seven.
-
-| Model | Baseline | Treatment |
-| :--- | :--- | :--- |
-| Haiku 4.5 | ❌ FAIL | ✅ PASS |
-| Sonnet 5 | ❌ FAIL | ✅ PASS |
-| Opus 5.5 | ❌ FAIL | ❌ FAIL |
-| GPT-5.6-luna | ❌ FAIL | ✅ PASS |
-| Gemini 3.8 Flash | ✅ PASS | ❌ FAIL |
-| DeepSeek-v4-pro | ❌ FAIL | ✅ PASS |
-| Qwen3.6-35B | ❌ FAIL | ✅ PASS |
-
-The skill makes agents report *fewer invented* findings on clean `gradle init`
-output, which is the opposite of the intuition that a checklist encourages
-nitpicking. The two exceptions are instructive:
-
-- **Opus 5.5 fails in both arms.** Its treatment report is four defensible lines plus
-  one that is not: the JUnit version being hardcoded in `lib/build.gradle.kts` rather
-  than in a catalog. `gradle init` writes that line; there is no catalog to move it
-  to.
-- **Gemini's regression is the scenario working as designed.** Its baseline wrote an
-  empty `VIOLATIONS.md` — a trivial PASS, silence on a clean build. Its treatment arm
-  reported two findings, one of them the same hardcoded-version claim. The skill
-  turned a vacuous pass into a real, slightly-wrong audit.
-
-### 6. The skill is not free
-
-Totals across the 35 delta arms, by model:
-
-| Model | Turns | Output tokens | Cached input | Wall (s) | Cost (USD) |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| Haiku 4.5 | 147 → 209 (1.42×) | 27,671 → 46,174 (1.67×) | 5.78M → 11.15M (1.93×) | 556 → 900 (1.62×) | 0.81 → 1.57 |
-| Sonnet 5 | 117 → 154 (1.32×) | 116,163 → 229,102 (1.97×) | 6.94M → 14.92M (2.15×) | 1,597 → 2,858 (1.79×) | 3.05 → 6.31 |
-| Opus 5.5 | 43 → 67 (1.56×) | 40,441 → 68,101 (1.68×) | 1.30M → 3.32M (2.55×) | 639 → 1,061 (1.66×) | 1.52 → 3.16 |
-| GPT-5.6-luna | 96 → 100 (1.04×) | 27,819 → 36,441 (1.31×) | 1.15M → 2.17M (1.88×) | 601 → 834 (1.39×) | 0.10 → 0.16 |
-| Gemini 3.8 Flash | 294 → 287 (0.98×) | 492,621 → 345,219 (0.70×) | 15.83M → 18.57M (1.17×) | 2,867 → 2,557 (0.89×) | 4.30 → 3.86 |
-| DeepSeek-v4-pro | 178 → 148 (0.83×) | 191,258 → 251,428 (1.31×) | 6.15M → 8.88M (1.44×) | 1,884 → 2,238 (1.19×) | 0.63 → 0.87 |
-| Qwen3.6-35B | 93 → ≥289 (≥3.11×) | 188,886 → ≥297,934 (≥1.58×) | 4.57M → ≥21.75M (≥4.76×) | 10,167 → ≥12,902 (≥1.27×) | n/a |
-
-Gemini's apparent saving is one outlier: its `plugin-authoring` **baseline** burned
-263,866 output tokens and 1,060s — 3.9× its own treatment arm's output tokens and 2.0×
-its wall clock. Strip that scenario and Gemini's output-token ratio is 1.21×, not 0.70×.
-Do not read Gemini as evidence the skill is free.
-
-A more useful figure than the raw multiple is **extra output tokens spent per check
-gained**: ~430 for GPT-5.6-luna, ~1,050 for Haiku 4.5, ~2,700 for DeepSeek-v4-pro,
-~5,600 for Sonnet 5, ~9,200 for Opus 5.5. The models that gain most cost least per
-gain, which is the right shape — the skill is cheapest exactly where it does the most
-work, and Opus pays the most per check because it had the least left to learn. Gemini
-is omitted because its output-token delta is negative on the outlier above; Qwen is
-omitted because its gain count is not comparable (finding 1).
-
-**One arm of thirty-five was bounded**, `plugin-authoring`/Qwen3.6-35B on tokens. No
-Anthropic, OpenAI, Google or DeepSeek arm came within a third of any cap.
-
-### 7. The bundled catalog trades fetch cost for read cost, and buys determinism
-
-Zero `WebFetch` calls in any treatment arm. The catalog does not arrive free — it
-moves into `Read` calls on `references/`, and treatment arms consistently show
-elevated `Read` counts (Haiku `structure` 7 → 16, Qwen `structure` 11 → 44, DeepSeek
-`plugin-authoring` 24 → 44).
-
-What this buys is **determinism**: every run reads the same catalog, captured from the
-Gradle 9.9.0-nightly documentation on 2026-09-23, and no run can be perturbed by a
-documentation edit, a rate limit, or a failed fetch. For a skill whose entire purpose
-is injecting a specific body of knowledge, reproducibility is worth more than the
-token delta — and it means these results describe what a user will get offline, not
-what the docs happened to say on 2026-09-24.
-
-### 8. The noise floor is wide
-
-The `aa` control runs on all seven models. Scorer disagreement between two
-**identical** `no-skills` arms:
-
-| Model | Scorers disagreeing | Which | Detection lines |
-| :--- | :---: | :--- | :--- |
-| GPT-5.6-luna | 0 / 12 | — | 4 vs 11 |
-| Haiku 4.5 | 1 / 12 | `no-duplicate-dependencies` | 8 vs 1 |
-| Opus 5.5 | 1 / 12 | `wrapper-checksum-engaged` | 24 vs 25 |
-| Qwen3.6-35B | 2 / 12 | `root-project-named`, `lazy-extension-wiring` | 5 vs 3 |
-| Sonnet 5 | 3 / 12 | `repos-not-in-build-scripts`, `convention-plugins`, `wrapper-checksum-engaged` | 17 vs 14 |
-| DeepSeek-v4-pro | 3 / 12 | `version-catalog`, `convention-plugins`, `violations-count` | 14 vs 11 |
-| Gemini 3.8 Flash | 4 / 12 | `root-project-named`, `no-eager-getbyname`, `lazy-extension-wiring`, `no-duplicate-dependencies` | 9 vs — ⚠️ |
-
-⚠️ **Gemini's control is void.** Its `no-skills-b` arm ran two turns, produced 554 output
-tokens, wrote no `VIOLATIONS.md` and consumed zero cached input. That is a degenerate
-arm, not a measurement, and its 4/12 should be discarded.
-
-**There is a third unaided run per model, and it belongs here.** `aa` uses `structure`'s
-fixture and `structure`'s prompt, so each model's `structure` baseline arm is a third
-draw from the same distribution as the two control arms:
-
-| Model | `structure` baseline | `aa`-a | `aa`-b | Spread |
-| :--- | ---: | ---: | ---: | ---: |
-| Sonnet 5 | 8 | 17 | 14 | **9** |
-| DeepSeek-v4-pro | 6 | 14 | 11 | **8** |
-| Haiku 4.5 | 3 | 8 | 1 | 7 |
-| GPT-5.6-luna | 8 | 4 | 11 | 7 |
-| Gemini 3.8 Flash | 12 | 9 | void | 3 |
-| Opus 5.5 | 25 | 24 | 25 | 1 |
-| Qwen3.6-35B | 4 | 5 | 3 | 2 |
-
-**The detection-count band is much wider than the scorer band.** The control pair alone
-swings 7 lines — Haiku's **8 versus 1**, GPT's **4 versus 11**. The third run widens it
-to **9** on Sonnet and 8 on DeepSeek, same fixture, same prompt, same conditions. Read 9
-as the floor of this band rather than its ceiling: three runs is still three.
-
-Against a band of 9, **20 of the 28 cells in finding 2's detection table sit inside the
-noise**, the entire `plugin-authoring` row among them. Eight clear it: Sonnet on
-`structure`, `tasks` and `idioms`; DeepSeek on `structure` and `tasks`; Opus and GPT on
-`tasks`; Gemini on `structure`.
-
-On the scorer grid, up to 3 of 12 checks flip between identical control arms — and that
-is a **lower bound**, because a third sample can add disagreements but never remove
-them, and the per-check `aa` grids needed to compute the three-run figure are not
-reproduced in this report. Aggregate deltas of +18 and above are far outside that band
-either way; **Opus's +3 is not.** Opus's control was clean (1/12) and its three runs
-span a single line, which helps, but a single-check-per-scenario movement on one model
-is directional at best.
-
-### 9. n = 1 per arm
-
-Single trials throughout, with the noise floor measured on one fixture per model.
-Every magnitude in this report is directional.
-
----
-
-## Summary tables
-
-### Checks passed, by model and scenario
-
-| Model | `structure` | `tasks` | `idioms` | `plugin-authoring` | `false-positives` | **Total** |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| Haiku 4.5 | 2 → 6 | 3 → 9 | 2 → 7 | 3 → 5 | 1 → 2 | **11 → 29** (+18) |
-| Sonnet 5 | 6 → 12 | 10 → 14 | 10 → 14 | 3 → 8 | 1 → 2 | **30 → 50** (+20) |
-| Opus 5.5 | 11 → 12 | 13 → 13 | 12 → 14 | 8 → 8 | 1 → 1 | **45 → 48** (+3) |
-| GPT-5.6-luna | 3 → 11 | 8 → 13 | 9 → 13 | 6 → 8 | 1 → 2 | **27 → 47** (+20) |
-| Gemini 3.8 Flash | 5 → 10 | 13 → 15 | 10 → 12 | 8 → 8 | 2 → 1 | **38 → 46** (+8) |
-| DeepSeek-v4-pro | 4 → 12 | 9 → 15 | 9 → 14 | 6 → 8 | 1 → 2 | **29 → 51** (+22) |
-| Qwen3.6-35B | 1 → 5 | 0 → 7 | 7 → 3 | 2 → 4 | 1 → 2 | **11 → 21** (+10) |
-| **All** | **32 → 68** | **56 → 86** | **59 → 77** | **36 → 49** | **8 → 12** | **191 → 292** |
-| *Max* | *84* | *105* | *98* | *56* | *14* | *357* |
-
-### Every regression in the sweep
-
-Twelve, across five models. Two models regress nowhere.
-
-| Model | Scenario | Check | Assessment |
-| :--- | :--- | :--- | :--- |
-| Opus 5.5 | `tasks` | `tasks-documented` | **Scorer artifact** — the harvester cannot read Java task registration |
-| Qwen3.6-35B | `idioms` | `project-builds` | Real — treatment broke the build |
-| Qwen3.6-35B | `idioms` | `plugins-block-only` | Real |
-| Qwen3.6-35B | `idioms` | `no-after-evaluate` | Real |
-| Qwen3.6-35B | `idioms` | `build-cache-enabled` | Real |
-| Qwen3.6-35B | `idioms` | `config-cache-enabled` | Real |
-| Qwen3.6-35B | `plugin-authoring` | `project-builds` | Real — treatment broke the build |
-| Qwen3.6-35B | `plugin-authoring` | `no-forced-java-plugin` | Real |
-| Haiku 4.5 | `structure` | `no-duplicate-dependencies` | **Inside the control band** — Haiku's own control flipped this exact scorer |
-| Haiku 4.5 | `tasks` | `no-cc-optout` | Real — added a configuration-cache opt-out |
-| GPT-5.6-luna | `tasks` | `no-cc-optout` | Real — same failure mode |
-| Gemini 3.8 Flash | `false-positives` | `only-defensible-findings` | Real, but replaces a vacuous pass — see finding 5 |
-
-Discounting the one scorer artifact and the one control-band flip, **10 real
-regressions, 7 of them one model.**
-
-`no-cc-optout` failing in two independent treatment arms and no baseline arm is the
-only cross-model negative signal in the sweep. Both agents added
-`notCompatibleWithConfigurationCache` to a task rather than fixing the incompatibility.
-**The skill should say not to do that.**
-
-### Skill pickup
-
-| Model | Treatment arms | `skill-used` | `WebFetch` calls |
-| :--- | :---: | :---: | :---: |
-| Haiku 4.5 | 5 | 5 / 5 PASS | 0 |
-| Sonnet 5 | 5 | 5 / 5 PASS | 0 |
-| Opus 5.5 | 5 | 5 / 5 PASS | 0 |
-| GPT-5.6-luna | 5 | 5 / 5 PASS | 0 |
-| Gemini 3.8 Flash | 5 | 5 / 5 PASS | 0 |
-| DeepSeek-v4-pro | 5 | 5 / 5 PASS | 0 |
-| Qwen3.6-35B | 5 | 5 / 5 PASS | 0 |
-
-35 of 35, across three CLIs with three different skill-invocation tools (`Skill`,
-`skill`, `activate_skill`). No baseline arm invoked a skill. Two baseline arms made
-incidental `WebFetch`/`WebSearch` calls; no treatment arm fetched the catalog.
+*Skill loaded*: runs with the skill available in which the model invoked it. *Differences between two identical runs*: see Run-to-run variation.
 
 ---
 
 ## Results by scenario
 
-Grids read `baseline → treatment`. ✅ = PASS, ❌ = FAIL.
+✅ passed, ❌ failed, ⚠️ could not be graded; — where a model has no run.
 
 ### structure
 
-**Fixture:** `sample-carlog` (`sha256:624f1d41fe05…`), detection floor 14
-**Key checks:** root project named in settings; version catalog present; repositories
-declared in settings; no eager `getByName`; no intra-project `dependsOn`; lazy
-extension wiring (behavioural); no sources in the root project; convention plugins
-wired end to end; wrapper checksum engaged; no duplicate dependencies.
+`sample-carlog`, a two-project Groovy DSL build with 14 listed violations centred on build structure: no `rootProject.name`, source in the root project, repositories in build scripts, no version catalog, configuration repeated across scripts, a redundant dependency, an eager `Provider.get()`, `dependsOn` and `getByName` between tasks, and no wrapper checksum.
 
-| Check | Haiku | Sonnet | Opus | GPT | Gemini | DeepSeek | Qwen |
+- `project-builds` — Runs `./gradlew build` on the arm's final project; PASS when it exits 0.
+- `root-project-named` — PASS when a `settings.gradle` or `settings.gradle.kts` exists and sets `rootProject.name` outside a comment.
+- `version-catalog` — PASS when `gradle/libs.versions.toml` exists.
+- `repos-not-in-build-scripts` — Searches every `build.gradle` and `build.gradle.kts` of the main build (excluding `buildSrc` and directories named by `includeBuild(...)`), with comments stripped, for `mavenCentral()`; PASS when none matches.
+- `no-eager-getbyname` — Searches every `*.gradle` and `*.gradle.kts` file, with comments stripped, for `getByName`; PASS when no file matches.
+- `no-intraproject-dependson` — Scans every `*.gradle` and `*.gradle.kts` file, with comments stripped, for lines containing `dependsOn`; PASS when every such line names an included build or has a `:` after `dependsOn` (a task path).
+- `lazy-extension-wiring` — Runs `recordDemoMaintenance` with an init script that sets the `carLog` extension's `logFileName` to a probe name after all build scripts are evaluated; PASS when the run writes the file under the probe name.
+- `no-source-in-root` — PASS when no file exists under `src/main/` or `src/test/` at the project root.
+- `convention-plugins` — PASS when an included build (`buildSrc` or one named by `includeBuild(...)` in the root settings script) contains a precompiled script plugin under `src/main/` and a main-build script applies that plugin's id.
+- `wrapper-checksum-engaged` — PASS when `gradle/wrapper/gradle-wrapper.properties` sets a 64-hex-digit `distributionSha256Sum`, or when VIOLATIONS.md has a line against that file that mentions a checksum or SHA-256.
+- `no-duplicate-dependencies` — Runs an init script that, for each project's `compileClasspath`, compares the external modules the project declares directly with those reached through its project dependencies; PASS when no module appears in both.
+- `violations-count` — Counts the non-blank lines of VIOLATIONS.md; PASS when there are at least 14, the number of violations listed for `sample-carlog`.
+
+| Check (without / with skill) | `claude-haiku-4-5-20251001` | `claude-opus-5-5` | `claude-sonnet-5` | `deepseek-v4-pro` | `gemini-3-8-flash` | `gpt-5-6-luna` | `qwen3-6-35b-a3b-coding-nvfp4` |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| `project-builds` | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ |
-| `root-project-named` | ❌→✅ | ✅→✅ | ✅→✅ | ❌→✅ | ✅→✅ | ❌→✅ | ❌→✅ |
-| `version-catalog` | ❌→❌ | ❌→✅ | ✅→✅ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→❌ |
-| `repos-not-in-build-scripts` | ❌→✅ | ✅→✅ | ✅→✅ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→❌ |
-| `no-eager-getbyname` | ❌→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ❌→✅ |
-| `no-intraproject-dependson` | ❌→❌ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→✅ |
-| `lazy-extension-wiring` | ❌→✅ | ❌→✅ | ✅→✅ | ❌→✅ | ✅→✅ | ✅→✅ | ❌→❌ |
-| `no-source-in-root` | ❌→❌ | ❌→✅ | ✅→✅ | ❌→✅ | ❌→❌ | ❌→✅ | ❌→✅ |
-| `convention-plugins` | ❌→❌ | ❌→✅ | ✅→✅ | ❌→❌ | ❌→❌ | ❌→✅ | ❌→❌ |
-| `wrapper-checksum-engaged` | ❌→✅ | ✅→✅ | ✅→✅ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→❌ |
-| `no-duplicate-dependencies` | ✅→❌ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ❌→❌ |
-| `violations-count` | ❌→❌ | ❌→✅ | ✅→✅ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→❌ |
-
-**Signal:** The biggest scenario-level movement in the sweep, 32 → 68 of 84. GPT and
-DeepSeek both gain eight checks; Sonnet and DeepSeek reach 12/12, joining Opus.
-`no-intraproject-dependson` is the clearest single result — it fails in **all seven
-baselines and passes in six of seven treatments**, the only check in the sweep with
-that shape. No model removes intra-project `dependsOn` wiring unaided; six of seven
-do with the catalog. `convention-plugins` is the hardest check here: four models
-still cannot build the full included-build-plus-plugin-id chain.
+| `project-builds` | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ |
+| `root-project-named` | ❌ / ✅ | ✅ / ✅ | ✅ / ✅ | ❌ / ✅ | ✅ / ✅ | ❌ / ✅ | ❌ / ✅ |
+| `version-catalog` | ❌ / ❌ | ✅ / ✅ | ❌ / ✅ | ❌ / ✅ | ❌ / ✅ | ❌ / ✅ | ❌ / ❌ |
+| `repos-not-in-build-scripts` | ❌ / ✅ | ✅ / ✅ | ✅ / ✅ | ❌ / ✅ | ❌ / ✅ | ❌ / ✅ | ❌ / ❌ |
+| `no-eager-getbyname` | ❌ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ❌ / ✅ |
+| `no-intraproject-dependson` | ❌ / ❌ | ❌ / ✅ | ❌ / ✅ | ❌ / ✅ | ❌ / ✅ | ❌ / ✅ | ❌ / ✅ |
+| `lazy-extension-wiring` | ❌ / ✅ | ✅ / ✅ | ❌ / ✅ | ✅ / ✅ | ✅ / ✅ | ❌ / ✅ | ❌ / ❌ |
+| `no-source-in-root` | ❌ / ❌ | ✅ / ✅ | ❌ / ✅ | ❌ / ✅ | ❌ / ❌ | ❌ / ✅ | ❌ / ✅ |
+| `convention-plugins` | ❌ / ❌ | ✅ / ✅ | ❌ / ✅ | ❌ / ✅ | ❌ / ❌ | ❌ / ❌ | ❌ / ❌ |
+| `wrapper-checksum-engaged` | ❌ / ✅ | ✅ / ✅ | ✅ / ✅ | ❌ / ✅ | ❌ / ✅ | ❌ / ✅ | ❌ / ❌ |
+| `no-duplicate-dependencies` | ✅ / ❌ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ❌ / ❌ |
+| `violations-count` | ❌ / ❌ | ✅ / ✅ | ❌ / ✅ | ❌ / ✅ | ❌ / ✅ | ❌ / ✅ | ❌ / ❌ |
 
 ### tasks
 
-**Fixture:** `sample-star-charter` (`sha256:88676a5a66f6…`), detection floor 16
-**Key checks:** every script-defined task documented (`gradle tasks --all` probe); no
-`PathSensitivity.ABSOLUTE`; `@CacheableTask` present; no `.cacheIf`; no
-configuration-cache opt-out; `google()` removed from settings; no `configurations.all`;
-configuration attributes set; catalog entries meaningfully named; wrapper checksum;
-unique task outputs; no config-time resolution; configuration cache enabled.
+`sample-star-charter`, a Kotlin DSL build with 16 listed task and dependency-management violations, including undocumented tasks, `PathSensitivity.ABSOLUTE`, `cacheIf { true }`, two tasks sharing an output directory, a `notCompatibleWithConfigurationCache` opt-out, configuration-time resolution of `runtimeClasspath`, unfiltered repositories, blanket excludes, an attribute-less consumable configuration and vaguely named catalog entries.
 
-| Check | Haiku | Sonnet | Opus | GPT | Gemini | DeepSeek | Qwen |
+- `project-builds` — Runs `./gradlew build` on the arm's final project; PASS when it exits 0.
+- `tasks-documented` — Collects task names from `tasks.register(...)`/`tasks.create(...)` calls and Groovy `task name` declarations in `*.gradle`, `*.gradle.kts` and `*.kt` files (comments stripped), then runs `./gradlew tasks --all`; PASS when at least one name is collected and every collected task Gradle lists has a description.
+- `no-absolute-sensitivity` — Searches every `*.gradle`, `*.kts` and `*.kt` file, with comments stripped, for `PathSensitivity.ABSOLUTE`; PASS when no file matches.
+- `cacheable-annotation` — Runs an init script that finds the `renderStarChart` task and walks its class hierarchy up to the first `org.gradle` class; PASS when one of those classes carries `@CacheableTask`.
+- `no-cacheif` — Searches every `*.gradle`, `*.kts` and `*.kt` file, with comments stripped, for `.cacheIf`; PASS when no file matches.
+- `no-cc-optout` — Searches every `*.gradle`, `*.kts` and `*.kt` file, with comments stripped, for `notCompatibleWithConfigurationCache`; PASS when no file matches.
+- `google-repo-removed` — Searches `settings.gradle` and `settings.gradle.kts`, with comments stripped, for `google()`; PASS when no file matches.
+- `no-configurations-all` — Searches every `*.gradle`, `*.kts` and `*.kt` file, with comments stripped, for `configurations.all` or `configurations.configureEach`; PASS when no file matches.
+- `configuration-attributes` — Runs `outgoingVariants --all` for every project; PASS when every consumable variant other than `archives` and `default` lists attributes.
+- `catalog-entries-named` — Parses the keys of `gradle/libs.versions.toml` with comments stripped; PASS when the file exists and no key contains `stuff` or `utils` or is exactly `gv` or `theJson`.
+- `wrapper-checksum-engaged` — PASS when `gradle/wrapper/gradle-wrapper.properties` sets a 64-hex-digit `distributionSha256Sum`, or when VIOLATIONS.md has a line against that file that mentions a checksum or SHA-256.
+- `unique-task-outputs` — Runs an init script that collects the declared output files of every task in every project; PASS when no path is claimed by more than one task.
+- `no-config-time-resolution` — Runs an init script that records any configuration resolved before the task graph is ready; PASS when none is.
+- `config-cache-enabled` — PASS when the root `gradle.properties` exists and sets `org.gradle.configuration-cache=true` outside a comment.
+- `violations-count` — Counts the non-blank lines of VIOLATIONS.md; PASS when there are at least 16, the number of violations listed for `sample-star-charter`.
+
+| Check (without / with skill) | `claude-haiku-4-5-20251001` | `claude-opus-5-5` | `claude-sonnet-5` | `deepseek-v4-pro` | `gemini-3-8-flash` | `gpt-5-6-luna` | `qwen3-6-35b-a3b-coding-nvfp4` |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| `project-builds` | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ❌→✅ |
-| `tasks-documented` | ❌→✅ | ❌→✅ | ✅→❌ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→✅ |
-| `no-absolute-sensitivity` | ❌→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ❌→✅ |
-| `cacheable-annotation` | ❌→✅ | ❌→❌ | ❌→❌ | ❌→✅ | ✅→✅ | ✅→✅ | ❌→✅ |
-| `no-cacheif` | ✅→✅ | ❌→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ❌→❌ |
-| `no-cc-optout` | ✅→❌ | ✅→✅ | ✅→✅ | ✅→❌ | ✅→✅ | ✅→✅ | ❌→❌ |
-| `google-repo-removed` | ❌→❌ | ✅→✅ | ✅→✅ | ❌→❌ | ✅→✅ | ✅→✅ | ❌→❌ |
-| `no-configurations-all` | ❌→✅ | ✅→✅ | ❌→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ❌→❌ |
-| `configuration-attributes` | ❌→❌ | ✅→✅ | ✅→✅ | ❌→✅ | ✅→✅ | ❌→✅ | ❌→❌ |
-| `catalog-entries-named` | ❌→❌ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ❌→✅ | ❌→✅ |
-| `wrapper-checksum-engaged` | ❌→✅ | ❌→✅ | ✅→✅ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→❌ |
-| `unique-task-outputs` | ❌→❌ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ❌→❌ |
-| `no-config-time-resolution` | ❌→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ❌→✅ |
-| `config-cache-enabled` | ❌→✅ | ❌→✅ | ✅→✅ | ❌→✅ | ✅→✅ | ❌→✅ | ❌→✅ |
-| `violations-count` | ❌→❌ | ✅→✅ | ✅→✅ | ❌→✅ | ✅→✅ | ❌→✅ | ❌→❌ |
-
-**Signal:** 56 → 86 of 105. Gemini and DeepSeek reach 15/15. `tasks-documented` gains
-in six of seven models and is the single most-gained check in the sweep — and Opus's
-lone regression on it is a scorer artifact, not a defect: Opus
-documented all three tasks in a Java convention plugin the harvester cannot read.
-Corrected, Opus reads 13 → 14. `cacheable-annotation` fails in both Sonnet and both
-Opus arms, the only check that resists the two strongest Anthropic models.
-`no-cc-optout` is the sweep's one cross-model regression — see
-[Every regression in the sweep](#every-regression-in-the-sweep).
+| `project-builds` | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ❌ / ✅ |
+| `tasks-documented` | ❌ / ✅ | ✅ / ❌ | ❌ / ✅ | ❌ / ✅ | ❌ / ✅ | ❌ / ✅ | ❌ / ✅ |
+| `no-absolute-sensitivity` | ❌ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ❌ / ✅ |
+| `cacheable-annotation` | ❌ / ✅ | ❌ / ❌ | ❌ / ❌ | ✅ / ✅ | ✅ / ✅ | ❌ / ✅ | ❌ / ✅ |
+| `no-cacheif` | ✅ / ✅ | ✅ / ✅ | ❌ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ❌ / ❌ |
+| `no-cc-optout` | ✅ / ❌ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ❌ | ❌ / ❌ |
+| `google-repo-removed` | ❌ / ❌ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ❌ / ❌ | ❌ / ❌ |
+| `no-configurations-all` | ❌ / ✅ | ❌ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ❌ / ❌ |
+| `configuration-attributes` | ❌ / ❌ | ✅ / ✅ | ✅ / ✅ | ❌ / ✅ | ✅ / ✅ | ❌ / ✅ | ❌ / ❌ |
+| `catalog-entries-named` | ❌ / ❌ | ✅ / ✅ | ✅ / ✅ | ❌ / ✅ | ✅ / ✅ | ✅ / ✅ | ❌ / ✅ |
+| `wrapper-checksum-engaged` | ❌ / ✅ | ✅ / ✅ | ❌ / ✅ | ❌ / ✅ | ❌ / ✅ | ❌ / ✅ | ❌ / ❌ |
+| `unique-task-outputs` | ❌ / ❌ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ❌ / ❌ |
+| `no-config-time-resolution` | ❌ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ❌ / ✅ |
+| `config-cache-enabled` | ❌ / ✅ | ✅ / ✅ | ❌ / ✅ | ❌ / ✅ | ✅ / ✅ | ❌ / ✅ | ❌ / ✅ |
+| `violations-count` | ❌ / ❌ | ✅ / ✅ | ✅ / ✅ | ❌ / ✅ | ✅ / ✅ | ❌ / ✅ | ❌ / ❌ |
 
 ### idioms
 
-**Fixture:** `sample-recipe-vault` (`sha256:edc64794f43e…`), detection floor 13
-**Key checks:** `plugins {}` rather than `apply plugin`; no `afterEvaluate`; no
-`org.gradle.internal` APIs; build cache enabled; UTF-8 pinned in `org.gradle.jvmargs`;
-no `gradle.properties` outside the build root; no map-form GAVs; no empty container
-project; no configuration-time file hashing (behavioural); wrapper checksum;
-configuration cache enabled; no eager `fileTree`.
+`sample-recipe-vault`, a Groovy multi-project build with 13 listed legacy-idiom violations, including `apply plugin:` inside `subprojects {}`, `afterEvaluate`, an internal API, no root `gradle.properties`, a subproject `gradle.properties`, a map-notation dependency, an empty `:services` project, hashing at configuration time and an eager `fileTree(...).files`.
 
-| Check | Haiku | Sonnet | Opus | GPT | Gemini | DeepSeek | Qwen |
+- `project-builds` — Runs `./gradlew build` on the arm's final project; PASS when it exits 0.
+- `plugins-block-only` — Searches every `*.gradle` and `*.gradle.kts` file, with comments stripped, for `apply plugin` / `apply(plugin`; PASS when no file matches.
+- `no-after-evaluate` — Searches every `*.gradle` and `*.gradle.kts` file, with comments stripped, for `afterEvaluate`; PASS when no file matches.
+- `no-internal-apis` — Searches every `*.gradle` and `*.gradle.kts` file, with comments stripped, for `org.gradle.internal`; PASS when no file matches.
+- `build-cache-enabled` — PASS when the root `gradle.properties` exists and sets `org.gradle.caching=true` outside a comment.
+- `utf8-in-jvmargs` — PASS when the root `gradle.properties` exists and contains `file.encoding=UTF-8` outside a comment.
+- `no-subproject-properties` — Looks for `gradle.properties` files below the project root, excluding `buildSrc` and directories named by `includeBuild(...)` in the root settings script; PASS when there are none.
+- `single-gav-strings` — Searches every `*.gradle` and `*.gradle.kts` file, with comments stripped, for map-notation coordinates (`group:`, `name:` or `version:` followed by a quoted string); PASS when no file matches.
+- `no-empty-project` — PASS when no `settings.gradle` or `settings.gradle.kts` contains `services:exporter` outside a comment; the unmodified fixture's `include ':services:exporter'` makes `:services` an empty project.
+- `no-config-time-hashing` — Runs `./gradlew build --dry-run --no-configuration-cache`; PASS when it succeeds and its output has no `Recipe schema fingerprint:` line, which the fixture prints whenever it computes the schema hash.
+- `wrapper-checksum-engaged` — PASS when `gradle/wrapper/gradle-wrapper.properties` sets a 64-hex-digit `distributionSha256Sum`, or when VIOLATIONS.md has a line against that file that mentions a checksum or SHA-256.
+- `config-cache-enabled` — PASS when the root `gradle.properties` exists and sets `org.gradle.configuration-cache=true` outside a comment.
+- `no-eager-filetree` — Searches every `*.gradle`, `*.kts` and `*.kt` file, with comments stripped, for `fileTree(...)` followed by an eager call such as `.files`, `.forEach`, `.toList()` or `.asPath`; PASS when no file matches.
+- `violations-count` — Counts the non-blank lines of VIOLATIONS.md; PASS when there are at least 13, the number of violations listed for `sample-recipe-vault`.
+
+| Check (without / with skill) | `claude-haiku-4-5-20251001` | `claude-opus-5-5` | `claude-sonnet-5` | `deepseek-v4-pro` | `gemini-3-8-flash` | `gpt-5-6-luna` | `qwen3-6-35b-a3b-coding-nvfp4` |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| `project-builds` | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→❌ |
-| `plugins-block-only` | ❌→❌ | ❌→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→❌ |
-| `no-after-evaluate` | ❌→❌ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→❌ |
-| `no-internal-apis` | ❌→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ❌→❌ |
-| `build-cache-enabled` | ❌→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→❌ |
-| `utf8-in-jvmargs` | ❌→❌ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→❌ |
-| `no-subproject-properties` | ❌→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ |
-| `single-gav-strings` | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ |
-| `no-empty-project` | ❌→❌ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→✅ | ❌→❌ |
-| `no-config-time-hashing` | ❌→❌ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ❌→❌ |
-| `wrapper-checksum-engaged` | ❌→✅ | ✅→✅ | ✅→✅ | ❌→✅ | ❌→❌ | ❌→✅ | ❌→❌ |
-| `config-cache-enabled` | ❌→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→❌ |
-| `no-eager-filetree` | ❌→❌ | ✅→✅ | ✅→✅ | ❌→❌ | ✅→✅ | ❌→✅ | ❌→✅ |
-| `violations-count` | ❌→❌ | ❌→✅ | ✅→✅ | ❌→✅ | ❌→❌ | ❌→✅ | ❌→❌ |
-
-**Signal:** 59 → 77 of 98. Sonnet, Opus and DeepSeek all reach 14/14. `utf8-in-jvmargs`
-and `no-empty-project` are the story: both fail in **all seven baselines** and both
-gain in five treatments — two checks no model reaches for unaided and the catalog
-reliably surfaces. `no-subproject-properties` passes in 13 of 14 arms: the scorer
-distinguishes an included build's own root from a subproject, so the composite layout
-the skill recommends is not penalised. Qwen supplies five of the sweep's twelve
-regressions here, all downstream of breaking the build.
+| `project-builds` | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ❌ |
+| `plugins-block-only` | ❌ / ❌ | ✅ / ✅ | ❌ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ❌ |
+| `no-after-evaluate` | ❌ / ❌ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ❌ |
+| `no-internal-apis` | ❌ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ❌ / ❌ |
+| `build-cache-enabled` | ❌ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ❌ |
+| `utf8-in-jvmargs` | ❌ / ❌ | ❌ / ✅ | ❌ / ✅ | ❌ / ✅ | ❌ / ✅ | ❌ / ✅ | ❌ / ❌ |
+| `no-subproject-properties` | ❌ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ |
+| `single-gav-strings` | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ |
+| `no-empty-project` | ❌ / ❌ | ❌ / ✅ | ❌ / ✅ | ❌ / ✅ | ❌ / ✅ | ❌ / ✅ | ❌ / ❌ |
+| `no-config-time-hashing` | ❌ / ❌ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ❌ / ❌ |
+| `wrapper-checksum-engaged` | ❌ / ✅ | ✅ / ✅ | ✅ / ✅ | ❌ / ✅ | ❌ / ❌ | ❌ / ✅ | ❌ / ❌ |
+| `config-cache-enabled` | ❌ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ❌ |
+| `no-eager-filetree` | ❌ / ❌ | ✅ / ✅ | ✅ / ✅ | ❌ / ✅ | ✅ / ✅ | ❌ / ❌ | ❌ / ✅ |
+| `violations-count` | ❌ / ❌ | ✅ / ✅ | ❌ / ✅ | ❌ / ✅ | ❌ / ❌ | ❌ / ✅ | ❌ / ❌ |
 
 ### plugin-authoring
 
-**Fixture:** `sample-fleet-tracker` (`sha256:833ff574c5f9…`), detection floor 6
-**Key checks:** plugin applies correctly regardless of ordering (behavioural);
-convention plugin likewise; no forced `java` plugin application; no `buildSrc`;
-reproducible archives configured; `flatMap` rather than `map` for nested providers.
+`sample-fleet-tracker`, a Kotlin DSL build whose two convention plugins in an included `build-logic` build each configure nothing unless another plugin was applied first; it also has a `buildSrc/` helper, an archive task with `isPreserveFileTimestamps = true`, a `map` with a nested `.get()` and no TestKit tests.
 
-| Check | Haiku | Sonnet | Opus | GPT | Gemini | DeepSeek | Qwen |
+- `project-builds` — Runs `./gradlew build` on the arm's final project; PASS when it exits 0.
+- `plugin-order-agnostic` — Builds a separate probe build that applies the fleet reporting plugin before `java-library`, runs `fleetReport`, and PASSES when the task exists and its output shows the module was stamped.
+- `convention-order-agnostic` — Builds a separate probe build that applies the fleet compliance plugin before the fleet reporting plugin (after `java-library`), runs `verifyFleetStamp`, and PASSES when the task exists and its output shows the fleet unit was checked.
+- `no-forced-java-plugin` — Runs `./gradlew :docs:tasks --all`; PASS when `:docs` still exists and has no `jar`, `compileJava` or `compileTestJava` task. It passes on the unmodified fixture.
+- `no-buildsrc` — PASS when no `buildSrc/src/...`, `buildSrc/build.gradle(.kts)` or `buildSrc/settings.gradle(.kts)` file exists.
+- `reproducible-archives` — Searches every `*.gradle`, `*.kts` and `*.kt` file, with comments stripped, for `preserveFileTimestamps = true` (either case of the first letter); PASS when no file matches.
+- `flatmap-for-nested-providers` — Searches every `*.gradle`, `*.kts` and `*.kt` file, with comments stripped, for a `.map { ... }` block containing `.get()`; PASS when no file matches.
+- `violations-count` — Counts the non-blank lines of VIOLATIONS.md; PASS when there are at least 6, the number of violations listed for `sample-fleet-tracker`.
+
+| Check (without / with skill) | `claude-haiku-4-5-20251001` | `claude-opus-5-5` | `claude-sonnet-5` | `deepseek-v4-pro` | `gemini-3-8-flash` | `gpt-5-6-luna` | `qwen3-6-35b-a3b-coding-nvfp4` |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| `project-builds` | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→❌ |
-| `plugin-order-agnostic` | ❌→✅ | ❌→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ❌→✅ |
-| `convention-order-agnostic` | ❌→❌ | ❌→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ❌→❌ |
-| `no-forced-java-plugin` | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→❌ |
-| `no-buildsrc` | ✅→✅ | ❌→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ❌→✅ |
-| `reproducible-archives` | ❌→❌ | ✅→✅ | ✅→✅ | ❌→✅ | ✅→✅ | ❌→✅ | ❌→✅ |
-| `flatmap-for-nested-providers` | ❌→✅ | ❌→✅ | ✅→✅ | ❌→✅ | ✅→✅ | ❌→✅ | ❌→✅ |
-| `violations-count` | ❌→❌ | ❌→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ❌→❌ |
-
-**Signal:** 36 → 49 of 56 in its first outing, with five arms at 8/8.
-`flatmap-for-nested-providers` gains in five models — the largest single-check gain on
-this fixture — and `reproducible-archives` in three. The scenario is the cleanest evidence
-that the bundled catalog transfers specific, non-obvious practices rather than general
-tidiness.
+| `project-builds` | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ❌ |
+| `plugin-order-agnostic` | ❌ / ✅ | ✅ / ✅ | ❌ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ❌ / ✅ |
+| `convention-order-agnostic` | ❌ / ❌ | ✅ / ✅ | ❌ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ❌ / ❌ |
+| `no-forced-java-plugin` | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ❌ |
+| `no-buildsrc` | ✅ / ✅ | ✅ / ✅ | ❌ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ❌ / ✅ |
+| `reproducible-archives` | ❌ / ❌ | ✅ / ✅ | ✅ / ✅ | ❌ / ✅ | ✅ / ✅ | ❌ / ✅ | ❌ / ✅ |
+| `flatmap-for-nested-providers` | ❌ / ✅ | ✅ / ✅ | ❌ / ✅ | ❌ / ✅ | ✅ / ✅ | ❌ / ✅ | ❌ / ✅ |
+| `violations-count` | ❌ / ❌ | ✅ / ✅ | ❌ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ❌ / ❌ |
 
 ### false-positives
 
-**Fixture:** `sample-init-library` (`sha256:9e2a7c7b0f14…`) — untouched `gradle init`
-output, no seeded violations
-**Key checks:** the build still builds; every reported finding is defensible against
-the tree as staged.
+`sample-init-library`, unmodified `gradle init` output (Kotlin DSL, Java 21 toolchain, incubating APIs).
 
-| Check | Haiku | Sonnet | Opus | GPT | Gemini | DeepSeek | Qwen |
+- `project-builds` — Runs `./gradlew build` on the arm's final project; PASS when it exits 0.
+- `only-defensible-findings` — Reads VIOLATIONS.md; PASS when the file exists, every non-blank line has the `<file>: <line>: <description>` format, and every reported issue is one of the allowed findings (repositories in the build script, incubating API use, or a missing checksum, the rewritten `distributionUrl` or an older Gradle version reported against `gradle-wrapper.properties`); an empty file passes.
+
+| Check (without / with skill) | `claude-haiku-4-5-20251001` | `claude-opus-5-5` | `claude-sonnet-5` | `deepseek-v4-pro` | `gemini-3-8-flash` | `gpt-5-6-luna` | `qwen3-6-35b-a3b-coding-nvfp4` |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| `project-builds` | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ | ✅→✅ |
-| `only-defensible-findings` | ❌→✅ | ❌→✅ | ❌→❌ | ❌→✅ | ✅→❌ | ❌→✅ | ❌→✅ |
-
-**Signal:** Five gains, one regression, one flat — see finding 5. `project-builds`
-passes in all fourteen arms, which is the audit-only prompt being obeyed everywhere.
-The two remaining failures cluster on one claim: that `gradle init`'s hardcoded JUnit
-version belongs in a version catalog the generated project does not have. Both Opus's
-treatment failure and Gemini's regression are that line.
+| `project-builds` | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ | ✅ / ✅ |
+| `only-defensible-findings` | ❌ / ✅ | ❌ / ❌ | ❌ / ✅ | ❌ / ✅ | ✅ / ❌ | ❌ / ✅ | ❌ / ✅ |
 
 ---
 
-## Cost & Efficiency
+## Cost and time
 
-**Key — every cell in this section reads `no-skills / with-skills`:**
+Wall clock is the agent's active time in seconds. Cost is the harness's price for the tokens used; local for a model served locally, which has no price; n/a where no price is configured for the model. `≥ x` marks a figure from a run that stopped at a limit, which is a lower bound.
 
-| Position in cell | Arm | Meaning |
-| :--- | :--- | :--- |
-| **Left** of the `/` | `no-skills` | Baseline — no skill provided |
-| **Right** of the `/` | `with-skills` | Treatment — `gradle-best-practices@1.0.0` (`0b1f547`) |
+### Totals over all scenarios
 
-So `🏆 23 / 36` means the baseline arm spent 23 and the treatment arm spent 36, and the
-baseline was the cheaper of the two. Baseline is always first, in every table below.
-
-> **Token accounting note:** the Inspect harness uses prompt caching where the
-> provider supports it. "Cached input" is served from the prompt cache; "cache write"
-> is billed at a premium. `gemini-cli`, `opencode`/DeepSeek and the local Ollama path
-> report **zero** cache writes — that is missing instrumentation, not a saving, and
-> those cells are omitted. Wall clock is `adjusted_wall_clock` in seconds — the
-> agent's active time, minus harness overhead.
->
-> **Reading the 🏆:** it marks the cheaper of the two arms for that model and metric;
-> lower is better everywhere. ✅ ❌ are reserved for scorer verdicts and never appear
-> here. Ties are unmarked. **A bounded arm is never marked and its figures carry `≥`.**
->
-> **Per-arm limits are NOT uniform across models** — see Methodology. Both arms of a
-> given run always share limits, so every baseline-versus-treatment comparison below
-> is clean. **Cross-model cost comparison is not**, and no claim here makes one.
-
-### structure — cost
-
-| Model | Turns | Wall (s) | Output | Cached input | Cost (USD) |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| Haiku 4.5 | 🏆 23 / 36 | 🏆 99.7 / 171.4 | 🏆 4,329 / 9,109 | 🏆 908,573 / 1,969,285 | 🏆 0.133 / 0.290 |
-| Sonnet 5 | 🏆 13 / 34 | 🏆 235.7 / 827.0 | 🏆 17,559 / 70,579 | 🏆 739,399 / 3,896,073 | 🏆 0.425 / 1.783 |
-| Opus 5.5 | 🏆 12 / 18 | 🏆 195.4 / 356.0 | 🏆 14,953 / 23,604 | 🏆 467,833 / 1,109,695 | 🏆 0.556 / 1.032 |
-| GPT-5.6-luna | 24 / 🏆 22 | 🏆 155.9 / 190.4 | 🏆 7,131 / 9,688 | 🏆 384,083 / 589,307 | 🏆 0.025 / 0.043 |
-| Gemini 3.8 Flash | 72 / 🏆 52 | 549.1 / 🏆 524.1 | 85,058 / 🏆 80,706 | 5,963,023 / 🏆 3,465,753 | 1.060 / 🏆 0.779 |
-| DeepSeek-v4-pro | 51 / 🏆 32 | 🏆 415.9 / 508.4 | 🏆 37,433 / 59,099 | 🏆 1,766,144 / 2,092,544 | 🏆 0.147 / 0.202 |
-| Qwen3.6-35B | 🏆 10 / 66 | 🏆 332.1 / 1,598.6 | 🏆 13,158 / 52,772 | 🏆 315,385 / 5,034,109 | n/a |
-
-### tasks — cost
-
-| Model | Turns | Wall (s) | Output | Cached input | Cost (USD) |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| Haiku 4.5 | 🏆 39 / 42 | 🏆 154.7 / 189.4 | 🏆 8,504 / 9,632 | 🏆 1,613,600 / 2,262,058 | 🏆 0.231 / 0.323 |
-| Sonnet 5 | 🏆 42 / 43 | 🏆 436.0 / 659.4 | 🏆 31,597 / 53,176 | 🏆 2,687,974 / 4,203,828 | 🏆 0.988 / 1.603 |
-| Opus 5.5 | 🏆 9 / 19 | 🏆 135.0 / 255.5 | 🏆 8,169 / 18,070 | 🏆 243,677 / 887,600 | 🏆 0.292 / 0.779 |
-| GPT-5.6-luna | 🏆 23 / 25 | 🏆 135.1 / 199.1 | 🏆 6,020 / 8,619 | 🏆 288,129 / 530,142 | 🏆 0.023 / 0.036 |
-| Gemini 3.8 Flash | 🏆 50 / 64 | 542.5 / 🏆 481.9 | 66,370 / 🏆 57,957 | 🏆 2,460,184 / 4,844,521 | 🏆 0.677 / 0.850 |
-| DeepSeek-v4-pro | 56 / 🏆 38 | 542.4 / 🏆 483.2 | 57,077 / 🏆 54,160 | 2,492,928 / 🏆 2,153,728 | 0.202 / 🏆 0.199 |
-| Qwen3.6-35B | 🏆 12 / 49 | 🏆 332.7 / 1,441.8 | 🏆 12,181 / 50,217 | 🏆 301,267 / 3,405,159 | n/a |
-
-### idioms — cost
-
-| Model | Turns | Wall (s) | Output | Cached input | Cost (USD) |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| Haiku 4.5 | 🏆 45 / 46 | 🏆 132.8 / 167.0 | 🏆 7,599 / 9,524 | 🏆 1,785,112 / 2,373,754 | 🏆 0.238 / 0.324 |
-| Sonnet 5 | 26 / 🏆 25 | 🏆 292.8 / 559.9 | 🏆 21,473 / 46,518 | 🏆 1,455,452 / 1,990,509 | 🏆 0.592 / 1.054 |
-| Opus 5.5 | 🏆 9 / 12 | 🏆 117.9 / 177.8 | 🏆 8,224 / 12,635 | 🏆 242,293 / 536,577 | 🏆 0.289 / 0.568 |
-| GPT-5.6-luna | 🏆 21 / 23 | 🏆 120.3 / 173.5 | 🏆 5,731 / 7,504 | 🏆 208,779 / 513,645 | 🏆 0.018 / 0.035 |
-| Gemini 3.8 Flash | 🏆 51 / 55 | 🏆 417.0 / 511.2 | 🏆 55,129 / 69,742 | 🏆 2,333,572 / 3,836,368 | 🏆 0.622 / 0.758 |
-| DeepSeek-v4-pro | 24 / 🏆 23 | 🏆 261.5 / 462.8 | 🏆 25,173 / 55,515 | 🏆 583,296 / 1,107,456 | 🏆 0.077 / 0.166 |
-| Qwen3.6-35B | 🏆 28 / 55 | 🏆 515.7 / 1,880.6 | 🏆 20,349 / 54,644 | 🏆 1,138,400 / 3,830,761 | n/a |
-
-### plugin-authoring — cost
-
-| Model | Turns | Wall (s) | Output | Cached input | Cost (USD) |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| Haiku 4.5 | 🏆 27 / 64 | 🏆 110.2 / 245.8 | 🏆 5,035 / 13,025 | 🏆 1,034,623 / 3,592,217 | 🏆 0.148 / 0.479 |
-| Sonnet 5 | 🏆 26 / 44 | 🏆 476.5 / 675.8 | 🏆 36,569 / 50,904 | 🏆 1,638,690 / 4,450,288 | 🏆 0.828 / 1.640 |
-| Opus 5.5 | 🏆 8 / 13 | 🏆 119.4 / 192.6 | 🏆 6,423 / 11,773 | 🏆 234,940 / 639,424 | 🏆 0.266 / 0.593 |
-| GPT-5.6-luna | 🏆 17 / 19 | 🏆 122.2 / 169.2 | 🏆 5,927 / 7,585 | 🏆 199,931 / 380,417 | 🏆 0.019 / 0.031 |
-| Gemini 3.8 Flash | 75 / 🏆 63 | 1,060.1 / 🏆 535.8 | 263,866 / 🏆 67,951 | 3,780,164 / 🏆 3,360,416 | 1.551 / 🏆 0.763 |
-| DeepSeek-v4-pro | 🏆 20 / 48 | 🏆 329.7 / 644.8 | 🏆 36,416 / 71,584 | 🏆 612,224 / 3,444,224 | 🏆 0.100 / 0.261 |
-| Qwen3.6-35B | 🏆 32 / ≥ 107 | 8,756.0 / ≥ 7,630.6 | 136,078 / ≥ 128,221 | 🏆 2,649,556 / ≥ 9,259,438 | n/a |
-
-Gemini's baseline here is the sweep's single most expensive arm and the sole reason
-its aggregate reads as a saving. Treat it as an outlier, not a result.
-
-### false-positives — cost
-
-| Model | Turns | Wall (s) | Output | Cached input | Cost (USD) |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| Haiku 4.5 | 🏆 13 / 21 | 🏆 58.3 / 126.3 | 🏆 2,204 / 4,884 | 🏆 440,718 / 953,409 | 🏆 0.062 / 0.151 |
-| Sonnet 5 | 10 / 🏆 8 | 155.5 / 🏆 135.8 | 8,965 / 🏆 7,925 | 423,133 / 🏆 381,369 | 🏆 0.214 / 0.228 |
-| Opus 5.5 | 5 / 5 | 🏆 71.0 / 78.9 | 2,672 / 🏆 2,019 | 🏆 111,371 / 144,614 | 🏆 0.116 / 0.190 |
-| GPT-5.6-luna | 11 / 11 | 🏆 67.3 / 101.9 | 🏆 3,010 / 3,045 | 🏆 73,555 / 152,270 | 🏆 0.011 / 0.013 |
-| Gemini 3.8 Flash | 🏆 46 / 53 | 🏆 298.4 / 504.3 | 🏆 22,198 / 68,863 | 🏆 1,291,041 / 3,063,779 | 🏆 0.387 / 0.715 |
-| DeepSeek-v4-pro | 27 / 🏆 7 | 334.1 / 🏆 138.9 | 35,159 / 🏆 11,070 | 697,472 / 🏆 79,360 | 0.108 / 🏆 0.044 |
-| Qwen3.6-35B | 🏆 11 / 12 | 🏆 230.8 / 350.5 | 🏆 7,120 / 12,080 | 🏆 165,519 / 218,795 | n/a |
-
-### Where the skill costs, and where it pays
-
-Totals across the 35 delta arms appear in finding 6. The short version:
-
-- The skill costs **1.3× to 2.0× output tokens** on six of seven models — every model
-  but Gemini, whose 0.70× is the `plugin-authoring` baseline outlier of finding 6 — and
-  **1.4× to 2.6× cached input** on five of seven. Qwen is the outlier at ≥4.8× cached
-  input; Gemini reads 1.2×. Every Qwen ratio is a floor — its `plugin-authoring`
-  treatment arm was bounded on tokens.
-- **Extra output tokens per check gained** range from ~430 (GPT-5.6-luna) to ~9,200
-  (Opus 5.5), and track inversely with how much the model gained.
-- **One arm of thirty-five was bounded**, on tokens, and it is Qwen.
-- **Failed `./gradlew` invocations rose 18 → 43** across all arms. Treatment arms
-  attempt more and thrash more mid-flight. `project-builds` still passes in 33 of 35
-  treatment arms against 34 of 35 baselines, so they recover — but that churn is real
-  and appears in the wall-clock figures.
-
----
-
-## Methodology
-
-**Trials.** n = 1 per arm. 42 runs, 84 arms: 5 delta scenarios × 7 models × 2 arms,
-plus 7 repeat-run controls × 2 identical arms. Runs were strictly sequential within a model.
-
-**Toolchain.** JDK 21, Gradle 9.5.0, `resources: small`, network on. CLIs and versions
-per model are in [Models tested](#models-tested). Every arm ran against a pinned
-offline distribution — the container rewrites the fixture's `distributionUrl` to
-`file:///opt/dists/gradle-9.5.0-bin.zip`. That rewrite is now explicitly accounted
-for by the `false-positives` allowlist rather than penalising agents who notice it.
-
-**Limits are not uniform across models.**
-
-| Model | Turns | Tokens | Wall clock |
+| Model (without / with skill) | Wall clock (s) | Output tokens | Cost (USD) |
 | :--- | ---: | ---: | ---: |
-| Haiku 4.5, Opus 5.5 | 100 | 5,500,000 | 30m |
-| Sonnet 5 | 125 | 6,875,000 | 2,250s |
-| Opus 5.5, Sonnet 5 (`plugin-authoring` only) | 100 | 6,875,000 | 30m |
-| GPT-5.6-luna, DeepSeek-v4-pro | 100 | 5,000,000 | 30m |
-| DeepSeek-v4-pro (`plugin-authoring` only) | 100 | 6,250,000 | 30m |
-| Gemini 3.8 Flash | 200 | 10,000,000 | 60m |
-| Qwen3.6-35B | 200 | 10,000,000 | 120m (180m on `plugin-authoring`) |
+| `claude-haiku-4-5-20251001` | 555.7 / 900.0 (1.62×) | 27,671 / 46,174 (1.67×) | 0.812 / 1.566 (1.93×) |
+| `claude-opus-5-5` | 638.7 / 1,060.7 (1.66×) | 40,441 / 68,101 (1.68×) | 1.519 / 3.161 (2.08×) |
+| `claude-sonnet-5` | 1,596.5 / 2,857.8 (1.79×) | 116,163 / 229,102 (1.97×) | 3.046 / 6.308 (2.07×) |
+| `deepseek-v4-pro` | 1,883.6 / 2,238.0 (1.19×) | 191,258 / 251,428 (1.31×) | 0.634 / 0.872 (1.37×) |
+| `gemini-3-8-flash` | 2,867.1 / 2,557.4 (0.89×) | 492,621 / 345,219 (0.70×) | 4.298 / 3.865 (0.90×) |
+| `gpt-5-6-luna` | 600.8 / 834.2 (1.39×) | 27,819 / 36,441 (1.31×) | 0.096 / 0.159 (1.66×) |
+| `qwen3-6-35b-a3b-coding-nvfp4` | 10,167.3 / ≥ 12,902.2 (≥ 1.27×) | 188,886 / ≥ 297,934 (≥ 1.58×) | local / local |
 
-**Both arms of any single run always share limits**, so every within-model
-baseline-versus-treatment delta in this report is sound. Cross-model cost comparisons
-are not, and none is made. One arm was bounded: `plugin-authoring`/Qwen3.6-35B,
-treatment, at 100% of tokens.
+The figure in parentheses is with ÷ without.
 
-**Skill provenance.** All 35 treatment arms received git revision
-`0b1f5470c1999ba3d351ce2ba4d7010188c325b0`, resolved from
-`git+https://github.com/gradle/gradle-skills@main#skills/gradle-best-practices`. The
-bundled catalog was captured from the Gradle 9.9.0-nightly documentation on
-2026-09-23 and covers 48 practices.
+### Cost and time: structure
 
-**Prompt uniformity.** The four fixing prompts and the repeat-run control's prompt are
-textually identical — five scenarios, one prompt — so every fixing scenario is
-prompt-comparable to every other. `false-positives` uses its own audit-only prompt,
-as designed.
+| Model (without / with skill) | Wall clock (s) | Output tokens | Cost (USD) |
+| :--- | ---: | ---: | ---: |
+| `claude-haiku-4-5-20251001` | 99.7 / 171.4 | 4,329 / 9,109 | 0.133 / 0.290 |
+| `claude-opus-5-5` | 195.4 / 356.0 | 14,953 / 23,604 | 0.556 / 1.032 |
+| `claude-sonnet-5` | 235.7 / 827.0 | 17,559 / 70,579 | 0.425 / 1.783 |
+| `deepseek-v4-pro` | 415.9 / 508.4 | 37,433 / 59,099 | 0.147 / 0.202 |
+| `gemini-3-8-flash` | 549.1 / 524.1 | 85,058 / 80,706 | 1.060 / 0.779 |
+| `gpt-5-6-luna` | 155.9 / 190.4 | 7,131 / 9,688 | 0.025 / 0.043 |
+| `qwen3-6-35b-a3b-coding-nvfp4` | 332.1 / 1,598.6 | 13,158 / 52,772 | local / local |
 
-**Non-uniformity, disclosed.**
+### Cost and time: tasks
 
-1. **Per-arm limits vary by model**, as tabulated above.
-2. **Gemini's repeat-run control is void.** Its `no-skills-b` arm ran two turns and produced
-   no report. Gemini has no usable noise measurement in this sweep.
-3. **Three CLIs report no cache-write telemetry** (`gemini-cli`, `opencode`, the local
-   Ollama path). Those cells are omitted rather than recorded as zero.
-4. **Qwen3.6-35B has no configured price**, so its cost rows read `n/a`. The harness
-   reports this as a warning rather than guessing.
+| Model (without / with skill) | Wall clock (s) | Output tokens | Cost (USD) |
+| :--- | ---: | ---: | ---: |
+| `claude-haiku-4-5-20251001` | 154.7 / 189.4 | 8,504 / 9,632 | 0.231 / 0.323 |
+| `claude-opus-5-5` | 135.0 / 255.5 | 8,169 / 18,070 | 0.292 / 0.779 |
+| `claude-sonnet-5` | 436.0 / 659.4 | 31,597 / 53,176 | 0.988 / 1.603 |
+| `deepseek-v4-pro` | 542.4 / 483.2 | 57,077 / 54,160 | 0.202 / 0.199 |
+| `gemini-3-8-flash` | 542.5 / 481.9 | 66,370 / 57,957 | 0.677 / 0.850 |
+| `gpt-5-6-luna` | 135.1 / 199.1 | 6,020 / 8,619 | 0.023 / 0.036 |
+| `qwen3-6-35b-a3b-coding-nvfp4` | 332.7 / 1,441.8 | 12,181 / 50,217 | local / local |
 
-**Provenance.** The sweep ran on 2026-09-24. Each run's machine-readable result, its
-resolved experiment configuration and a pruned copy of the project tree it left behind
-were retained, and every figure in this report is taken from them. Agent transcripts were
-not retained, so the behavioural claims here rest on scorer output and final project state
-rather than on step-by-step traces. The scenarios, fixtures and scorers live in a separate
-repository that is not public.
+### Cost and time: idioms
 
-**Harness caveats bearing on the figures above.** Three are worth stating outright.
-The `tasks-documented` scorer cannot parse Java-style task registration, which cost
-Opus 5.5 one check it had earned. `violations-count` is a one-sided floor, so Opus's
-detection gains register as zero delta. And the repeat-run control covers one fixture out of
-five, with Gemini's control void — the noise floor is therefore narrower evidence than
-the aggregate deltas it is used to qualify.
+| Model (without / with skill) | Wall clock (s) | Output tokens | Cost (USD) |
+| :--- | ---: | ---: | ---: |
+| `claude-haiku-4-5-20251001` | 132.8 / 167.0 | 7,599 / 9,524 | 0.238 / 0.324 |
+| `claude-opus-5-5` | 117.9 / 177.8 | 8,224 / 12,635 | 0.289 / 0.568 |
+| `claude-sonnet-5` | 292.8 / 559.9 | 21,473 / 46,518 | 0.592 / 1.054 |
+| `deepseek-v4-pro` | 261.5 / 462.8 | 25,173 / 55,515 | 0.077 / 0.166 |
+| `gemini-3-8-flash` | 417.0 / 511.2 | 55,129 / 69,742 | 0.622 / 0.758 |
+| `gpt-5-6-luna` | 120.3 / 173.5 | 5,731 / 7,504 | 0.018 / 0.035 |
+| `qwen3-6-35b-a3b-coding-nvfp4` | 515.7 / 1,880.6 | 20,349 / 54,644 | local / local |
+
+### Cost and time: plugin-authoring
+
+| Model (without / with skill) | Wall clock (s) | Output tokens | Cost (USD) |
+| :--- | ---: | ---: | ---: |
+| `claude-haiku-4-5-20251001` | 110.2 / 245.8 | 5,035 / 13,025 | 0.148 / 0.479 |
+| `claude-opus-5-5` | 119.4 / 192.6 | 6,423 / 11,773 | 0.266 / 0.593 |
+| `claude-sonnet-5` | 476.5 / 675.8 | 36,569 / 50,904 | 0.828 / 1.640 |
+| `deepseek-v4-pro` | 329.7 / 644.8 | 36,416 / 71,584 | 0.100 / 0.261 |
+| `gemini-3-8-flash` | 1,060.1 / 535.8 | 263,866 / 67,951 | 1.551 / 0.763 |
+| `gpt-5-6-luna` | 122.2 / 169.2 | 5,927 / 7,585 | 0.019 / 0.031 |
+| `qwen3-6-35b-a3b-coding-nvfp4` | 8,756.0 / ≥ 7,630.6 | 136,078 / ≥ 128,221 | local / local |
+
+### Cost and time: false-positives
+
+| Model (without / with skill) | Wall clock (s) | Output tokens | Cost (USD) |
+| :--- | ---: | ---: | ---: |
+| `claude-haiku-4-5-20251001` | 58.3 / 126.3 | 2,204 / 4,884 | 0.062 / 0.151 |
+| `claude-opus-5-5` | 71.0 / 78.9 | 2,672 / 2,019 | 0.116 / 0.190 |
+| `claude-sonnet-5` | 155.5 / 135.8 | 8,965 / 7,925 | 0.214 / 0.228 |
+| `deepseek-v4-pro` | 334.1 / 138.9 | 35,159 / 11,070 | 0.108 / 0.044 |
+| `gemini-3-8-flash` | 298.4 / 504.3 | 22,198 / 68,863 | 0.387 / 0.715 |
+| `gpt-5-6-luna` | 67.3 / 101.9 | 3,010 / 3,045 | 0.011 / 0.013 |
+| `qwen3-6-35b-a3b-coding-nvfp4` | 230.8 / 350.5 | 7,120 / 12,080 | local / local |
+
+---
+
+## Run-to-run variation
+
+Each model ran the same task as the `structure` scenario twice, without the skill and with identical settings. The two runs show how much results vary when nothing changes. Values are first run / second run; `≥ x` marks a lower bound from a run that stopped at a limit.
+
+| Model (first / second run) | Checks passed | Checks that differed | Wall clock (s) | Output tokens | Cost (USD) |
+| :--- | :---: | :--- | ---: | ---: | ---: |
+| `claude-haiku-4-5-20251001` | 2 / 1 of 12 | `no-duplicate-dependencies` | 123.2 / 124.1 | 7,864 / 6,545 | 0.225 / 0.222 |
+| `claude-opus-5-5` | 10 / 11 of 12 | `wrapper-checksum-engaged` | 168.4 / 185.3 | 11,529 / 14,627 | 0.547 / 0.531 |
+| `claude-sonnet-5` | 9 / 8 of 12 | `repos-not-in-build-scripts`, `convention-plugins`, `wrapper-checksum-engaged` | 466.0 / 369.3 | 37,125 / 25,795 | 1.236 / 0.899 |
+| `deepseek-v4-pro` | 8 / 5 of 12 | `version-catalog`, `convention-plugins`, `violations-count` | ≥ 610.5 / 579.5 | ≥ 63,019 / 53,766 | ≥ 0.279 / 0.224 |
+| `gemini-3-8-flash` | 5 / 1 of 12 | `root-project-named`, `no-eager-getbyname`, `lazy-extension-wiring`, `no-duplicate-dependencies` | 568.8 / 63.9 | 77,841 / 554 | 0.942 / 0.019 |
+| `gpt-5-6-luna` | 2 / 2 of 12 | none | 110.8 / 132.7 | 4,517 / 5,931 | 0.019 / 0.024 |
+| `qwen3-6-35b-a3b-coding-nvfp4` | 3 / 3 of 12 | `root-project-named`, `lazy-extension-wiring` | 1,417.7 / 579.8 | 52,182 / 22,607 | local / local |
+
+---
+
+## Notes
+
+- `deepseek-v4-pro` stopped at a limit in: `aa` `no-skills-a` (tokens limit, 5,000,000). Its figures for those runs are lower bounds.
+- `qwen3-6-35b-a3b-coding-nvfp4` stopped at a limit in: `plugin-authoring` with the skill (tokens limit, 10,000,000). Its figures for those runs are lower bounds.
+- `qwen3-6-35b-a3b-coding-nvfp4`: served locally, so no cost is recorded.
+- Not every model ran on the same `claude-code` version: `2.1.233` for `claude-haiku-4-5-20251001`, `claude-sonnet-5`, `qwen3-6-35b-a3b-coding-nvfp4`; `2.1.281` for `claude-opus-5-5`.
+- Turn, token and time limits were set per model, so they differ between models. Both runs of a comparison always had the same limits.
+- The `tasks-documented` scorer that ran collected task names only from `*.gradle`, `*.gradle.kts` and `*.kt` files and matched `tasks.register(`, not `getTasks().register(`; it FAILs when it collects no names. In `tasks` / `claude-opus-5-5` with the skill, the arm registered its three tasks in `build-logic/src/main/java/com/example/starchart/gradle/StarObservationsPlugin.java` with `project.getTasks().register(...)`, calling `setGroup` and `setDescription` on each; the scorer collected no names from that tree and recorded FAIL. No other `tasks` arm registered tasks in Java or Groovy sources. The scorer was extended to Java and Groovy sources and `getTasks()` in commit `8ca284e` on 2026-09-28, after this sweep.
+- `plugin-authoring` / `qwen3-6-35b-a3b-coding-nvfp4` / with the skill stopped at the token limit: 10,039,551 tokens used of a 10,000,000 limit, after 107 of 200 allowed turns and 7,770 s of a 10,800 s wall-clock limit.
+- `aa` / `deepseek-v4-pro` / `no-skills-a` stopped at the token limit: 5,098,199 tokens used of a 5,000,000 limit, after 71 of 100 allowed turns and 751 s of a 1,800 s wall-clock limit.
+- `aa` / `gemini-3-8-flash` / `no-skills-b` ended after 2 turns and 63.9 s with no limit reached: the transcript shows five file reads followed by an empty assistant reply. The arm called only file-read tools and wrote no VIOLATIONS.md.
+- `single-gav-strings` passed in every `idioms` arm. The unmodified fixture's `services/exporter/build.gradle` declares `implementation group: 'com.google.code.gson', name: 'gson', version: '2.11.0'`, which the scorer matches; in every arm's final state that line uses a single coordinate string or a catalog accessor.
